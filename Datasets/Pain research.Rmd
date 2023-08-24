@@ -1,0 +1,122 @@
+---
+title: "Pain Research - Dr. Marc O. Martel"
+author: "Jiaqi Bi"
+date: "2023-07-31"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Load packages
+library(tidyverse)
+library(ggplot2)
+library(tidyr)
+```
+
+
+## Read SPSS Data
+
+```{r}
+# This library provides functions to read sav file into R
+library(haven)
+df1 <- read_sav("Dataset Part 1; Clinic visit; Baseline.sav")
+df2 <- read_sav("Dataset Part 2; Followup; Daily diaries.sav")
+df3 <- read_sav("Dataset Part 3; Followup; Clinic visits; Followup 3m; 6m.sav")
+
+# Check duplicated IDs
+which(duplicated(df1$ID))
+which(duplicated(df2$ID))
+which(duplicated(df3$ID))
+
+# ID 476 duplicated, delete
+df1 <- df1 %>%
+  filter(!duplicated(ID))
+df2 <- df2 %>%
+  filter(!duplicated(ID))
+df3 <- df3 %>%
+  filter(!duplicated(ID))
+```
+
+```{r}
+# Date to numerical measurement day
+date_cols <- grep("^Date_", names(df2), value = TRUE)
+df2_test <- df2
+df2_test[date_cols] <- lapply(df2_test[date_cols], as.Date, format = "%Y-%m-%d")
+
+for (i in 2:length(date_cols)) {
+  df2_test[[date_cols[i]]] <- as.numeric(df2_test[[date_cols[i]]] - df2_test$Date_1 + 1)
+}
+
+df2_test$Date_1 <- 1
+
+# Replace to NA for repeated measures
+all_cols <- names(df2_test)
+
+for (i in 2:length(date_cols)) {
+  if (any(df2_test[[date_cols[i]]] == 1, na.rm = TRUE)) {
+    same_day_cols <- grep(paste0("_", i), all_cols, value = TRUE)
+    df2_test[df2_test[[date_cols[i]]] == 1 & !is.na(df2_test[[date_cols[i]]]), same_day_cols] <- NA
+  }
+}
+```
+
+```{r}
+# Wide to Long, delete NA Days, keep 30-day measures, delete repeated measures
+# Complete Day variables 1-30
+long_df2 <- df2_test %>%
+  pivot_longer(
+    cols = -ID, 
+    names_to = c(".value", "day"), 
+    names_pattern = "([^_]+)_(\\d+)"
+  ) %>%
+  select(-day) %>%
+  rename(Day = Date) %>%
+  filter(Day <= 30 & !is.na(Day)) %>%
+  group_by(ID) %>%
+  distinct(Day, .keep_all = TRUE) %>%
+  complete(Day = seq(1, 30, by = 1))
+
+# Plot x = Day, y = measures, for ID 2, 4, 6, 8, 9, 11, here y can be any variable
+long_df2 %>%
+  filter(ID <= 20) %>%
+  ggplot(aes(x = Day, y = ave, color = factor(ID))) +
+  geom_point() + 
+  geom_line() +
+  theme(legend.position = "none")
+
+# There are 260 individuals
+length(unique(long_df2$ID))
+
+# The average reporting days is 14.53 days 
+long_df2_test <- long_df2 %>%
+  mutate(pain_notmissing = ifelse(!is.na(ave), 1, 0)) %>%
+  group_by(ID) %>%
+  mutate(num_nonmissing = sum(pain_notmissing)) %>%
+  distinct(ID, .keep_all = TRUE) 
+
+sum(long_df2_test$num_nonmissing)/260
+
+# Probability of Acute Change indicator (PAC)
+new_df <- merge(long_df2, df1, by = "ID")
+
+new_df <- new_df %>%
+  arrange(ID, Day) %>%
+  group_by(ID) %>%
+  mutate(lag_ave = ifelse(Day == 1, Baseline_Pain_Level, lag(ave)), 
+         PAC = ifelse(Day == 1, ifelse(abs(ave - Baseline_Pain_Level) >= 2, 1, 0), 
+                      ifelse(abs(ave - lag_ave) >= 2, 1, 0)))
+
+############ Check Zone ##############
+check <- new_df %>%
+  select(ave, ID, Day, Baseline_Pain_Level, lag_ave, PAC)
+
+
+```
+
+
+
+
+
