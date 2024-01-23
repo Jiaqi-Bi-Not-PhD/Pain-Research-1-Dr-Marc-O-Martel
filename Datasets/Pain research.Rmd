@@ -10,6 +10,52 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+# Two different files
+setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Martel")
+setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison")
+```
+
+```{r}
+## Load packages
+library(tidyverse)
+library(ggplot2)
+library(tidyr)
+```
+
+```{r}
+## This library provides functions to read sav file into R
+library(haven)
+## Baseline data
+df1 <- read_sav("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
+## Daily data
+df2 <- read_sav("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
+
+## Examine the duplicated observation
+df1$ID[which(duplicated(df1$ID))]
+df2$StudyID[which(duplicated(df2$StudyID))]
+
+df1 <- df1 |>
+  filter(!duplicated(ID))
+df2 <- df2 |>
+  filter(!duplicated(StudyID))
+
+## Time variable to numerical day (consecutive)
+date_cols <- grep("^Date_", names(df2), value = TRUE)
+```
+
+```{r}
+## Wide to Long
+
+```
+
+
+**Code below consists old version of Dr. Martel's dataset**
+**Code below consists old version of Dr. Martel's dataset**
+**Code below consists old version of Dr. Martel's dataset**
+**Code below consists old version of Dr. Martel's dataset**
+**Code below consists old version of Dr. Martel's dataset**
+
+```{r}
 # Load packages
 library(tidyverse)
 library(ggplot2)
