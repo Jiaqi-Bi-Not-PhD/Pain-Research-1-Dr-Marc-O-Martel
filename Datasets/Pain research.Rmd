@@ -27,8 +27,10 @@ library(tidyr)
 library(haven)
 ## Baseline data
 df1 <- read_sav("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
+df1 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
 ## Daily data
 df2 <- read_sav("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
+df2 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
 
 ## Examine the duplicated observation
 df1$ID[which(duplicated(df1$ID))]
@@ -37,14 +39,38 @@ df2$StudyID[which(duplicated(df2$StudyID))]
 df1 <- df1 |>
   filter(!duplicated(ID))
 df2 <- df2 |>
-  filter(!duplicated(StudyID))
+  filter(!duplicated(StudyID)) |>
+  rename(ID = StudyID)
 
 ## Time variable to numerical day (consecutive)
-date_cols <- grep("^Date_", names(df2), value = TRUE)
+date_cols <- grep("^Date", names(df2), value = TRUE)
+df2 <- df2 |>
+  mutate(across(all_of(date_cols), as.Date, format = "%Y-%m-%d")) |>
+  mutate(across(all_of(date_cols[-1]), ~ as.numeric(. - df2$Date1 + 1)))
+
+df2$Date1 <- 1
+all_cols <- names(df2)
+
+#for (i in 2:length(date_cols)) {
+#  if (any(df2[[date_cols[i]]] == 1, na.rm = TRUE)) {
+#    same_day_cols <- grep(paste0("_", i), all_cols, value = TRUE)
+#    df2[df2[[date_cols[i]]] == 1 & !is.na(df2_test[[date_cols[i]]]), same_day_cols] <- NA
+#  }
+#}
+
+df2_long <- df2 |>
+  pivot_longer(cols = -ID,
+               names_to = c(".value", "day"),
+               names_pattern = "([A-Za-z]+)(\\d+)") |>
+  select(-day) |>
+  rename(Day = Date) |>
+  filter(Day <= 30 & !is.na(Day)) |>
+  group_by(ID) |>
+  distinct(Day, .keep_all = TRUE) |>
+  complete(Day = seq(1,30))
 ```
 
 ```{r}
-## Wide to Long
 
 ```
 
