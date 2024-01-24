@@ -32,6 +32,8 @@ df1 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/D
 df2 <- read_sav("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
 df2 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
 
+
+
 ## Examine the duplicated observation
 df1$ID[which(duplicated(df1$ID))]
 df2$StudyID[which(duplicated(df2$StudyID))]
@@ -44,8 +46,49 @@ df2 <- df2 |>
 
 ## Time variable to numerical day (consecutive)
 date_cols <- grep("^Date", names(df2), value = TRUE)
+
+df2 <- df2 %>%
+  mutate(across(all_of(date_cols), as.Date, format = "%Y-%m-%d"))
+
+## Correct abberrant years
+df2 <- df2 %>%
+  rowwise() %>%
+  mutate(across(all_of(date_cols), ~ {
+    if (. != Date1 && !is.na(.)) {
+      day_diff <- as.numeric(. - Date1)
+      if (day_diff < 0) {
+        update(., year = year(Date1))
+      } else {
+        .
+      }
+    } else {
+      .
+    }
+  })) %>%
+  ungroup()
+
+####### Below investigates the rest of aberrant objects #######
+##### Above does not solve those entering a new year ##########
+df2_investigate <- df2 |>
+  pivot_longer(
+  cols = starts_with("Date"), 
+  names_to = "Date_Number", 
+  values_to = "Date_Value"
+) |>
+  select(ID, Date_Value)
+
+print(n = 36, df2_investigate[df2_investigate$ID == 673,])
+###############################################################
+
+## Below solved all objects date problem
+df2$Date8[df2$ID == 610] <- "2023-01-01"
+df2$Date8[df2$ID == 703] <- "2022-01-09"
+df2$Date8[df2$ID == 741] <- "2021-01-10"
+df2$Date8[df2$ID == 680] <- "2023-01-09"
+df2$Date28[df2$ID == 673] <- "2023-02-02"
+
+## Convert the date to number
 df2 <- df2 |>
-  mutate(across(all_of(date_cols), as.Date, format = "%Y-%m-%d")) |>
   mutate(across(all_of(date_cols[-1]), ~ as.numeric(. - df2$Date1 + 1)))
 
 df2$Date1 <- 1
@@ -58,6 +101,7 @@ all_cols <- names(df2)
 #  }
 #}
 
+## Wide to long
 df2_long <- df2 |>
   pivot_longer(cols = -ID,
                names_to = c(".value", "day"),
@@ -68,12 +112,16 @@ df2_long <- df2 |>
   group_by(ID) |>
   distinct(Day, .keep_all = TRUE) |>
   complete(Day = seq(1,30))
+
+## replace all -1 to NA
+df2_long <- df2_long |>
+  mutate_all(~if_else(. < 0, NA_real_, .))
 ```
 
 ```{r}
+## lmer Analysis
 
 ```
-
 
 **Code below consists old version of Dr. Martel's dataset**
 **Code below consists old version of Dr. Martel's dataset**
