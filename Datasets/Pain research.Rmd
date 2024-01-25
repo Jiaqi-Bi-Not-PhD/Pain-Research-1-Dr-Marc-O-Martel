@@ -11,8 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # Two different files
-setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Martel")
-setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison")
+#setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Martel")
+#setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison")
 ```
 
 ```{r}
@@ -20,17 +20,18 @@ setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Marte
 library(tidyverse)
 library(ggplot2)
 library(tidyr)
+library(haven)## This library provides functions to read sav file into R
+library(lme4)
+library(lmerTest)
 ```
 
 ```{r}
-## This library provides functions to read sav file into R
-library(haven)
 ## Baseline data
 df1 <- read_sav("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
-df1 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
+#df1 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
 ## Daily data
 df2 <- read_sav("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
-df2 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
+#df2 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
 
 
 
@@ -116,125 +117,48 @@ df2_long <- df2 |>
 ## replace all -1 to NA
 df2_long <- df2_long |>
   mutate_all(~if_else(. < 0, NA_real_, .))
-```
 
-```{r}
-## lmer Analysis
+df2_long <- df2_long |>
+  rename(GlobalImprovement = Changed)
 
-```
+## Calculate the lagged variable
+df2_long <- df2_long |>
+  group_by(ID) |>
+  arrange(ID, Day) |>
+  mutate(AvePain_Change = abs(AvePain - lag(AvePain)), 
+         ActivityInt_Change = abs(ActivityInt - lag(ActivityInt)), 
+         Mood_Change = abs(Mood - lag(Mood)) )
 
-**Code below consists old version of Dr. Martel's dataset**
-**Code below consists old version of Dr. Martel's dataset**
-**Code below consists old version of Dr. Martel's dataset**
-**Code below consists old version of Dr. Martel's dataset**
-**Code below consists old version of Dr. Martel's dataset**
-
-```{r}
-# Load packages
-library(tidyverse)
-library(ggplot2)
-library(tidyr)
-```
-
-
-## Read SPSS Data
-
-```{r}
-# This library provides functions to read sav file into R
-library(haven)
-df1 <- read_sav("Dataset Part 1; Clinic visit; Baseline.sav")
-df2 <- read_sav("Dataset Part 2; Followup; Daily diaries.sav")
-df3 <- read_sav("Dataset Part 3; Followup; Clinic visits; Followup 3m; 6m.sav")
-
-# Check duplicated IDs
-which(duplicated(df1$ID))
-which(duplicated(df2$ID))
-which(duplicated(df3$ID))
-
-# ID 476 duplicated, delete
-df1 <- df1 %>%
-  filter(!duplicated(ID))
-df2 <- df2 %>%
-  filter(!duplicated(ID))
-df3 <- df3 %>%
-  filter(!duplicated(ID))
-```
-
-```{r}
-# Date to numerical measurement day
-date_cols <- grep("^Date_", names(df2), value = TRUE)
-df2_test <- df2
-df2_test[date_cols] <- lapply(df2_test[date_cols], as.Date, format = "%Y-%m-%d")
-
-for (i in 2:length(date_cols)) {
-  df2_test[[date_cols[i]]] <- as.numeric(df2_test[[date_cols[i]]] - df2_test$Date_1 + 1)
-}
-
-df2_test$Date_1 <- 1
-
-# Replace to NA for repeated measures
-all_cols <- names(df2_test)
-
-for (i in 2:length(date_cols)) {
-  if (any(df2_test[[date_cols[i]]] == 1, na.rm = TRUE)) {
-    same_day_cols <- grep(paste0("_", i), all_cols, value = TRUE)
-    df2_test[df2_test[[date_cols[i]]] == 1 & !is.na(df2_test[[date_cols[i]]]), same_day_cols] <- NA
-  }
-}
-```
-
-```{r}
-# Wide to Long, delete NA Days, keep 30-day measures, delete repeated measures
-# Complete Day variables 1-30
-long_df2 <- df2_test %>%
-  pivot_longer(
-    cols = -ID, 
-    names_to = c(".value", "day"), 
-    names_pattern = "([^_]+)_(\\d+)"
-  ) %>%
-  select(-day) %>%
-  rename(Day = Date) %>%
-  filter(Day <= 30 & !is.na(Day)) %>%
+df2_greaterthan7 <- df2_long |>
   group_by(ID) %>%
-  distinct(Day, .keep_all = TRUE) %>%
-  complete(Day = seq(1, 30, by = 1))
-
-# Plot x = Day, y = measures, for ID 2, 4, 6, 8, 9, 11, here y can be any variable
-long_df2 %>%
-  filter(ID <= 20) %>%
-  ggplot(aes(x = Day, y = ave, color = factor(ID))) +
-  geom_point() + 
-  geom_line() +
-  theme(legend.position = "none")
-
-# There are 260 individuals
-length(unique(long_df2$ID))
-
-# The average reporting days is 14.53 days 
-long_df2_test <- long_df2 %>%
-  mutate(pain_notmissing = ifelse(!is.na(ave), 1, 0)) %>%
-  group_by(ID) %>%
-  mutate(num_nonmissing = sum(pain_notmissing)) %>%
-  distinct(ID, .keep_all = TRUE) 
-
-sum(long_df2_test$num_nonmissing)/260
-
-# Probability of Acute Change indicator (PAC)
-new_df <- merge(long_df2, df1, by = "ID")
-
-new_df <- new_df %>%
-  arrange(ID, Day) %>%
-  group_by(ID) %>%
-  mutate(lag_ave = ifelse(Day == 1, Baseline_Pain_Level, lag(ave)), 
-         PAC = ifelse(Day == 1, ifelse(abs(ave - Baseline_Pain_Level) >= 2, 1, 0), 
-                      ifelse(abs(ave - lag_ave) >= 2, 1, 0)))
-
-############ Check Zone ##############
-check <- new_df %>%
-  select(ave, ID, Day, Baseline_Pain_Level, lag_ave, PAC)
-
-
+  summarise(NonMissingGI = sum(!is.na(GlobalImprovement))) %>%
+  filter(NonMissingGI >= 7) %>%
+  inner_join(df2_long, by = "ID")
 ```
+
+```{r}
+## lmer Analysis (GlobImp vs. AvePain_Change)
+model_1 <- lmer(GlobalImprovement ~ AvePain_Change + Day + (1|ID), data = df2_greaterthan7) # Random intercept only
+summary(model_1)
+model_2 <- lmer(GlobalImprovement ~ AvePain_Change + Day + (Day|ID), data = df2_greaterthan7) # Random slope + Random intercept
+summary(model_2)
+model_3 <- lmer(GlobalImprovement ~ AvePain_Change + Mood_Change + Day + (1|ID), data = df2_greaterthan7) # Adjust AvePain_Change and Mood_Change
+summary(model_3)
+model_4 <- lmer(GlobalImprovement ~ AvePain_Change + Mood_Change + Day + (Day|ID), data = df2_greaterthan7) # Add random slope
+summary(model_4)
+
+## Model comparison for above analysis
+anova(model_1, model_2)
+anova(model_3, model_4)
+
+## lmer Analysis (GlobImp vs. Mood_Change)
+model_5 <- lmer(GlobalImprovement ~ Mood_Change + Day + (1|ID), data = df2_greaterthan7) # random intercept only
+summary(model_5)
+model_6 <- lmer(GlobalImprovement ~ Mood_Change + Day + (Day|ID), data = df2_greaterthan7) # Add random slope
+summary(model_6)
+anova(model_5, model_6) # prefer random slope + intercept
+```
+
 
 
 
