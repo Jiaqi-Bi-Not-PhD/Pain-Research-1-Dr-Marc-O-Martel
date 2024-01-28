@@ -27,11 +27,11 @@ library(lmerTest)
 
 ```{r}
 ## Baseline data
-df1 <- read_sav("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
-#df1 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
+#df1 <- read_sav("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
+df1 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
 ## Daily data
-df2 <- read_sav("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
-#df2 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
+#df2 <- read_sav("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
+df2 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
 
 
 
@@ -125,9 +125,9 @@ df2_long <- df2_long |>
 df2_long <- df2_long |>
   group_by(ID) |>
   arrange(ID, Day) |>
-  mutate(AvePain_Change = abs(AvePain - lag(AvePain)), 
-         ActivityInt_Change = abs(ActivityInt - lag(ActivityInt)), 
-         Mood_Change = abs(Mood - lag(Mood)) )
+  mutate(AvePain_Change = AvePain - lag(AvePain), 
+         ActivityInt_Change = ActivityInt - lag(ActivityInt), 
+         Mood_Change = Mood - lag(Mood)) 
 
 df2_greaterthan7 <- df2_long |>
   group_by(ID) %>%
