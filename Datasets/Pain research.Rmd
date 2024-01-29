@@ -159,6 +159,14 @@ summary(model_6)
 anova(model_5, model_6) # prefer random slope + intercept
 ```
 
+```{r}
+model_4plus <- lmer(GlobalImprovement ~ AvePain_Change + Mood_Change + Sleep + Day + (Day|ID), 
+                    data = df2_greaterthan7)
+summary(model_4plus)
+confint(model_4plus)
+```
+
+
 
 
 
