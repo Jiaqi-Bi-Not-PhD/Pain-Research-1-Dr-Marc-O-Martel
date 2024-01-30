@@ -134,6 +134,12 @@ df2_greaterthan7 <- df2_long |>
   summarise(NonMissingGI = sum(!is.na(GlobalImprovement))) %>%
   filter(NonMissingGI >= 7) %>%
   inner_join(df2_long, by = "ID")
+
+## Add level 2 age, gender, and PCS to the longitudinal data
+df1_temporary <- df1 |>
+  select(c(B_Demog_Age, B_Demog_Gender, B_Psych_PCS, ID))
+
+df_new <- merge(df2_greaterthan7, df1_temporary, by = "ID")
 ```
 
 ```{r}
@@ -165,6 +171,52 @@ model_4plus <- lmer(GlobalImprovement ~ AvePain_Change + Mood_Change + Sleep + D
 summary(model_4plus)
 confint(model_4plus)
 ```
+
+```{r}
+model_4plus_level2 <- lmer(GlobalImprovement ~ AvePain_Change + Mood_Change + Sleep + B_Demog_Age + B_Demog_Gender + B_Psych_PCS + Day + (Day|ID), 
+                    data = df_new)
+
+model_test1 <- lmer(GlobalImprovement ~ B_Demog_Age + Day + (Day|ID), 
+                    data = df_new)
+summary(model_test1)
+
+model_test2 <- lmer(GlobalImprovement ~ B_Demog_Age + AvePain_Change + Mood_Change + Sleep + Day + (Day|ID), 
+                    data = df_new)
+summary(model_test2)
+
+model_test3 <- lmer(GlobalImprovement ~ B_Psych_PCS + Day + (Day|ID), 
+                    data = df_new)
+summary(model_test3)
+
+model_test4 <- lmer(GlobalImprovement ~ B_Psych_PCS + AvePain_Change + Mood_Change + Sleep + Day + (Day|ID), 
+                    data = df_new)
+summary(model_test4)
+
+model_test5 <- lmer(GlobalImprovement ~ Mood_Change*B_Demog_Gender + Day + (Day|ID), data = df_new)
+summary(model_test5)
+
+model_test6 <- lmer(GlobalImprovement ~ B_Demog_Gender*AvePain_Change + Day + (Day|ID),
+                    data = df_new)
+summary(model_test6)
+
+model_test7 <- lmer(GlobalImprovement ~ B_Demog_Age*AvePain_Change + Day + (Day|ID),
+                    data = df_new)
+summary(model_test7)
+
+model_test8 <- lmer(GlobalImprovement ~ B_Demog_Age*Mood_Change + Day + (Day|ID),
+                    data = df_new)
+summary(model_test8)
+
+#### PCS * AvePain_Change ####
+model_test9 <- lmer(GlobalImprovement ~ B_Psych_PCS*AvePain_Change + Day + (Day|ID),
+                    data = df_new)
+summary(model_test9)
+
+model_test10 <- lmer(GlobalImprovement ~ B_Psych_PCS*Mood_Change + Day + (Day|ID),
+                    data = df_new)
+summary(model_test10)
+```
+
 
 
 
