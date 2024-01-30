@@ -140,6 +140,10 @@ df1_temporary <- df1 |>
   select(c(B_Demog_Age, B_Demog_Gender, B_Psych_PCS, ID))
 
 df_new <- merge(df2_greaterthan7, df1_temporary, by = "ID")
+
+## Global improvement 10 to 1, 9 to 2, ...
+df_new <- df_new |>
+  mutate(GlobalImprovement = 11-GlobalImprovement)
 ```
 
 ```{r}
