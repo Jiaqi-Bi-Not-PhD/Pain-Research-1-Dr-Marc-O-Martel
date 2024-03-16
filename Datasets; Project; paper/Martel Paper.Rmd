@@ -1,14 +1,32 @@
 ---
-title: "Martel Paper"
-output: pdf_document
+title: "Martel Paper - Daily OA Pain"
 date: "2024-03-16"
+output:
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+urlcolor: blue
+header-includes:    
+  - \usepackage{lastpage}
+  - \usepackage{fancyhdr}
+  - \usepackage{setspace}
+  - \usepackage{float}
+  - \pagestyle{fancy}
+  - \fancyhead[CO, CE]{Jiaqi Bi}
+  - \fancyhead[LE, RO]{Martel et al. Daily OA Pain}
+  - \fancyfoot[CO, CE]{\thepage \ of \pageref{LastPage}}
+  - \floatplacement{figure}{H}
+mainfont: Times New Roman
+fontsize: 12pt
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+## Data Wrangling
+
+```{r, warning = FALSE, message = FALSE}
 ## Load packages
 library(tidyverse)
 library(ggplot2)
@@ -22,5 +40,95 @@ library(lmerTest)
 ```{r}
 ## Read data
 data_paper <- read_sav("Dataset; 2024.1.sav")
+checkdf3 <- data_paper |> 
+  subset(ID == 2072) |> 
+  select(c(ID, 
+           Level1_Even_DateIn, 
+           Level1_Even_TimeIn))
 ```
+
+\begin{itemize}
+  \item $DT_i$ combines $D_i$ and $T_i$: `DateTime` variable
+  \item $DT_0$ is the first response `DateTime` for each patient
+  \item $W_i$ is the adjusted `Wave\_Day` variable
+  \item Add a grace period $G$ for calculating the adjusted $W_i$, in our case $G=6$ hours
+  \item Calculate the datetime difference $H_i$ in **hours** from the first response, incorporating the grace period:
+  $$
+  H_i = DT_i-DT_{i-1}
+  $$
+  \item Then apply the grace period indicator $I_i$:
+  $$
+  I_i=
+  \begin{cases}
+  1 & \text{if } H_{i} \leq 24 + G \\
+  \left\lceil\frac{H_{i} - G}{24}\right\rceil & \text{otherwise}
+  \end{cases}
+  $$
+  \item The initial response for `Wave\_Day` is 1, i.e., $W_0=1$, then the adjusted `Wave\_Day` $W_i$ is 
+  $$
+  W_i=\sum_{i=0}^{i-1} I_i
+  $$
+\end{itemize}
+
+
+```{r}
+## Consecutive Days - Grace Period 6 hours
+data_paper <- data_paper |>
+  mutate(Lev1_DateTimeIn = as.POSIXct(strptime(paste(Level1_Even_DateIn, 
+                                                     Level1_Even_TimeIn), 
+                                          format="%Y-%m-%d %H:%M:"))) |>
+  arrange(ID, Lev1_DateTimeIn) |>
+  group_by(ID) |>
+  mutate(
+    TimeDiffHours = as.numeric(difftime(Lev1_DateTimeIn, 
+                                        lag(Lev1_DateTimeIn, 
+                                            default = first(Lev1_DateTimeIn)), 
+                                        units = "hours")), # T diff
+    WithinGracePeriod = if_else(TimeDiffHours <= 30, 
+                                1, 
+                                ceiling((TimeDiffHours - 6) / 24)), # Check grace period
+    Wave_Day_Adjusted = cumsum(WithinGracePeriod) # Adjusted Wave_Day
+  ) |>
+  ungroup()
+
+## Check if the above approach is correct
+checkdf <- data_paper |> select(c(ID, 
+                                  Lev1_DateTimeIn, 
+                                  TimeDiffHours, 
+                                  WithinGracePeriod, 
+                                  Wave_Day_Adjusted))
+checkdf2 <- checkdf |> subset(ID == 2072) # Weird ID 2072
+max(checkdf$Wave_Day_Adjusted)
+```
+
+
+```{r}
+## Fill in the gap of Wave_Day
+data_paper2 <- data_paper |>
+  group_by(ID) |>
+  complete(Wave_Day = 1:14) |>
+  ungroup()
+```
+
+```{r}
+## Check the aberrant values
+summary(data_paper2$IndexLev1_NegativeAffect_Total) # Lev 1 Negative Affect 
+summary(data_paper2$IndexLev1_Catastrophizing_Total) # Lev 1 Catas
+summary(data_paper2$IndexLev2_QST_BaselinePPTh) # Lev 2 PPThs?
+summary(data_paper2$IndexLev2_QST_TSPAve) # Lev 2 TSP?
+summary(data_paper2$IndexLev2_QST_CpmTrialAve) # Lev 2 CPM?
+
+```
+
+$$
+APE(t_i)=I(PAIN(t_i)-PAIN(t_i-1) \geq 20)
+$$
+
+```{r}
+## APE index
+```
+
+
+
+
 

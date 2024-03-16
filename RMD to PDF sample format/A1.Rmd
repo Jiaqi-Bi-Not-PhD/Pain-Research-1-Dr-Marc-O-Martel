@@ -1,0 +1,123 @@
+---
+title: "STATS 9864 Assignment 1"
+subtitle: "Advanced Statistical Computing"
+author: "Jiaqi Bi"
+output:
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+urlcolor: blue
+header-includes:    
+  - \usepackage{lastpage}
+  - \usepackage{fancyhdr}
+  - \usepackage{setspace}
+  - \usepackage{float}
+  - \pagestyle{fancy}
+  - \fancyhead[CO, CE]{Jiaqi Bi}
+  - \fancyhead[LE, RO]{STATS9864 Assignment 1}
+  - \fancyfoot[CO, CE]{\thepage \ of \pageref{LastPage}}
+  - \floatplacement{figure}{H}
+mainfont: Times New Roman
+fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1
+
+The data of the breast cancer patient profile was collected in November 2017 through the Surveillance, Epidemiology, and End Results (SEER) Program of the National Cancer Institute (NCI), the link of the data can be found [here](https://ieee-dataport.org/open-access/seer-breast-cancer-data). The data included female breast cancer patients diagnosed in 2006 to 2010. According to the author, patients with missing values in tumor size and survival months less than 1 month were excluded. There are total 4024 patients. The variables I will use include patients' races, marital status, ages, and tumor sizes. The race and marital status are categorical, where the race contains the information of the patients being white, black or others; The marital status contains the information of being single, married, divorced, widowed or separated. The age is described in calendar years, and the tumor size is described in millimeters (mm).
+
+Reference: JING TENG, January 18, 2019, "SEER Breast Cancer Data", IEEE Dataport, doi: https://dx.doi.org/10.21227/a9qy-ph35.
+
+## Question 2
+
+```{r}
+## Read packages
+library(dplyr)
+library(ggplot2)
+library(readr)
+
+## Read csv files using `readr` package
+BC_data <- read_csv("Breast_Cancer.csv")
+
+## Select variables to be used in this assignment
+BC_data <- BC_data |>
+  select(c(Race, `Marital Status`, Age, `Tumor Size`))
+
+## Check variable types
+is.character(BC_data$Race)
+is.character(BC_data$`Marital Status`)
+is.numeric(BC_data$Age)
+is.numeric(BC_data$`Tumor Size`)
+
+## Check missing values
+any(is.na(BC_data))
+```
+
+Firstly, I read packages I am going to use in this assignment using `library()` function. Then I imported the data using `read_csv` function from `readr` package. In order to keep only 4 variables I am about to use in this assignment, I overwrote my data to select only variables to use using `select()` function from `dplyr` package. Also the step was completed through a pipe function `|>` to tell R to store data into the original dataframe. In the end, I used function `is.character()` and `is.numeric()` to check the variable types, to make sure I have 2 categorical and 2 continuous variables, and using `any(is.na())` to check if there are any missing values. 
+
+## Question 3
+
+```{r}
+BC_data |>
+  ggplot(aes(x = Age, y = `Tumor Size`, color = `Marital Status`, shape = Race)) +
+  geom_point() +
+  ggtitle("Age vs. Tumor Size by Race and Marital Status") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+## Question 4
+
+```{r}
+BC_data |>
+  ggplot(aes(x = `Marital Status`, y = `Tumor Size`, color = Race)) +
+  geom_boxplot() +
+  ggtitle("Age vs. Tumor Size by Race and Marital Status") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+## Question 5 (Need to confirm)
+
+```{r}
+BC_data |>
+  ggplot(aes(x = Age)) +
+  geom_histogram(fill = "pink", color = "black", bins = 20) +
+  facet_grid(`Marital Status` ~ Race) +
+  ggtitle("Remember to add a title") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+## Question 6
+
+```{r}
+BC_data <- BC_data |>
+  mutate(TumorGrowthPerYear = `Tumor Size`/Age)
+```
+
+Assume a patient is meant to develop the breast cancer, we want to examine the average growth per year for the patient. Therefore, we create a new variable called `TumorGrowthPerYear` to indicate the current tumor size divided by the patient's age. 
+
+```{r}
+new_BC_data <- BC_data |>
+  group_by(Race, `Marital Status`) |>
+  summarize(NumObs = n(),
+            Avg_TGPY = mean(TumorGrowthPerYear),
+            sd_TGPY = sd(TumorGrowthPerYear), 
+            min_TGPY = min(TumorGrowthPerYear), 
+            max_TGPY = max(TumorGrowthPerYear))
+
+new_BC_data
+```
+
+## Question 7
+
+
+
+
+
+
+
+
+
+
