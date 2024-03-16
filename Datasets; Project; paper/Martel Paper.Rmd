@@ -47,6 +47,8 @@ checkdf3 <- data_paper |>
            Level1_Even_TimeIn))
 ```
 
+### Adjusting Wave Day ###
+
 \begin{itemize}
   \item $DT_i$ combines $D_i$ and $T_i$: `DateTime` variable
   \item $DT_0$ is the first response `DateTime` for each patient

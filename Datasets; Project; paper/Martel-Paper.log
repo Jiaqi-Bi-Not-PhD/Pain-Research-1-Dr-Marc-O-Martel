@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.9)  16 MAR 2024 17:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.9)  16 MAR 2024 17:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -556,21 +556,21 @@ LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <12> not available
 (Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 136.
 
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 1
-59.
+62.
 (/usr/local/texlive/2022/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 159.
+(Font)              <12> on input line 162.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 159.
+(Font)              <8> on input line 162.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 159.
+(Font)              <6> on input line 162.
 [1
 
 {/usr/local/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-237.
+240.
 (/usr/local/texlive/2022/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -594,13 +594,13 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 [3] (./Martel-Paper.aux) ) 
 Here is how much of TeX's memory you used:
- 14582 strings out of 478268
- 232497 string characters out of 5846348
- 592652 words of memory out of 5000000
- 32479 multiletter control sequences out of 15000+600000
- 520247 words of font info for 104 fonts, out of 8000000 for 9000
+ 14592 strings out of 478268
+ 232635 string characters out of 5846348
+ 591693 words of memory out of 5000000
+ 32483 multiletter control sequences out of 15000+600000
+ 523439 words of font info for 107 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 74i,11n,77p,1009b,360s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 74i,11n,77p,1009b,408s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/l
 m/lm-ts1.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{
 /usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local
@@ -620,10 +620,10 @@ r/local/texlive/2022/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/local/te
 xlive/2022/texmf-dist/fonts/type1/public/lm/lmtko10.pfb></usr/local/texlive/202
 2/texmf-dist/fonts/type1/public/lm/lmtt12.pfb></usr/local/texlive/2022/texmf-di
 st/fonts/type1/public/lm/lmtti10.pfb>
-Output written on Martel-Paper.pdf (3 pages, 270662 bytes).
+Output written on Martel-Paper.pdf (3 pages, 272409 bytes).
 PDF statistics:
- 119 PDF objects out of 1000 (max. 8388607)
- 80 compressed objects within 1 object stream
- 6 named destinations out of 1000 (max. 500000)
- 28681 words of extra memory for PDF output out of 29859 (max. 10000000)
+ 126 PDF objects out of 1000 (max. 8388607)
+ 87 compressed objects within 1 object stream
+ 8 named destinations out of 1000 (max. 500000)
+ 30737 words of extra memory for PDF output out of 35830 (max. 10000000)
 
