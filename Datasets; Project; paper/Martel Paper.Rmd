@@ -1,0 +1,26 @@
+---
+title: "Martel Paper"
+output: pdf_document
+date: "2024-03-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+## Load packages
+library(tidyverse)
+library(ggplot2)
+library(tidyr)
+library(haven)## This library provides functions to read sav file into R
+library(lme4)
+library(lmerTest)
+```
+
+
+```{r}
+## Read data
+data_paper <- read_sav("Dataset; 2024.1.sav")
+```
+
