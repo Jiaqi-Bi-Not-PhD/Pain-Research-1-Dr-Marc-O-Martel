@@ -103,7 +103,7 @@
 \usepackage{float}
 \pagestyle{fancy}
 \fancyhead[CO, CE]{Jiaqi Bi}
-\fancyhead[LE, RO]{Martel et al. Daily OA Pain}
+\fancyhead[LE, RO]{Martel - Daily OA Pain}
 \fancyfoot[CO, CE]{\thepage \ of \pageref{LastPage}}
 \floatplacement{figure}{H}
 \ifLuaTeX
@@ -315,7 +315,10 @@ APE(t_i)=I(PAIN(t_i)-PAIN(t_i-1) \geq 20)
 
 \DocumentationTok{\#\#\#\#\#\# Check if it is correctly coded \#\#\#\#\#\#}
 \NormalTok{data\_paper2\_check }\OtherTok{\textless{}{-}}\NormalTok{ data\_paper2 }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{select}\NormalTok{(}\FunctionTok{c}\NormalTok{(ID, Wave\_Day\_Adjusted, IndexLev1\_PainAverage, IndexLev1\_PainAverage\_Lagged, APE))}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{c}\NormalTok{(ID, Wave\_Day\_Adjusted, }
+\NormalTok{           IndexLev1\_PainAverage, }
+\NormalTok{           IndexLev1\_PainAverage\_Lagged, }
+\NormalTok{           APE))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -329,7 +332,7 @@ A(t_i)=I\Big(PAIN(t_i)>\frac{1}{n_{t_i}}\sum_{t_i=1}^{n_{t_i}}PAIN(t_i)\Big)
 \(t_i\).
 
 \[
-RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t=1}^{n_{t_i}}PAIN(t_i)\Big)\times A(t_i-1)
+RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t_i=1}^{n_{t_i}}PAIN(t_i)\Big)\times A(t_i-1)
 \]
 
 \begin{Shaded}
@@ -354,7 +357,7 @@ RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t=1}^{n_{t_i}}PAIN(t_i)\Big)
 For calculating the RPE based on the APE,
 
 \[
-RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_t}\sum_{t=1}^{n_i}PAIN(t_i)\Big)\times APE(t_i-1)
+RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t_i=1}^{n_{t_i}}PAIN(t_i)\Big)\times APE(t_i-1)
 \]
 
 \begin{Shaded}

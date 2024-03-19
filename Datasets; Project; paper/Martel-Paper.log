@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.10)  18 MAR 2024 23:09
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.10)  18 MAR 2024 23:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -611,7 +611,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 Here is how much of TeX's memory you used:
  14710 strings out of 476093
  233587 string characters out of 5795583
- 1865787 words of memory out of 5000000
+ 1864787 words of memory out of 5000000
  34768 multiletter control sequences out of 15000+600000
  566467 words of font info for 111 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -633,7 +633,7 @@ blic/lm/lmsy8.pfb><e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmtk10.pfb>
 <e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmtko10.pfb><e:/texlive/2022/
 texmf-dist/fonts/type1/public/lm/lmtt12.pfb><e:/texlive/2022/texmf-dist/fonts/t
 ype1/public/lm/lmtti10.pfb>
-Output written on Martel-Paper.pdf (4 pages, 281890 bytes).
+Output written on Martel-Paper.pdf (4 pages, 281772 bytes).
 PDF statistics:
  131 PDF objects out of 1000 (max. 8388607)
  91 compressed objects within 1 object stream

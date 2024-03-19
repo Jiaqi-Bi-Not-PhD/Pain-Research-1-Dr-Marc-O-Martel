@@ -13,7 +13,7 @@ header-includes:
   - \usepackage{float}
   - \pagestyle{fancy}
   - \fancyhead[CO, CE]{Jiaqi Bi}
-  - \fancyhead[LE, RO]{Martel et al. Daily OA Pain}
+  - \fancyhead[LE, RO]{Martel - Daily OA Pain}
   - \fancyfoot[CO, CE]{\thepage \ of \pageref{LastPage}}
   - \floatplacement{figure}{H}
 mainfont: Times New Roman
@@ -138,7 +138,10 @@ data_paper2 <- data_paper2 |>
 
 ###### Check if it is correctly coded ######
 data_paper2_check <- data_paper2 |>
-  select(c(ID, Wave_Day_Adjusted, IndexLev1_PainAverage, IndexLev1_PainAverage_Lagged, APE))
+  select(c(ID, Wave_Day_Adjusted, 
+           IndexLev1_PainAverage, 
+           IndexLev1_PainAverage_Lagged, 
+           APE))
 ```
 
 For calculating the RPE based on the within person mean, define the indicator that the pain is above the average pain for person $i$ on day $t_i$. Note that $n_{t_i}=\max{t_i}$ for patient $i$.
@@ -149,7 +152,7 @@ $$
 Then define the RPE given $A(t_i)=1$ for person $i$ on day $t_i$. 
 
 $$
-RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t=1}^{n_{t_i}}PAIN(t_i)\Big)\times A(t_i-1)
+RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t_i=1}^{n_{t_i}}PAIN(t_i)\Big)\times A(t_i-1)
 $$
 
 ```{r}
@@ -173,7 +176,7 @@ data_paper2_check <- data_paper2 |>
 For calculating the RPE based on the APE, 
 
 $$
-RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_t}\sum_{t=1}^{n_i}PAIN(t_i)\Big)\times APE(t_i-1)
+RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t_i=1}^{n_{t_i}}PAIN(t_i)\Big)\times APE(t_i-1)
 $$
 
 ```{r}
