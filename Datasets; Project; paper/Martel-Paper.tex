@@ -123,7 +123,7 @@
 
 \title{Martel Paper - Daily OA Pain}
 \author{}
-\date{\vspace{-2.5em}2024-03-16}
+\date{\vspace{-2.5em}2024-03-18}
 
 \begin{document}
 \maketitle
@@ -202,19 +202,19 @@
 \NormalTok{  ) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{ungroup}\NormalTok{()}
 
-\DocumentationTok{\#\# Check if the above approach is correct}
+\DocumentationTok{\#\#\#\#\#\# Check if the above approach is correct \#\#\#\#\#\#}
 \NormalTok{checkdf }\OtherTok{\textless{}{-}}\NormalTok{ data\_paper }\SpecialCharTok{|\textgreater{}} \FunctionTok{select}\NormalTok{(}\FunctionTok{c}\NormalTok{(ID, }
 \NormalTok{                                  Lev1\_DateTimeIn, }
 \NormalTok{                                  TimeDiffHours, }
 \NormalTok{                                  WithinGracePeriod, }
 \NormalTok{                                  Wave\_Day\_Adjusted))}
 \NormalTok{checkdf2 }\OtherTok{\textless{}{-}}\NormalTok{ checkdf }\SpecialCharTok{|\textgreater{}} \FunctionTok{subset}\NormalTok{(ID }\SpecialCharTok{==} \DecValTok{2072}\NormalTok{) }\CommentTok{\# Weird ID 2072}
-\FunctionTok{max}\NormalTok{(checkdf}\SpecialCharTok{$}\NormalTok{Wave\_Day\_Adjusted)}
+\FunctionTok{max}\NormalTok{(checkdf}\SpecialCharTok{$}\NormalTok{Wave\_Day\_Adjusted, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{) }\CommentTok{\# Maybe these two are different patients?}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## [1] NA
+## [1] 3588
 \end{verbatim}
 
 \begin{Shaded}
@@ -283,6 +283,25 @@
 ##   37.56  103.21  119.69  122.83  135.13  251.76    1321
 \end{verbatim}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(data\_paper2}\SpecialCharTok{$}\NormalTok{IndexLev1\_PainAverage) }\CommentTok{\# Lev 1 Pain?}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##     0.0    24.0    38.0    41.7    59.0   100.0    1226
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#\#\#\# Check if lagged value is correct \#\#\#\#\#\#}
+\NormalTok{data\_paper2\_check }\OtherTok{\textless{}{-}}\NormalTok{ data\_paper2 }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{c}\NormalTok{(ID, Wave\_Day\_Adjusted, IndexLev1\_PainAverage, IndexLev1\_PainAverage\_Lagged))}
+\end{Highlighting}
+\end{Shaded}
+
 \[
 APE(t_i)=I(PAIN(t_i)-PAIN(t_i-1) \geq 20)
 \]
@@ -290,6 +309,68 @@ APE(t_i)=I(PAIN(t_i)-PAIN(t_i-1) \geq 20)
 \begin{Shaded}
 \begin{Highlighting}[]
 \DocumentationTok{\#\# APE index}
+\NormalTok{data\_paper2 }\OtherTok{\textless{}{-}}\NormalTok{ data\_paper2 }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{group\_by}\NormalTok{(ID) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{APE =} \FunctionTok{ifelse}\NormalTok{(IndexLev1\_PainAverage }\SpecialCharTok{{-}}\NormalTok{ IndexLev1\_PainAverage\_Lagged }\SpecialCharTok{\textgreater{}=} \DecValTok{20}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{))}
+
+\DocumentationTok{\#\#\#\#\#\# Check if it is correctly coded \#\#\#\#\#\#}
+\NormalTok{data\_paper2\_check }\OtherTok{\textless{}{-}}\NormalTok{ data\_paper2 }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{c}\NormalTok{(ID, Wave\_Day\_Adjusted, IndexLev1\_PainAverage, IndexLev1\_PainAverage\_Lagged, APE))}
+\end{Highlighting}
+\end{Shaded}
+
+For calculating the RPE based on the within person mean, define the
+indicator that the pain is above the average pain for person \(i\) on
+day \(t_i\).
+
+\[
+A(t_i)=I(PAIN(t_i)>\frac{1}{n_t}\sum_{t=1}^{n_i}PAIN(t_i))
+\] Then define the RPE given \(A(t_i)=1\) for person \(i\) on day
+\(t_i\).
+
+\[
+RPE(t_i)=I\Big([PAIN(t_i)\leq \frac{1}{n_t}\sum_{t=1}^{n_i}PAIN(t_i)]|A(t_i-1)\Big)
+\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# RPE Index using within person mean}
+\NormalTok{data\_paper2 }\OtherTok{\textless{}{-}}\NormalTok{ data\_paper2 }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{group\_by}\NormalTok{(ID) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{AVE =} \FunctionTok{mean}\NormalTok{(IndexLev1\_PainAverage, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+         \AttributeTok{A =} \FunctionTok{ifelse}\NormalTok{(IndexLev1\_PainAverage }\SpecialCharTok{\textgreater{}}\NormalTok{ AVE, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{),}
+         \AttributeTok{A\_lag =} \FunctionTok{lag}\NormalTok{(A),}
+         \AttributeTok{Lev1\_RPE\_useMean =} \FunctionTok{ifelse}\NormalTok{(A\_lag }\SpecialCharTok{==} \DecValTok{1}\NormalTok{, }
+                                   \FunctionTok{ifelse}\NormalTok{(IndexLev1\_PainAverage }\SpecialCharTok{\textless{}=}\NormalTok{ AVE, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{), }\DecValTok{0}\NormalTok{)) }
+
+\DocumentationTok{\#\#\#\#\#\# Check \#\#\#\#\#\#}
+\NormalTok{data\_paper2\_check }\OtherTok{\textless{}{-}}\NormalTok{ data\_paper2 }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{c}\NormalTok{(ID, Wave\_Day\_Adjusted, IndexLev1\_PainAverage, IndexLev1\_PainAverage\_Lagged, }
+\NormalTok{           AVE, A, A\_lag, Lev1\_RPE\_useMean))}
+\CommentTok{\# 203 RPEs}
+\end{Highlighting}
+\end{Shaded}
+
+For calculating the RPE based on the APE,
+
+\[
+RPE(t_i)=I\Big([PAIN(t_i)\leq \frac{1}{n_t}\sum_{t=1}^{n_i}PAIN(t_i)]|APE(t_i-1)\Big)
+\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# RPE Index using APE}
+\NormalTok{data\_paper2 }\OtherTok{\textless{}{-}}\NormalTok{ data\_paper2 }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{group\_by}\NormalTok{(ID) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{APE\_lag =} \FunctionTok{lag}\NormalTok{(APE), }
+         \AttributeTok{Lev1\_RPE\_useAPE =} \FunctionTok{ifelse}\NormalTok{(APE\_lag }\SpecialCharTok{==} \DecValTok{1}\NormalTok{, }
+                                   \FunctionTok{ifelse}\NormalTok{(IndexLev1\_PainAverage }\SpecialCharTok{\textless{}=} \DecValTok{20}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{), }\DecValTok{0}\NormalTok{)) }
+
+\DocumentationTok{\#\#\#\#\#\# Check \#\#\#\#\#\#}
+\NormalTok{data\_paper2\_check }\OtherTok{\textless{}{-}}\NormalTok{ data\_paper2 }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{c}\NormalTok{(ID, Wave\_Day\_Adjusted, IndexLev1\_PainAverage, IndexLev1\_PainAverage\_Lagged, }
+\NormalTok{           APE, APE\_lag, Lev1\_RPE\_useAPE))}
+\CommentTok{\# 4 RPEs}
 \end{Highlighting}
 \end{Shaded}
 
