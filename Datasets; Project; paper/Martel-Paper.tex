@@ -321,15 +321,15 @@ APE(t_i)=I(PAIN(t_i)-PAIN(t_i-1) \geq 20)
 
 For calculating the RPE based on the within person mean, define the
 indicator that the pain is above the average pain for person \(i\) on
-day \(t_i\).
+day \(t_i\). Note that \(n_{t_i}=\max{t_i}\) for patient \(i\).
 
 \[
-A(t_i)=I\Big(PAIN(t_i)>\frac{1}{n_t}\sum_{t=1}^{n_i}PAIN(t_i)\Big)
+A(t_i)=I\Big(PAIN(t_i)>\frac{1}{n_{t_i}}\sum_{t_i=1}^{n_{t_i}}PAIN(t_i)\Big)
 \] Then define the RPE given \(A(t_i)=1\) for person \(i\) on day
 \(t_i\).
 
 \[
-RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_t}\sum_{t=1}^{n_i}PAIN(t_i)\Big)\times A(t_i-1)
+RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t=1}^{n_{t_i}}PAIN(t_i)\Big)\times A(t_i-1)
 \]
 
 \begin{Shaded}
