@@ -44,7 +44,12 @@ checkdf3 <- data_paper |>
   subset(ID == 2072) |> 
   select(c(ID, 
            Level1_Even_DateIn, 
-           Level1_Even_TimeIn))
+           Level1_Even_TimeIn,
+           Wave_Day))
+
+## Delete Weird ID 2072 those weird reporting days
+data_paper <- data_paper |>
+  filter(!(ID == 2072 & Wave_Day >= 7))
 ```
 
 ### Adjusting Wave Day ###
@@ -98,10 +103,14 @@ checkdf <- data_paper |> select(c(ID,
                                   Lev1_DateTimeIn, 
                                   TimeDiffHours, 
                                   WithinGracePeriod, 
-                                  Wave_Day_Adjusted))
+                                  Wave_Day_Adjusted,
+                                  Baseline_Demog_BMI))
 checkdf2 <- checkdf |> subset(ID == 2072) # Weird ID 2072
-max(checkdf$Wave_Day_Adjusted, na.rm = TRUE) # Maybe these two are different patients?
+max(checkdf$Wave_Day_Adjusted, na.rm = TRUE) 
+
 ```
+
+
 
 
 ```{r}
@@ -193,6 +202,8 @@ data_paper2_check <- data_paper2 |>
            APE, APE_lag, Lev1_RPE_useAPE))
 # 4 RPEs
 ```
+
+## Analysis
 
 
 
