@@ -151,7 +151,12 @@
   \FunctionTok{subset}\NormalTok{(ID }\SpecialCharTok{==} \DecValTok{2072}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
   \FunctionTok{select}\NormalTok{(}\FunctionTok{c}\NormalTok{(ID, }
 \NormalTok{           Level1\_Even\_DateIn, }
-\NormalTok{           Level1\_Even\_TimeIn))}
+\NormalTok{           Level1\_Even\_TimeIn,}
+\NormalTok{           Wave\_Day))}
+
+\DocumentationTok{\#\# Delete Weird ID 2072 those weird reporting days}
+\NormalTok{data\_paper }\OtherTok{\textless{}{-}}\NormalTok{ data\_paper }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\NormalTok{(ID }\SpecialCharTok{==} \DecValTok{2072} \SpecialCharTok{\&}\NormalTok{ Wave\_Day }\SpecialCharTok{\textgreater{}=} \DecValTok{7}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -207,14 +212,15 @@
 \NormalTok{                                  Lev1\_DateTimeIn, }
 \NormalTok{                                  TimeDiffHours, }
 \NormalTok{                                  WithinGracePeriod, }
-\NormalTok{                                  Wave\_Day\_Adjusted))}
+\NormalTok{                                  Wave\_Day\_Adjusted,}
+\NormalTok{                                  Baseline\_Demog\_BMI))}
 \NormalTok{checkdf2 }\OtherTok{\textless{}{-}}\NormalTok{ checkdf }\SpecialCharTok{|\textgreater{}} \FunctionTok{subset}\NormalTok{(ID }\SpecialCharTok{==} \DecValTok{2072}\NormalTok{) }\CommentTok{\# Weird ID 2072}
-\FunctionTok{max}\NormalTok{(checkdf}\SpecialCharTok{$}\NormalTok{Wave\_Day\_Adjusted, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{) }\CommentTok{\# Maybe these two are different patients?}
+\FunctionTok{max}\NormalTok{(checkdf}\SpecialCharTok{$}\NormalTok{Wave\_Day\_Adjusted, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{) }
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 3588
+## [1] 21
 \end{verbatim}
 
 \begin{Shaded}
@@ -236,7 +242,7 @@
 
 \begin{verbatim}
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-##   0.000   8.667  20.500  25.154  36.667  97.333    1220
+##   0.000   8.333  20.667  25.189  37.000  97.333    1228
 \end{verbatim}
 
 \begin{Shaded}
@@ -247,7 +253,7 @@
 
 \begin{verbatim}
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-##   0.000   2.792  12.667  23.018  37.750 100.000    1220
+##   0.000   2.667  12.667  23.085  38.000 100.000    1228
 \end{verbatim}
 
 \begin{Shaded}
@@ -258,7 +264,7 @@
 
 \begin{verbatim}
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-##    67.0   235.5   369.0   395.3   473.5  1200.0    1313
+##    67.0   235.5   369.0   395.8   482.5  1200.0    1321
 \end{verbatim}
 
 \begin{Shaded}
@@ -269,7 +275,7 @@
 
 \begin{verbatim}
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-##   -2.50    1.50    7.50   13.93   15.00   94.00    1276
+##   -2.50    1.50    7.50   13.97   15.00   94.00    1284
 \end{verbatim}
 
 \begin{Shaded}
@@ -280,7 +286,7 @@
 
 \begin{verbatim}
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-##   37.56  103.21  119.69  122.83  135.13  251.76    1321
+##   37.56  104.00  119.74  123.10  135.13  251.76    1329
 \end{verbatim}
 
 \begin{Shaded}
@@ -291,7 +297,7 @@
 
 \begin{verbatim}
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-##     0.0    24.0    38.0    41.7    59.0   100.0    1226
+##    0.00   24.00   38.00   41.73   59.75  100.00    1234
 \end{verbatim}
 
 \begin{Shaded}
@@ -377,5 +383,237 @@ RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t_i=1}^{n_{t_i}}PAIN(t_i)\Bi
 \end{Highlighting}
 \end{Shaded}
 
+\hypertarget{analysis}{%
+\subsection{Analysis}\label{analysis}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Unadjusted APE to Negative Affect}
+\NormalTok{model\_APE.NA }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(APE }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev1\_NegativeAffect\_Total }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\FunctionTok{summary}\NormalTok{(model\_APE.NA)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: APE ~ IndexLev1_NegativeAffect_Total + (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    451.6    465.7   -222.8    445.6      809 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.5907 -0.2780 -0.2335 -0.2048  3.9737 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0.7268   0.8525  
+## Number of obs: 812, groups:  ID, 157
+## 
+## Fixed effects:
+##                                 Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)                    -3.124537   0.329004  -9.497   <2e-16 ***
+## IndexLev1_NegativeAffect_Total  0.014167   0.006951   2.038   0.0415 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## IndxL1_NA_T -0.732
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+ \DocumentationTok{\#\# Unadjusted APE to Catastrophizing}
+\NormalTok{model\_APE.Cata }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(APE }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev1\_Catastrophizing\_Total }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\FunctionTok{summary}\NormalTok{(model\_APE.Cata)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: APE ~ IndexLev1_Catastrophizing_Total + (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    444.2    458.3   -219.1    438.2      809 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.6057 -0.2835 -0.2176 -0.1865  3.9271 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0.7367   0.8583  
+## Number of obs: 812, groups:  ID, 157
+## 
+## Fixed effects:
+##                                  Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)                     -3.252303   0.316961 -10.261  < 2e-16 ***
+## IndexLev1_Catastrophizing_Total  0.019020   0.005777   3.292 0.000994 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## IndxLv1_C_T -0.720
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Unadjusted APE to PPThs}
+\NormalTok{model\_APE.PPThs }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(APE }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev2\_QST\_BaselinePPTh }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+## Model failed to converge with max|grad| = 0.00456593 (tol = 0.002, component 1)
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, : Model is nearly unidentifiable: very large eigenvalue
+##  - Rescale variables?;Model is nearly unidentifiable: large eigenvalue ratio
+##  - Rescale variables?
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model\_APE.PPThs)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: APE ~ IndexLev2_QST_BaselinePPTh + (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    415.4    429.2   -204.7    409.4      726 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.4954 -0.2973 -0.2563 -0.2168  4.4125 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0.49     0.7     
+## Number of obs: 729, groups:  ID, 142
+## 
+## Fixed effects:
+##                              Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)                -1.7980758  0.3779896  -4.757 1.97e-06 ***
+## IndexLev2_QST_BaselinePPTh -0.0021978  0.0009134  -2.406   0.0161 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## IL2_QST_BPP -0.807
+## optimizer (Nelder_Mead) convergence code: 0 (OK)
+## Model failed to converge with max|grad| = 0.00456593 (tol = 0.002, component 1)
+## Model is nearly unidentifiable: very large eigenvalue
+##  - Rescale variables?
+## Model is nearly unidentifiable: large eigenvalue ratio
+##  - Rescale variables?
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Unadjusted APE to TSP}
+\NormalTok{model\_APE.TSP }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(APE }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev2\_QST\_TSPAve }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\FunctionTok{summary}\NormalTok{(model\_APE.TSP)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: APE ~ IndexLev2_QST_TSPAve + (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    433.9    447.8   -213.9    427.9      758 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.4841 -0.2851 -0.2630 -0.2260  5.6749 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0.512    0.7155  
+## Number of obs: 761, groups:  ID, 146
+## 
+## Fixed effects:
+##                      Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)          -2.40370    0.24326  -9.881   <2e-16 ***
+## IndexLev2_QST_TSPAve -0.01805    0.01029  -1.754   0.0794 .  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## IL2_QST_TSP -0.450
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Unadjusted APE to CPM}
+\NormalTok{model\_APE.CPM }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(APE }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev2\_QST\_CpmTrialAve }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, : Model is nearly unidentifiable: very large eigenvalue
+##  - Rescale variables?
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model\_APE.CPM)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: APE ~ IndexLev2_QST_CpmTrialAve + (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    415.4    429.2   -204.7    409.4      719 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.4942 -0.2957 -0.2365 -0.2284  3.3972 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0.7285   0.8536  
+## Number of obs: 722, groups:  ID, 141
+## 
+## Fixed effects:
+##                            Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)               -2.895586   0.682405  -4.243  2.2e-05 ***
+## IndexLev2_QST_CpmTrialAve  0.001580   0.005063   0.312    0.755    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## IL2_QST_CTA -0.939
+## optimizer (Nelder_Mead) convergence code: 0 (OK)
+## Model is nearly unidentifiable: very large eigenvalue
+##  - Rescale variables?
+\end{verbatim}
 
 \end{document}

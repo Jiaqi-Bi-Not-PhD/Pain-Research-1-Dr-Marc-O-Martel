@@ -205,6 +205,29 @@ data_paper2_check <- data_paper2 |>
 
 ## Analysis
 
+```{r}
+## Unadjusted APE to Negative Affect
+model_APE.NA <- glmer(APE ~ IndexLev1_NegativeAffect_Total + (1|ID), family = binomial(), data = data_paper2)
+summary(model_APE.NA)
+
+ ## Unadjusted APE to Catastrophizing
+model_APE.Cata <- glmer(APE ~ IndexLev1_Catastrophizing_Total + (1|ID), family = binomial(), data = data_paper2)
+summary(model_APE.Cata)
+
+## Unadjusted APE to PPThs
+model_APE.PPThs <- glmer(APE ~ IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
+summary(model_APE.PPThs)
+
+## Unadjusted APE to TSP
+model_APE.TSP <- glmer(APE ~ IndexLev2_QST_TSPAve + (1|ID), family = binomial(), data = data_paper2)
+summary(model_APE.TSP)
+
+## Unadjusted APE to CPM
+model_APE.CPM <- glmer(APE ~ IndexLev2_QST_CpmTrialAve + (1|ID), family = binomial(), data = data_paper2)
+summary(model_APE.CPM)
+```
+
+
 
 
 

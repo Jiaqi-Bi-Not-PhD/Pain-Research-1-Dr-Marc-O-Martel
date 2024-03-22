@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.10)  18 MAR 2024 23:18
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.10)  21 MAR 2024 23:03
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -562,21 +562,30 @@ LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <12> not available
 (Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 136.
 
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 1
-62.
+67.
 (e:/texlive/2022/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 162.
+(Font)              <12> on input line 167.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 162.
+(Font)              <8> on input line 167.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 162.
+(Font)              <6> on input line 167.
 [1
 
 {e:/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[2]
 LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-240.
+246.
 (e:/texlive/2022/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -588,7 +597,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[2]
+[3]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
@@ -597,7 +606,76 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[3] 
+[4]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[5]
+Overfull \hbox (30.42023pt too wide) in paragraph at lines 477--477
+[]\T1/lmtt/m/n/12 ## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = 
+control$checkConv, :[] 
+ []
+
+
+Overfull \hbox (36.58122pt too wide) in paragraph at lines 477--477
+[]\T1/lmtt/m/n/12 ## Model failed to converge with max|grad| = 0.00456593 (tol 
+= 0.002, component 1)[] 
+ []
+
+
+Overfull \hbox (363.87039pt too wide) in paragraph at lines 483--483
+[]\T1/lmtt/m/n/12 ## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = 
+control$checkConv, : Model is nearly unidentifiable: very large eigenvalue[] 
+ []
+
+
+Overfull \hbox (18.07022pt too wide) in paragraph at lines 483--483
+[]\T1/lmtt/m/n/12 ##  - Rescale variables?;Model is nearly unidentifiable: larg
+e eigenvalue ratio[] 
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[6]
+Overfull \hbox (36.58122pt too wide) in paragraph at lines 526--526
+[]\T1/lmtt/m/n/12 ## Model failed to converge with max|grad| = 0.00456593 (tol 
+= 0.002, component 1)[] 
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[7]
+Overfull \hbox (363.87039pt too wide) in paragraph at lines 577--577
+[]\T1/lmtt/m/n/12 ## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = 
+control$checkConv, : Model is nearly unidentifiable: very large eigenvalue[] 
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[8] 
 AED: lastpage setting LastPage
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -607,15 +685,15 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[4] (./Martel-Paper.aux) ) 
+[9] (./Martel-Paper.aux) ) 
 Here is how much of TeX's memory you used:
- 14710 strings out of 476093
- 233587 string characters out of 5795583
- 1864787 words of memory out of 5000000
- 34768 multiletter control sequences out of 15000+600000
+ 14719 strings out of 476093
+ 233650 string characters out of 5795583
+ 1865787 words of memory out of 5000000
+ 34770 multiletter control sequences out of 15000+600000
  566467 words of font info for 111 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 74i,12n,81p,1009b,521s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 74i,11n,81p,1009b,657s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {e:/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-ts1
 .enc}{e:/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{e:/texlive/2022/
 texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{e:/texlive/2022/texmf-dist/fonts/e
@@ -633,10 +711,10 @@ blic/lm/lmsy8.pfb><e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmtk10.pfb>
 <e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmtko10.pfb><e:/texlive/2022/
 texmf-dist/fonts/type1/public/lm/lmtt12.pfb><e:/texlive/2022/texmf-dist/fonts/t
 ype1/public/lm/lmtti10.pfb>
-Output written on Martel-Paper.pdf (4 pages, 281772 bytes).
+Output written on Martel-Paper.pdf (9 pages, 295256 bytes).
 PDF statistics:
- 131 PDF objects out of 1000 (max. 8388607)
- 91 compressed objects within 1 object stream
- 9 named destinations out of 1000 (max. 500000)
- 30737 words of extra memory for PDF output out of 35830 (max. 10000000)
+ 165 PDF objects out of 1000 (max. 8388607)
+ 119 compressed objects within 2 object streams
+ 16 named destinations out of 1000 (max. 500000)
+ 30745 words of extra memory for PDF output out of 35830 (max. 10000000)
 
