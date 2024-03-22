@@ -383,8 +383,8 @@ RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t_i=1}^{n_{t_i}}PAIN(t_i)\Bi
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{analysis}{%
-\subsection{Analysis}\label{analysis}}
+\hypertarget{analysis-of-ape}{%
+\subsection{Analysis of APE}\label{analysis-of-ape}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -614,6 +614,476 @@ RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t_i=1}^{n_{t_i}}PAIN(t_i)\Bi
 ## optimizer (Nelder_Mead) convergence code: 0 (OK)
 ## Model is nearly unidentifiable: very large eigenvalue
 ##  - Rescale variables?
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Adjusted APE}
+\NormalTok{model\_APE }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(APE }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev1\_Catastrophizing\_Total }\SpecialCharTok{+}\NormalTok{ IndexLev1\_NegativeAffect\_Total }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\FunctionTok{summary}\NormalTok{(model\_APE)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: 
+## APE ~ IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total +  
+##     (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    445.9    464.7   -219.0    437.9      807 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.6339 -0.2812 -0.2176 -0.1846  3.9902 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0.7666   0.8755  
+## Number of obs: 811, groups:  ID, 157
+## 
+## Fixed effects:
+##                                  Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)                     -3.326941   0.364314  -9.132  < 2e-16 ***
+## IndexLev1_Catastrophizing_Total  0.017634   0.006465   2.728  0.00638 ** 
+## IndexLev1_NegativeAffect_Total   0.003769   0.008028   0.470  0.63869    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) IL1_C_
+## IndxLv1_C_T -0.361       
+## IndxL1_NA_T -0.481 -0.434
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model\_APE\_2 }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(APE }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev2\_QST\_CpmTrialAve }\SpecialCharTok{+}\NormalTok{ IndexLev2\_QST\_TSPAve }\SpecialCharTok{+}\NormalTok{ IndexLev2\_QST\_BaselinePPTh }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+## Model failed to converge with max|grad| = 0.0082828 (tol = 0.002, component 1)
+\end{verbatim}
+
+\begin{verbatim}
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, : Model is nearly unidentifiable: very large eigenvalue
+##  - Rescale variables?;Model is nearly unidentifiable: large eigenvalue ratio
+##  - Rescale variables?
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model\_APE\_2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: 
+## APE ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh +  
+##     (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    395.4    418.1   -192.7    385.4      679 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.4812 -0.3194 -0.2721 -0.2041  6.7952 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0.2546   0.5046  
+## Number of obs: 684, groups:  ID, 132
+## 
+## Fixed effects:
+##                              Estimate Std. Error z value Pr(>|z|)   
+## (Intercept)                -0.8004088  0.8281574  -0.966  0.33380   
+## IndexLev2_QST_CpmTrialAve  -0.0025796  0.0048250  -0.535  0.59290   
+## IndexLev2_QST_TSPAve       -0.0250571  0.0106213  -2.359  0.01832 * 
+## IndexLev2_QST_BaselinePPTh -0.0028134  0.0009779  -2.877  0.00401 **
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) IL2_QST_C IL2_QST_T
+## IL2_QST_CTA -0.864                    
+## IL2_QST_TSP -0.236  0.030             
+## IL2_QST_BPP -0.631  0.275     0.176   
+## optimizer (Nelder_Mead) convergence code: 0 (OK)
+## Model failed to converge with max|grad| = 0.0082828 (tol = 0.002, component 1)
+## Model is nearly unidentifiable: very large eigenvalue
+##  - Rescale variables?
+## Model is nearly unidentifiable: large eigenvalue ratio
+##  - Rescale variables?
+\end{verbatim}
+
+\hypertarget{analysis-of-rpe}{%
+\subsection{Analysis of RPE}\label{analysis-of-rpe}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Unadjusted RPE to Negative Affect}
+\NormalTok{model\_RPE.NA }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(Lev1\_RPE\_useMean }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev1\_NegativeAffect\_Total }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model\_RPE.NA)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: Lev1_RPE_useMean ~ IndexLev1_NegativeAffect_Total + (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    923.8    937.9   -458.9    917.8      814 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.5986 -0.5882 -0.5715 -0.5178  1.9000 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0        0       
+## Number of obs: 817, groups:  ID, 157
+## 
+## Fixed effects:
+##                                 Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)                    -1.026494   0.127343  -8.061 7.58e-16 ***
+## IndexLev1_NegativeAffect_Total -0.002979   0.004024  -0.740    0.459    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## IndxL1_NA_T -0.773
+## optimizer (Nelder_Mead) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+ \DocumentationTok{\#\# Unadjusted RPE to Catastrophizing}
+\NormalTok{model\_RPE.Cata }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(Lev1\_RPE\_useMean }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev1\_Catastrophizing\_Total }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model\_RPE.Cata)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: Lev1_RPE_useMean ~ IndexLev1_Catastrophizing_Total + (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    920.2    934.3   -457.1    914.2      814 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.6210 -0.6084 -0.5641 -0.4431  2.2700 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0        0       
+## Number of obs: 817, groups:  ID, 157
+## 
+## Fixed effects:
+##                                  Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)                     -0.952720   0.107572  -8.857   <2e-16 ***
+## IndexLev1_Catastrophizing_Total -0.006868   0.003466  -1.981   0.0475 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## IndxLv1_C_T -0.658
+## optimizer (Nelder_Mead) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Unadjusted RPE to PPThs}
+\NormalTok{model\_RPE.PPThs }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(Lev1\_RPE\_useMean }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev2\_QST\_BaselinePPTh }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model\_RPE.PPThs)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: Lev1_RPE_useMean ~ IndexLev2_QST_BaselinePPTh + (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    837.0    850.8   -415.5    831.0      731 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.6444 -0.6050 -0.5738  1.5684  2.1812 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0        0       
+## Number of obs: 734, groups:  ID, 142
+## 
+## Fixed effects:
+##                              Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)                -0.8386985  0.1835064  -4.570 4.87e-06 ***
+## IndexLev2_QST_BaselinePPTh -0.0006009  0.0004239  -1.418    0.156    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## IL2_QST_BPP -0.887
+## optimizer (Nelder_Mead) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Unadjusted RPE to TSP}
+\NormalTok{model\_RPE.TSP }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(Lev1\_RPE\_useMean }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev2\_QST\_TSPAve }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model\_RPE.TSP)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: Lev1_RPE_useMean ~ IndexLev2_QST_TSPAve + (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    868.0    881.9   -431.0    862.0      762 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.5804 -0.5799 -0.5790  1.7229  1.7501 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0        0       
+## Number of obs: 765, groups:  ID, 146
+## 
+## Fixed effects:
+##                        Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)          -1.0888762  0.1040629 -10.464   <2e-16 ***
+## IndexLev2_QST_TSPAve -0.0003236  0.0044722  -0.072    0.942    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## IL2_QST_TSP -0.598
+## optimizer (Nelder_Mead) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Unadjusted RPE to CPM}
+\NormalTok{model\_RPE.CPM }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(Lev1\_RPE\_useMean }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev2\_QST\_CpmTrialAve }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model\_RPE.CPM)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: Lev1_RPE_useMean ~ IndexLev2_QST_CpmTrialAve + (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    828.3    842.1   -411.1    822.3      724 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.6344 -0.5849 -0.5771  1.5998  1.8201 
+## 
+## Random effects:
+##  Groups Name        Variance  Std.Dev. 
+##  ID     (Intercept) 3.286e-16 1.813e-08
+## Number of obs: 727, groups:  ID, 141
+## 
+## Fixed effects:
+##                            Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)               -1.248189   0.345374  -3.614 0.000301 ***
+## IndexLev2_QST_CpmTrialAve  0.001342   0.002699   0.497 0.618951    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## IL2_QST_CTA -0.969
+## optimizer (Nelder_Mead) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Adjusted RPE}
+\NormalTok{model\_RPE }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(Lev1\_RPE\_useMean }\SpecialCharTok{\textasciitilde{}}\NormalTok{  IndexLev1\_Catastrophizing\_Total }\SpecialCharTok{+}\NormalTok{ IndexLev1\_NegativeAffect\_Total }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model\_RPE)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: 
+## Lev1_RPE_useMean ~ IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total +  
+##     (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    919.5    938.4   -455.8    911.5      812 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.6507 -0.6074 -0.5641 -0.4285  2.3095 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0        0       
+## Number of obs: 816, groups:  ID, 157
+## 
+## Fixed effects:
+##                                  Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)                     -0.985040   0.130399  -7.554 4.22e-14 ***
+## IndexLev1_Catastrophizing_Total -0.007347   0.004012  -1.831   0.0671 .  
+## IndexLev1_NegativeAffect_Total   0.001537   0.004684   0.328   0.7428    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) IL1_C_
+## IndxLv1_C_T -0.189       
+## IndxL1_NA_T -0.562 -0.502
+## optimizer (Nelder_Mead) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model\_RPE\_2 }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(Lev1\_RPE\_useMean }\SpecialCharTok{\textasciitilde{}}\NormalTok{ IndexLev2\_QST\_CpmTrialAve }\SpecialCharTok{+}\NormalTok{ IndexLev2\_QST\_TSPAve }\SpecialCharTok{+}\NormalTok{ IndexLev2\_QST\_BaselinePPTh }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{ID), }\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(), }\AttributeTok{data =}\NormalTok{ data\_paper2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## boundary (singular) fit: see help('isSingular')
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(model\_RPE\_2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: Lev1_RPE_useMean ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve +  
+##     IndexLev2_QST_BaselinePPTh + (1 | ID)
+##    Data: data_paper2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    786.9    809.6   -388.4    776.9      683 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.6359 -0.5949 -0.5740  1.5799  2.0883 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  ID     (Intercept) 0        0       
+## Number of obs: 688, groups:  ID, 132
+## 
+## Fixed effects:
+##                              Estimate Std. Error z value Pr(>|z|)  
+## (Intercept)                -0.8913559  0.4717127  -1.890   0.0588 .
+## IndexLev2_QST_CpmTrialAve   0.0001801  0.0028856   0.062   0.9502  
+## IndexLev2_QST_TSPAve       -0.0010464  0.0046924  -0.223   0.8235  
+## IndexLev2_QST_BaselinePPTh -0.0005068  0.0004886  -1.037   0.2996  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) IL2_QST_C IL2_QST_T
+## IL2_QST_CTA -0.878                    
+## IL2_QST_TSP -0.281  0.055             
+## IL2_QST_BPP -0.645  0.278     0.227   
+## optimizer (Nelder_Mead) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
 \end{verbatim}
 
 \end{document}

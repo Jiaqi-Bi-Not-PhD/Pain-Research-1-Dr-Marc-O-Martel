@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.10)  21 MAR 2024 23:03
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.10)  22 MAR 2024 00:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -675,7 +675,115 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[8] 
+[8]
+Overfull \hbox (30.42023pt too wide) in paragraph at lines 671--671
+[]\T1/lmtt/m/n/12 ## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = 
+control$checkConv, :[] 
+ []
+
+
+Overfull \hbox (30.42023pt too wide) in paragraph at lines 671--671
+[]\T1/lmtt/m/n/12 ## Model failed to converge with max|grad| = 0.0082828 (tol =
+ 0.002, component 1)[] 
+ []
+
+
+Overfull \hbox (363.87039pt too wide) in paragraph at lines 677--677
+[]\T1/lmtt/m/n/12 ## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = 
+control$checkConv, : Model is nearly unidentifiable: very large eigenvalue[] 
+ []
+
+
+Overfull \hbox (18.07022pt too wide) in paragraph at lines 677--677
+[]\T1/lmtt/m/n/12 ##  - Rescale variables?;Model is nearly unidentifiable: larg
+e eigenvalue ratio[] 
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[9]
+Overfull \hbox (73.64525pt too wide) in paragraph at lines 726--726
+[]\T1/lmtt/m/n/12 ## APE ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + I
+ndexLev2_QST_BaselinePPTh +[] 
+ []
+
+
+Overfull \hbox (30.42023pt too wide) in paragraph at lines 726--726
+[]\T1/lmtt/m/n/12 ## Model failed to converge with max|grad| = 0.0082828 (tol =
+ 0.002, component 1)[] 
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[10]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[11]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[12]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[13]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[14]
+Overfull \hbox (73.64525pt too wide) in paragraph at lines 1033--1033
+[]\T1/lmtt/m/n/12 ## Lev1_RPE_useMean ~ IndexLev1_Catastrophizing_Total + Index
+Lev1_NegativeAffect_Total +[] 
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[15]
+Overfull \hbox (30.42023pt too wide) in paragraph at lines 1087--1087
+[]\T1/lmtt/m/n/12 ## Formula: Lev1_RPE_useMean ~ IndexLev2_QST_CpmTrialAve + In
+dexLev2_QST_TSPAve +[] 
+ []
+
+
 AED: lastpage setting LastPage
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -685,36 +793,36 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[9] (./Martel-Paper.aux) ) 
+[16] (./Martel-Paper.aux) ) 
 Here is how much of TeX's memory you used:
- 14719 strings out of 476093
- 233650 string characters out of 5795583
+ 14730 strings out of 476093
+ 233760 string characters out of 5795583
  1865787 words of memory out of 5000000
- 34770 multiletter control sequences out of 15000+600000
+ 34772 multiletter control sequences out of 15000+600000
  566467 words of font info for 111 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 74i,11n,81p,1009b,657s stack positions out of 10000i,1000n,20000p,200000b,200000s
-{e:/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-ts1
-.enc}{e:/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{e:/texlive/2022/
-texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{e:/texlive/2022/texmf-dist/fonts/e
-nc/dvips/lm/lm-mathex.enc}{e:/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-mat
-hsy.enc}{e:/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}<e:/texlive/20
-22/texmf-dist/fonts/type1/public/lm/lmbx12.pfb><e:/texlive/2022/texmf-dist/font
-s/type1/public/lm/lmex10.pfb><e:/texlive/2022/texmf-dist/fonts/type1/public/lm/
-lmmi12.pfb><e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmmi6.pfb><e:/texl
-ive/2022/texmf-dist/fonts/type1/public/lm/lmmi8.pfb><e:/texlive/2022/texmf-dist
-/fonts/type1/public/lm/lmr12.pfb><e:/texlive/2022/texmf-dist/fonts/type1/public
-/lm/lmr17.pfb><e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmr8.pfb><e:/te
-xlive/2022/texmf-dist/fonts/type1/public/lm/lmro12.pfb><e:/texlive/2022/texmf-d
-ist/fonts/type1/public/lm/lmsy10.pfb><e:/texlive/2022/texmf-dist/fonts/type1/pu
-blic/lm/lmsy8.pfb><e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmtk10.pfb>
-<e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmtko10.pfb><e:/texlive/2022/
-texmf-dist/fonts/type1/public/lm/lmtt12.pfb><e:/texlive/2022/texmf-dist/fonts/t
-ype1/public/lm/lmtti10.pfb>
-Output written on Martel-Paper.pdf (9 pages, 295256 bytes).
+ 74i,11n,81p,1009b,665s stack positions out of 10000i,1000n,20000p,200000b,200000s
+{e:/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-ts
+1.enc}{e:/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{e:/texlive/2022
+/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{e:/texlive/2022/texmf-dist/fonts/
+enc/dvips/lm/lm-mathex.enc}{e:/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-ma
+thsy.enc}{e:/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}<e:/texlive/2
+022/texmf-dist/fonts/type1/public/lm/lmbx12.pfb><e:/texlive/2022/texmf-dist/fon
+ts/type1/public/lm/lmex10.pfb><e:/texlive/2022/texmf-dist/fonts/type1/public/lm
+/lmmi12.pfb><e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmmi6.pfb><e:/tex
+live/2022/texmf-dist/fonts/type1/public/lm/lmmi8.pfb><e:/texlive/2022/texmf-dis
+t/fonts/type1/public/lm/lmr12.pfb><e:/texlive/2022/texmf-dist/fonts/type1/publi
+c/lm/lmr17.pfb><e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmr8.pfb><e:/t
+exlive/2022/texmf-dist/fonts/type1/public/lm/lmro12.pfb><e:/texlive/2022/texmf-
+dist/fonts/type1/public/lm/lmsy10.pfb><e:/texlive/2022/texmf-dist/fonts/type1/p
+ublic/lm/lmsy8.pfb><e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmtk10.pfb
+><e:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmtko10.pfb><e:/texlive/2022
+/texmf-dist/fonts/type1/public/lm/lmtt12.pfb><e:/texlive/2022/texmf-dist/fonts/
+type1/public/lm/lmtti10.pfb>
+Output written on Martel-Paper.pdf (16 pages, 310990 bytes).
 PDF statistics:
- 165 PDF objects out of 1000 (max. 8388607)
- 119 compressed objects within 2 object streams
- 16 named destinations out of 1000 (max. 500000)
- 30745 words of extra memory for PDF output out of 35830 (max. 10000000)
+ 208 PDF objects out of 1000 (max. 8388607)
+ 155 compressed objects within 2 object streams
+ 25 named destinations out of 1000 (max. 500000)
+ 30753 words of extra memory for PDF output out of 35830 (max. 10000000)
 

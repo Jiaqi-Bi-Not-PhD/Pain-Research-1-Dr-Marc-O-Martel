@@ -203,7 +203,7 @@ data_paper2_check <- data_paper2 |>
 # 4 RPEs
 ```
 
-## Analysis
+## Analysis of APE
 
 ```{r}
 ## Unadjusted APE to Negative Affect
@@ -226,6 +226,50 @@ summary(model_APE.TSP)
 model_APE.CPM <- glmer(APE ~ IndexLev2_QST_CpmTrialAve + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE.CPM)
 ```
+
+```{r}
+## Adjusted APE
+model_APE <- glmer(APE ~ IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total + (1|ID), family = binomial(), data = data_paper2)
+summary(model_APE)
+
+model_APE_2 <- glmer(APE ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
+summary(model_APE_2)
+```
+
+## Analysis of RPE
+
+```{r}
+## Unadjusted RPE to Negative Affect
+model_RPE.NA <- glmer(Lev1_RPE_useMean ~ IndexLev1_NegativeAffect_Total + (1|ID), family = binomial(), data = data_paper2)
+summary(model_RPE.NA)
+
+ ## Unadjusted RPE to Catastrophizing
+model_RPE.Cata <- glmer(Lev1_RPE_useMean ~ IndexLev1_Catastrophizing_Total + (1|ID), family = binomial(), data = data_paper2)
+summary(model_RPE.Cata)
+
+## Unadjusted RPE to PPThs
+model_RPE.PPThs <- glmer(Lev1_RPE_useMean ~ IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
+summary(model_RPE.PPThs)
+
+## Unadjusted RPE to TSP
+model_RPE.TSP <- glmer(Lev1_RPE_useMean ~ IndexLev2_QST_TSPAve + (1|ID), family = binomial(), data = data_paper2)
+summary(model_RPE.TSP)
+
+## Unadjusted RPE to CPM
+model_RPE.CPM <- glmer(Lev1_RPE_useMean ~ IndexLev2_QST_CpmTrialAve + (1|ID), family = binomial(), data = data_paper2)
+summary(model_RPE.CPM)
+```
+
+```{r}
+## Adjusted RPE
+model_RPE <- glmer(Lev1_RPE_useMean ~  IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total + (1|ID), family = binomial(), data = data_paper2)
+summary(model_RPE)
+
+model_RPE_2 <- glmer(Lev1_RPE_useMean ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
+summary(model_RPE_2)
+```
+
+
 
 
 
