@@ -52,7 +52,7 @@ data_paper <- data_paper |>
   filter(!(ID == 2072 & Wave_Day >= 7))
 ```
 
-### Adjusting Wave Day ###
+### Adjusting Wave Day 
 
 \begin{itemize}
   \item $DT_i$ combines $D_i$ and $T_i$: `DateTime` variable
@@ -203,7 +203,7 @@ data_paper2_check <- data_paper2 |>
 # 4 RPEs
 ```
 
-## Analysis of APE
+## Analysis of APE using the Table in the Manuscript
 
 ```{r}
 ## Unadjusted APE to Negative Affect
@@ -236,7 +236,7 @@ model_APE_2 <- glmer(APE ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + In
 summary(model_APE_2)
 ```
 
-## Analysis of RPE
+## Analysis of RPE using the Table of Manuscript
 
 ```{r}
 ## Unadjusted RPE to Negative Affect
@@ -268,6 +268,19 @@ summary(model_RPE)
 model_RPE_2 <- glmer(Lev1_RPE_useMean ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
 summary(model_RPE_2)
 ```
+
+## Adjusting more confounding factors
+
+```{r}
+## Consider age, sex, BMI,... (Lvl2) for APE
+model_APE_2_conf <- glmer(APE ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + Baseline_Demog_Ethnicity + Baseline_Demog_Age + Baseline_Demog_BMI + Baseline_Demog_Sex + (1|ID), family = binomial(), data = data_paper2)
+summary(model_APE_2_conf)
+
+## Consider age, sex, BMI,... (Lvl2) for RPE
+model_RPE_2_conf <- glmer(Lev1_RPE_useMean ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + Baseline_Demog_Ethnicity + Baseline_Demog_Age + Baseline_Demog_BMI + Baseline_Demog_Sex + (1|ID), family = binomial(), data = data_paper2)
+summary(model_RPE_2_conf)
+```
+
 
 
 
