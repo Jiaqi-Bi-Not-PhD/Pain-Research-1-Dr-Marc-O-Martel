@@ -43,12 +43,15 @@ average_predictions <- new_data |>
 ggplot() +
   geom_line(data = new_data, aes(x = AggregDay_All_PainAve, y = predicted, group = ID), color = "grey") +
   geom_line(data = average_predictions, aes(x = AggregDay_All_PainAve, y = mean_predicted), color = "black", size = 1) +
-  labs(title = "Multilevel Regression Line - Daily Pain Intensity vs Cannabis Creaving", 
+  labs(title = "Association between pain intensity and daily cannabis craving", 
        x = "Daily pain intensity", 
        y = "Cannabis craving") +
   ylim(0,100) +
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5)) 
+  theme(element_blank()) +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+              axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 ############################
 ###### End of Model 1 ######
 ############################
@@ -85,9 +88,13 @@ average_predictions <- new_data |>
 ggplot() +
   geom_line(data = new_data, aes(x = AggregDay_All_NA, y = predicted, group = ID), color = "grey") +
   geom_line(data = average_predictions, aes(x = AggregDay_All_NA, y = mean_predicted), color = "black", size = 1) +
-  labs(title = "Multilevel Regression Line - Daily Negative Affect vs Cannabis Creaving", 
+  labs(title = "Association between negative affect and daily cannabis craving", 
        x = "Daily negative affect", 
        y = "Cannabis craving") +
   ylim(0,100) +
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5)) 
+  theme(element_blank()) +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+
