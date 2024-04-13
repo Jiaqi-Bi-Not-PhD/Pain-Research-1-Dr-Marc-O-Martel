@@ -281,6 +281,19 @@ model_RPE_2_conf <- glmer(Lev1_RPE_useMean ~ IndexLev2_QST_CpmTrialAve + IndexLe
 summary(model_RPE_2_conf)
 ```
 
+These seem to have no confounding effects... 
+
+## Lev1 and Lev2 Together for APE and RPE
+
+```{r}
+model_APE_conf <- glmer(APE ~ IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total + Level1_Even_PhysActiv + IndexLev2_QST_CpmTrialAve + Wave_Day + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
+summary(model_APE_conf)
+
+model_RPE_conf <- glmer(Lev1_RPE_useMean ~ IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total + Level1_Even_PhysActiv + IndexLev2_QST_CpmTrialAve + Wave_Day + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
+summary(model_RPE_conf)
+```
+
+
 
 
 
