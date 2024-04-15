@@ -41,3 +41,27 @@ model_glmm_NA_n80 <- extend(model_glmm_NA, along = "ID", n = 80)
 powerSim(model_glmm_NA_n80)
 plot_power <- powerCurve(model_glmm_NA_n80, along = "ID")
 plot(plot_power, xlab = "# of Patients")
+
+######### Below is for Version 1.4 Dataset ##########
+Bab1.4 <- read_sav("Babiloni; Dataset 1.4.sav")
+Bab2 <- Bab1.4 |>
+  group_by(ID) |>
+  summarise(n = sum(is.na(Lev2_PainFlareAMPM))) |>
+  filter(n != 14)
+Bab1.4 <- Bab1.4 |>
+  filter(ID %in% Bab2$ID) |>
+  filter(Wave_Diary_Moment == 1)
+names(Bab1.4)
+model_full <- glmer(Lev2_PainFlareAMPM ~ Lev2_Agg_NA + Lev2_Agg_PA + Lev2_Agg_Sleep + Lev2_Agg_PCS + (1|ID), data = Bab1.4, family = binomial())
+summary(model_full)
+powerSim(model_full, fixed("Lev2_Agg_NA", "z"), nsim = 100)
+
+model_moreID <- extend(model_full, along = "ID", n = 100)
+plot_power <- powerCurve(model_moreID, fixed("Lev2_Agg_NA"), along = "ID")
+plot(plot_power, xlab = "# of Patients")
+summary(model_NA_moreID)
+
+plot_power_PCS <- powerCurve(model_moreID, fixed("Lev2_Agg_PCS"), along = "ID")
+plot(plot_power_PCS, xlab = "# of Patients")
+
+
