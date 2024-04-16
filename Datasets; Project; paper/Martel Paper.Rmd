@@ -37,7 +37,7 @@ library(lmerTest)
 ```
 
 
-```{r}
+```{r, message = FALSE}
 ## Read data
 data_paper <- read_sav("Dataset; 2024.1.sav")
 checkdf3 <- data_paper |> 
@@ -78,7 +78,7 @@ data_paper <- data_paper |>
 \end{itemize}
 
 
-```{r}
+```{r, message = FALSE}
 ## Consecutive Days - Grace Period 6 hours
 data_paper <- data_paper |>
   mutate(Lev1_DateTimeIn = as.POSIXct(strptime(paste(Level1_Even_DateIn, 
@@ -113,7 +113,7 @@ max(checkdf$Wave_Day_Adjusted, na.rm = TRUE)
 
 
 
-```{r}
+```{r, message = FALSE}
 ## Fill in the gap of Wave_Day
 data_paper2 <- data_paper |>
   group_by(ID) |>
@@ -121,7 +121,7 @@ data_paper2 <- data_paper |>
   ungroup()
 ```
 
-```{r}
+```{r, message = FALSE, echo = TRUE, results = 'hide'}
 ## Check the aberrant values
 summary(data_paper2$IndexLev1_NegativeAffect_Total) # Lev 1 Negative Affect 
 summary(data_paper2$IndexLev1_Catastrophizing_Total) # Lev 1 Catas
@@ -139,7 +139,7 @@ $$
 APE(t_i)=I(PAIN(t_i)-PAIN(t_i-1) \geq 20)
 $$
 
-```{r}
+```{r, results = 'hide', echo = TRUE}
 ## APE index
 data_paper2 <- data_paper2 |>
   group_by(ID) |>
@@ -164,7 +164,7 @@ $$
 RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t_i=1}^{n_{t_i}}PAIN(t_i)\Big)\times A(t_i-1)
 $$
 
-```{r}
+```{r, echo = TRUE, results = 'hide'}
 ## RPE Index using within person mean
 data_paper2 <- data_paper2 |>
   group_by(ID) |>
@@ -188,7 +188,7 @@ $$
 RPE(t_i)=I\Big(PAIN(t_i)\leq \frac{1}{n_{t_i}}\sum_{t_i=1}^{n_{t_i}}PAIN(t_i)\Big)\times APE(t_i-1)
 $$
 
-```{r}
+```{r, echo = TRUE, results = 'hide'}
 ## RPE Index using APE
 data_paper2 <- data_paper2 |>
   group_by(ID) |>
@@ -205,7 +205,7 @@ data_paper2_check <- data_paper2 |>
 
 ## Analysis of APE using the Table in the Manuscript
 
-```{r}
+```{r, echo = TRUE, results = 'hide'}
 ## Unadjusted APE to Negative Affect
 model_APE.NA <- glmer(APE ~ IndexLev1_NegativeAffect_Total + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE.NA)
@@ -227,7 +227,7 @@ model_APE.CPM <- glmer(APE ~ IndexLev2_QST_CpmTrialAve + (1|ID), family = binomi
 summary(model_APE.CPM)
 ```
 
-```{r}
+```{r, echo = TRUE, results = 'hide'}
 ## Adjusted APE
 model_APE <- glmer(APE ~ IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE)
@@ -238,7 +238,7 @@ summary(model_APE_2)
 
 ## Analysis of RPE using the Table of Manuscript
 
-```{r}
+```{r, echo = TRUE, results = 'hide'}
 ## Unadjusted RPE to Negative Affect
 model_RPE.NA <- glmer(Lev1_RPE_useMean ~ IndexLev1_NegativeAffect_Total + (1|ID), family = binomial(), data = data_paper2)
 summary(model_RPE.NA)
@@ -260,7 +260,7 @@ model_RPE.CPM <- glmer(Lev1_RPE_useMean ~ IndexLev2_QST_CpmTrialAve + (1|ID), fa
 summary(model_RPE.CPM)
 ```
 
-```{r}
+```{r, echo = TRUE, results = 'hide'}
 ## Adjusted RPE
 model_RPE <- glmer(Lev1_RPE_useMean ~  IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total + (1|ID), family = binomial(), data = data_paper2)
 summary(model_RPE)
@@ -271,7 +271,7 @@ summary(model_RPE_2)
 
 ## Adjusting more confounding factors
 
-```{r}
+```{r, echo = TRUE, results = 'hide'}
 ## Consider age, sex, BMI,... (Lvl2) for APE
 model_APE_2_conf <- glmer(APE ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + Baseline_Demog_Ethnicity + Baseline_Demog_Age + Baseline_Demog_BMI + Baseline_Demog_Sex + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE_2_conf)
@@ -285,13 +285,177 @@ These seem to have no confounding effects...
 
 ## Lev1 and Lev2 Together for APE and RPE
 
-```{r}
+```{r, echo = TRUE, results = 'hide'}
 model_APE_conf <- glmer(APE ~ IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total + Level1_Even_PhysActiv + IndexLev2_QST_CpmTrialAve + Wave_Day + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE_conf)
 
 model_RPE_conf <- glmer(Lev1_RPE_useMean ~ IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total + Level1_Even_PhysActiv + IndexLev2_QST_CpmTrialAve + Wave_Day + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
 summary(model_RPE_conf)
 ```
+
+According to the meeting with Dr. Marc O. Martel on Apr. 12, the above results are not sufficient. 
+
+\newpage
+
+## Results after Apr. 12
+
+```{r}
+## Day-to-day delta change score in pain (From yesterday to today), check normality
+ggplot(data_paper2, aes(x = IndexLev1_PainAverage_RawChange)) + 
+  geom_density() +
+  geom_vline(aes(xintercept = mean(IndexLev1_PainAverage_RawChange, na.rm = TRUE)), 
+             color = "red", linetype = "dashed", size = 1) + # 1399 out of 2212 have missing
+  labs(title = "Global density of Pain delta changes", 
+       x = "Pain Delta Change", 
+       y = "Density") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) # It looks normal to me 
+
+## Shapiro test (Formal test of normality)
+normal_check <- data_paper2$IndexLev1_PainAverage_RawChange[!is.na(data_paper2$IndexLev1_PainAverage_RawChange)]
+shapiro.test(normal_check) # Although the formal test does not suggest normality
+```
+
+The below will examine if baseline covairates are associated with the delta pain change individually. 
+
+```{r}
+## Age
+model_age <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Demog_Age + (1|ID), data = data_paper2)
+summary(model_age)
+
+## Sex
+model_sex <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Demog_Sex + (1|ID), data = data_paper2)
+summary(model_sex)
+
+## BMI
+model_bmi <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Demog_BMI + (1|ID), data = data_paper2)
+summary(model_bmi)
+
+## Ethnicity
+model_ethn <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Demog_Ethnicity_Rec + (1|ID), data = data_paper2)
+summary(model_ethn)
+
+## SmokePerday
+model_smoke <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Lifestyle_SmokePerday + (1|ID), data = data_paper2)
+summary(model_smoke)
+
+## Meds_Acetaminophen
+model_acetam <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Acetaminophen + (1|ID), data = data_paper2)
+summary(model_acetam)
+
+## NSAID
+model_NSAID <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_NSAID + (1|ID), data = data_paper2)
+summary(model_NSAID)
+
+## Cox2
+model_cox2 <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Cox2 + (1|ID), data = data_paper2)
+summary(model_cox2)
+
+## Antidepressants
+model_antidep <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Antidepressants + (1|ID), data = data_paper2)
+summary(model_antidep)
+
+## Baseline_Meds_Anxiolytics
+model_anxioly <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Anxiolytics + (1|ID), data = data_paper2)
+summary(model_anxioly)
+
+## MuscleRelaxants
+model_musclerelax <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_MuscleRelaxants + (1|ID), data = data_paper2)
+summary(model_musclerelax)
+
+## Baseline_Meds_Opioids
+model_opioid <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Opioids + (1|ID), data = data_paper2)
+summary(model_opioid)
+
+## Baseline_Meds_Anticonvulsants
+model_anticonv <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Anticonvulsants + (1|ID), data = data_paper2)
+summary(model_anticonv)
+```
+
+## Level 2 covariates
+
+The below will examine if PPTh, TSP, and CPM are significantly associated with the delta pain change. 
+
+```{r}
+## PPTh
+model_PPTh <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
+summary(model_PPTh)
+
+## TSP 
+model_TSP <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_QST_TSPAve + (1|ID), data = data_paper2)
+summary(model_TSP)
+
+## CPM
+model_CPM <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_QST_CpmTrialAve + (1|ID), data = data_paper2)
+summary(model_CPM)
+
+## Adjusted model
+model_adjusted_lev2 <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
+summary(model_adjusted_lev2)
+```
+
+## Level 1 covariates
+
+The following will examine if DailyCatastro, DailyNA, Daily PosAffect, DailyPhysExcersice are associated with the delta change in pain
+
+```{r}
+## Daily Catastro
+model_catastro <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
+summary(model_catastro) # Significant!
+
+## DailyNA
+model_DailyNA <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2)
+summary(model_DailyNA) # Significant!
+
+## PosAffect
+model_PosAffect <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev1_PositiveAffect_Total + (1|ID), data = data_paper2)
+summary(model_PosAffect)
+
+## DailyPhysExcersice
+model_PhysExercise <- lmer(IndexLev1_PainAverage_RawChange ~ Level1_Even_PhysActiv + (1|ID), data = data_paper2)
+summary(model_PhysExercise) # Significant! 
+
+## Adjusted level 1
+model_adj_lev1 <- lmer(IndexLev1_PainAverage_RawChange ~ Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
+summary(model_adj_lev1) # Catastro significant! 
+
+## Both level 1 and level 2
+model_adj_all <- lmer(IndexLev1_PainAverage_RawChange ~ Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
+summary(model_adj_all)
+```
+
+The following code will examine the count of the APEs per individual using Poisson regression
+
+```{r}
+library(pscl)
+data_paper2_pois <- data_paper2 |>
+  select(c(Baseline_Demog_Age, Baseline_Demog_Sex, 
+           Baseline_Demog_BMI, Baseline_Demog_Ethnicity_Rec, 
+           Baseline_Lifestyle_SmokePerday, Baseline_Meds_Acetaminophen, 
+           Baseline_Meds_NSAID, Baseline_Meds_Cox2, 
+           Baseline_Meds_Antidepressants, Baseline_Meds_Anxiolytics,
+           Baseline_Meds_MuscleRelaxants, Baseline_Meds_Opioids, 
+           Baseline_Meds_Anticonvulsants, IndexLev2_QST_BaselinePPTh, 
+           IndexLev2_QST_TSPAve, IndexLev2_QST_CpmTrialAve, APE, ID))
+data_paper2_pois2 <- data_paper2_pois |>
+  group_by(ID) |>
+  summarise(nAPE = sum(APE, na.rm = TRUE)) 
+data_paper2_pois <- merge(data_paper2_pois, data_paper2_pois2, by = "ID")
+data_paper2_pois <- data_paper2_pois |>
+  group_by(ID) |>
+  slice(1) |>
+  ungroup()
+
+zinb_model <- zeroinfl(nAPE ~ Baseline_Demog_Age + Baseline_Demog_Sex + 
+           Baseline_Demog_BMI + Baseline_Demog_Ethnicity_Rec + 
+           Baseline_Lifestyle_SmokePerday + IndexLev2_QST_BaselinePPTh + 
+           IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve, data = data_paper2_pois)
+summary(zinb_model)
+
+```
+
+
+
+
 
 
 
