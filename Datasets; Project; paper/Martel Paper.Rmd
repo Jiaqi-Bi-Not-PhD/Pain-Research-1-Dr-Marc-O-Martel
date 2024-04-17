@@ -472,6 +472,14 @@ summary(zinb_model_PPTh)
 summary(zinb_model_TSP)
 summary(zinb_model)
 
+pois_model <- glm(nAPE ~ Baseline_Demog_Age + Baseline_Demog_Sex + 
+           Baseline_Demog_BMI + Baseline_Demog_Ethnicity_Rec + 
+           Baseline_Lifestyle_SmokePerday + IndexLev2_QST_BaselinePPTh + 
+           IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve, data = data_paper2_pois, family = poisson())
+summary(pois_model)
+           
+
+
 ```
 
 
