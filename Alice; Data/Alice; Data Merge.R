@@ -7,8 +7,10 @@ library(lmerTest)
 library(readxl)
 
 data_alice <- read_sav("Dataset; Bruneau; EMA.sav")
-data_cortisol <- read_excel("Dataset; Bruneau; Cortisol.xlsx")
+data_cortisol <- read_excel("Dataset; Bruneau; Cortisol copy.xlsx")
 data_cortisol <- data_cortisol[,-c(8:18)]
+data_cortisol$Mean <- as.numeric(data_cortisol$Mean)
+
 
 ## Create additional variables in data_alice in order to make the merge easier
 data_merged <- full_join(data_cortisol, data_alice, by = c("ID" = "ID", 
