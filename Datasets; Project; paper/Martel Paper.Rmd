@@ -419,8 +419,25 @@ model_adj_lev1 <- lmer(IndexLev1_PainAverage_RawChange ~ Level1_Even_PhysActiv +
 summary(model_adj_lev1) # Catastro significant! 
 
 ## Both level 1 and level 2
-model_adj_all <- lmer(IndexLev1_PainAverage_RawChange ~ Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
+model_adj_all <- lmer(IndexLev1_PainAverage_RawChange ~ Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + Wave_Day + (1|ID), data = data_paper2)
 summary(model_adj_all)
+
+summary(data_paper2$IndexLev1_PainAverage_RawChange)
+
+## Outcome IndexLev1_PainAverage
+model_ppth_pain <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
+summary(model_ppth_pain)
+model_TSP_pain <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_TSPAve + (1|ID), data = data_paper2)
+summary(model_TSP_pain) #*
+model_CPM_pain <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_CpmTrialAve + (1|ID), data = data_paper2)
+summary(model_CPM_pain)
+
+model_TSP_pain2 <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_TSPAve + IndexLev1_Catastrophizing_Total + Level1_Even_PhysActiv + (1|ID), data = data_paper2)
+summary(model_TSP_pain2) #*
+
+model_PPTh_pain2 <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev1_Catastrophizing_Total + Level1_Even_PhysActiv + (1|ID), data = data_paper2)
+summary(model_PPTh_pain2)
+
 ```
 
 The following code will examine the count of the APEs per individual using Poisson regression
@@ -449,6 +466,10 @@ zinb_model <- zeroinfl(nAPE ~ Baseline_Demog_Age + Baseline_Demog_Sex +
            Baseline_Demog_BMI + Baseline_Demog_Ethnicity_Rec + 
            Baseline_Lifestyle_SmokePerday + IndexLev2_QST_BaselinePPTh + 
            IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve, data = data_paper2_pois)
+zinb_model_TSP <- zeroinfl(nAPE ~ IndexLev2_QST_TSPAve, data = data_paper2_pois)
+zinb_model_PPTh <- zeroinfl(nAPE ~ IndexLev2_QST_BaselinePPTh, data = data_paper2_pois)
+summary(zinb_model_PPTh)
+summary(zinb_model_TSP)
 summary(zinb_model)
 
 ```
