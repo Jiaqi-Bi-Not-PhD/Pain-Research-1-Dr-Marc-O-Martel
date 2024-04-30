@@ -20,6 +20,11 @@ data_merged <- full_join(data_cortisol, data_alice, by = c("ID" = "ID",
                                                             "Day_number" = "Saliva_Day", 
                                                             "Sample_number" = "Saliva_Moment", 
                                                             "Submission_Code" = "Diary_Submission_Code"))
+data_merged2 <- left_join(data_cortisol, data_alice, by = c("ID" = "ID", 
+                                                            "Day_number" = "Saliva_Day", 
+                                                            "Submission_Code" = "Diary_Submission_Code"))
+
+data_check <- read_sav("Merged Dataset; Bruneau.sav")
 
 ## Check everything
 check <- data_merged |>
