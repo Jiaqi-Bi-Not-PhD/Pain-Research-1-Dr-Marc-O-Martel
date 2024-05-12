@@ -494,5 +494,3 @@ summary(pois_model)
 
 
 
-
-

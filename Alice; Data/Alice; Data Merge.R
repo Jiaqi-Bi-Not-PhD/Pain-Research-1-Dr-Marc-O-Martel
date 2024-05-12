@@ -12,14 +12,14 @@ data_cortisol <- data_cortisol[,-c(8:18)]
 data_cortisol$Mean <- as.numeric(data_cortisol$Mean)
 data_cortisol$Submission_Code <- 1
 
-#data_alice2 <- subset(data_alice2, Submission_Code == 1)
-
+data_alice <- data_alice |>
+  group_by(ID, Diary_Day) |>
+  mutate(Sample_align = ifelse(Diary_Submission_Code == 1, cumsum(Diary_Submission_Code == 1), NA_integer_))
 
 ## Create additional variables in data_alice in order to make the merge easier
 data_merged <- full_join(data_cortisol, data_alice, by = c("ID" = "ID", 
                                                             "Day_number" = "Saliva_Day", 
-                                                            "Sample_number" = "Saliva_Moment", 
-                                                            "Submission_Code" = "Diary_Submission_Code"))
+                                                            "Sample_number" = "Sample_align"))
 data_merged2 <- left_join(data_cortisol, data_alice, by = c("ID" = "ID", 
                                                             "Day_number" = "Saliva_Day", 
                                                             "Submission_Code" = "Diary_Submission_Code"))
