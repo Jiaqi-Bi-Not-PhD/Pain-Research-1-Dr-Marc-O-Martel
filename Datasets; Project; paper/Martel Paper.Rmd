@@ -24,7 +24,7 @@ fontsize: 12pt
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Data Wrangling
+# Packges
 
 ```{r, warning = FALSE, message = FALSE}
 ## Load packages
@@ -36,6 +36,7 @@ library(lme4)
 library(lmerTest)
 ```
 
+# Dataset Preparation/Cleanup
 
 ```{r, message = FALSE}
 ## Read data
@@ -228,10 +229,11 @@ summary(model_APE.CPM)
 ```
 
 ```{r, echo = TRUE, results = 'hide'}
-## Adjusted APE
+## Adjusted APE Level 1 Variables
 model_APE <- glmer(APE ~ IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE)
 
+## Adjusted APE Level 2 Variables
 model_APE_2 <- glmer(APE ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE_2)
 ```
@@ -424,19 +426,7 @@ summary(model_adj_all)
 
 summary(data_paper2$IndexLev1_PainAverage_RawChange)
 
-## Outcome IndexLev1_PainAverage
-model_ppth_pain <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
-summary(model_ppth_pain)
-model_TSP_pain <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_TSPAve + (1|ID), data = data_paper2)
-summary(model_TSP_pain) #*
-model_CPM_pain <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_CpmTrialAve + (1|ID), data = data_paper2)
-summary(model_CPM_pain)
 
-model_TSP_pain2 <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_TSPAve + IndexLev1_Catastrophizing_Total + Level1_Even_PhysActiv + (1|ID), data = data_paper2)
-summary(model_TSP_pain2) #*
-
-model_PPTh_pain2 <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev1_Catastrophizing_Total + Level1_Even_PhysActiv + (1|ID), data = data_paper2)
-summary(model_PPTh_pain2)
 
 ```
 
@@ -483,6 +473,164 @@ summary(pois_model)
 ```
 
 
+```{r}
+## Daily Pain intensity average as outcome - Outcome IndexLev1_PainAverage
+## Age
+model_painave_age <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_Age + (1|ID), data = data_paper2)
+summary(model_painave_age) #Significant
+## Sex
+model_painave_sex <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_Sex + (1|ID), data = data_paper2)
+summary(model_painave_sex)
+## BMI
+model_painave_BMI <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_BMI + (1|ID), data = data_paper2)
+summary(model_painave_BMI)#Significant
+## Ethnicity
+model_painave_eth <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_Ethnicity_Rec + (1|ID), data = data_paper2)
+summary(model_painave_eth)
+## Smoke per day
+model_painave_smoke <- lmer(IndexLev1_PainAverage ~ Baseline_Lifestyle_SmokePerday + (1|ID), data = data_paper2)
+summary(model_painave_smoke)
+## Acetaminophen
+model_painave_ace <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Acetaminophen + (1|ID), data = data_paper2)
+summary(model_painave_ace)
+## NSAID
+model_painave_NSAID <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_NSAID + (1|ID), data = data_paper2)
+summary(model_painave_NSAID)#Significant
+## Cox2
+model_painave_cox2 <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Cox2 + (1|ID), data = data_paper2)
+summary(model_painave_cox2)
+## Antidepressant
+model_painave_antidep <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Antidepressants + (1|ID), data = data_paper2)
+summary(model_painave_antidep)
+## Anxiolytics
+model_painave_anxio <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Anxiolytics + (1|ID), data = data_paper2)
+summary(model_painave_anxio)
+## Muscle Relaxants
+model_painave_muscle <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_MuscleRelaxants + (1|ID), data = data_paper2)
+summary(model_painave_muscle)
+## Opioids
+model_painave_opioids <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Opioids + (1|ID), data = data_paper2)
+summary(model_painave_opioids)
+## Anticonvulsants
+model_painave_anticon <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Anticonvulsants + (1|ID), data = data_paper2)
+summary(model_painave_anticon)#Significant
+
+
+
+
+
+
+```
+
+```{r}
+## Main level 2 analysis - IndexLev1_PainAverage as the outcome
+## IndexLev2_QST_BaselinePPTh 
+model_painave_ppth <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
+summary(model_painave_ppth)
+## IndexLev2_QST_TSPAve 
+model_painave_TSP <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_TSPAve + (1|ID), data = data_paper2)
+summary(model_painave_TSP)
+## IndexLev2_QST_CpmTrialAve
+model_painave_CPM <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_CpmTrialAve + (1|ID), data = data_paper2)
+summary(model_painave_CPM)
+## Adjusted
+model_painave_lev2adj <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve + Baseline_Demog_Age + Baseline_Demog_BMI + Baseline_Meds_NSAID + Baseline_Meds_Anticonvulsants + (1|ID), data = data_paper2)
+summary(model_painave_lev2adj)
+## Adjusted with only main factors
+model_painave_lev2adj_main <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve + (1|ID), data = data_paper2)
+summary(model_painave_lev2adj_main)
+
+```
+
+```{r}
+## Outcome IndexLev1_PainAverage - Level 1
+## Daily Catastro
+model_painave_cata <- lmer(IndexLev1_PainAverage ~  IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
+summary(model_painave_cata)
+## Daily NA
+model_painave_NA <- lmer(IndexLev1_PainAverage ~  IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2)
+summary(model_painave_NA)
+## Daily PA
+model_painave_PA <- lmer(IndexLev1_PainAverage ~  IndexLev1_PositiveAffect_Total + (1|ID), data = data_paper2)
+summary(model_painave_PA)
+## Daily Phys Exercise
+model_painave_PhyEx <- lmer(IndexLev1_PainAverage ~  Level1_Even_PhysActiv + (1|ID), data = data_paper2)
+summary(model_painave_PhyEx)
+## Adjusted
+model_painave_lvl1adj <- lmer(IndexLev1_PainAverage ~  Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
+summary(model_painave_lvl1adj)
+
+## Level 1 and Level 2 together
+model_painave_lvl1and2 <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve + Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
+summary(model_painave_lvl1and2)
+```
+
+```{r}
+## Plot the daily time spent in pain percentage
+data_paper2 |>
+  ggplot(aes(x = Level1_Even_Percent)) +
+  geom_histogram(aes(y = ..density..)) +
+  geom_density(aes(y = ..density..))
+
+## Beta regression
+library(glmmTMB)
+data_paper2 <- data_paper2 |>
+  mutate(Level1_Even_Percent_Transf = Level1_Even_Percent/100)
+
+adjustments <- 0.0001
+data_paper2 <- data_paper2 |>
+  mutate(Level1_Even_Percent_Transf = ifelse(Level1_Even_Percent_Transf != 0, ifelse(Level1_Even_Percent_Transf == 1, Level1_Even_Percent_Transf - adjustments, Level1_Even_Percent_Transf), Level1_Even_Percent_Transf + adjustments))
+
+## Beta regression for Level1_Even_Percent_Transf
+## IndexLev2_QST_BaselinePPTh
+beta_PPTh <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_BaselinePPTh + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_PPTh)
+## IndexLev2_QST_TSPAve 
+beta_TSP <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_TSPAve + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_TSP)
+
+## IndexLev2_QST_CpmTrialAve
+beta_CPM <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_CpmTrialAve + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_CPM)
+
+## Adjusted with only main factors
+beta_level2_adj <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_level2_adj)
+
+## Level 1 covariates
+## Daily Catastro
+beta_cata <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_Catastrophizing_Total + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_cata)
+## Daily NA
+beta_NA <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_NegativeAffect_Total + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_NA)
+## Daily PA
+beta_PA <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_PositiveAffect_Total + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_PA)
+## Daily Phys Exercise
+beta_PhysEx <- glmmTMB(Level1_Even_Percent_Transf ~ Level1_Even_PhysActiv + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_PhysEx)
+## Adjusted
+beta_level1_adj <- glmmTMB(Level1_Even_Percent_Transf ~ Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_level1_adj)
+
+## Level 1 and Level 2 together
+beta_adj_lvl1and2 <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_adj_lvl1and2)
+
+```
+
+This represents the multiplicative change in the odds of the response variable for a one-unit increase in the predictor (`IndexLev2_QST_CpmTrialAve`). If the slope is not significant, it indicates that the predictor does not have a significant effect on the odds of the response variable being in a higher category.
 
 
 
