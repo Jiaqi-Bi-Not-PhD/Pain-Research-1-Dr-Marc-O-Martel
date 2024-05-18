@@ -624,10 +624,15 @@ beta_level1_adj <- glmmTMB(Level1_Even_Percent_Transf ~ Level1_Even_PhysActiv + 
 summary(beta_level1_adj)
 
 ## Level 1 and Level 2 together
-beta_adj_lvl1and2 <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+beta_adj_lvl1and2 <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), family = beta_family(), data = data_paper2, control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_adj_lvl1and2)
+confint(beta_adj_lvl1and2)
 
+## ICC
+beta_ICC <- glmmTMB(Level1_Even_Percent_Transf ~ 1 + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_ICC)
+VarCorr(beta_ICC,"sc")
 ```
 
 This represents the multiplicative change in the odds of the response variable for a one-unit increase in the predictor (`IndexLev2_QST_CpmTrialAve`). If the slope is not significant, it indicates that the predictor does not have a significant effect on the odds of the response variable being in a higher category.
