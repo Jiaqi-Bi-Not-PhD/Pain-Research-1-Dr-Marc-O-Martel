@@ -34,6 +34,7 @@ library(tidyr)
 library(haven)## This library provides functions to read sav file into R
 library(lme4)
 library(lmerTest)
+library(performance)
 ```
 
 # Dataset Preparation/Cleanup
@@ -210,32 +211,62 @@ data_paper2_check <- data_paper2 |>
 ## Unadjusted APE to Negative Affect
 model_APE.NA <- glmer(APE ~ IndexLev1_NegativeAffect_Total + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE.NA)
+confint(model_APE.NA, method = "Wald")
+exp(c(-3.7693732604, -2.47970059))
+exp(c(0.0005436968,  0.02779017))
 
  ## Unadjusted APE to Catastrophizing
 model_APE.Cata <- glmer(APE ~ IndexLev1_Catastrophizing_Total + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE.Cata)
+confint(model_APE.Cata, method = "Wald")
+exp(c(-3.873536895, -2.63107008))
+exp(c(0.007696443,  0.03034345))
 
 ## Unadjusted APE to PPThs
 model_APE.PPThs <- glmer(APE ~ IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE.PPThs)
+confint(model_APE.PPThs, method = "Wald")
+exp(c(-2.538915930, -1.057235635))
+exp(c(-0.003987894, -0.000407614))
 
 ## Unadjusted APE to TSP
 model_APE.TSP <- glmer(APE ~ IndexLev2_QST_TSPAve + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE.TSP)
+confint(model_APE.TSP, method = "Wald")
+exp(c(-2.88049068, -1.926912039))
+exp(c(-0.03821397,  0.002116432))
 
 ## Unadjusted APE to CPM
 model_APE.CPM <- glmer(APE ~ IndexLev2_QST_CpmTrialAve + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE.CPM)
+confint(model_APE.CPM, method = "Wald")
+exp(c(-4.233033049, -1.55813896))
+exp(c(-0.008342697,  0.01150198))
+
 ```
 
 ```{r, echo = TRUE, results = 'hide'}
 ## Adjusted APE Level 1 Variables
 model_APE <- glmer(APE ~ IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE)
+confint(model_APE, method = "Wald")
+exp(c(-4.040986071, -2.61289642))
+exp(c(0.004962518,  0.03030470))
+exp(c(-0.011965205,  0.01950413))
 
 ## Adjusted APE Level 2 Variables
 model_APE_2 <- glmer(APE ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
 summary(model_APE_2)
+confint(model_APE_2, method = "Wald")
+exp(c(-2.423626853,  0.8228091452))
+exp(c(-0.012036593,  0.0068773733))
+exp(c(-0.045874417, -0.0042397835))
+exp(c(-0.004730055, -0.0008967555))
+
+## Adjusted APE Level 1 and Level 2
+model_APE_1and2 <- glmer(APE ~ IndexLev1_Catastrophizing_Total + IndexLev1_NegativeAffect_Total + IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = binomial(), data = data_paper2)
+summary(model_APE_1and2)
+icc(model_APE_1and2)
 ```
 
 ## Analysis of RPE using the Table of Manuscript
@@ -317,60 +348,73 @@ normal_check <- data_paper2$IndexLev1_PainAverage_RawChange[!is.na(data_paper2$I
 shapiro.test(normal_check) # Although the formal test does not suggest normality
 ```
 
-The below will examine if baseline covairates are associated with the delta pain change individually. 
+The below will examine if baseline covariates are associated with the delta pain change individually. 
 
 ```{r}
 ## Age
 model_age <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Demog_Age + (1|ID), data = data_paper2)
 summary(model_age)
+confint(model_age, method = "Wald")
 
 ## Sex
 model_sex <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Demog_Sex + (1|ID), data = data_paper2)
 summary(model_sex)
+confint(model_sex, method = "Wald")
 
 ## BMI
 model_bmi <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Demog_BMI + (1|ID), data = data_paper2)
 summary(model_bmi)
+confint(model_bmi, method = "Wald")
 
 ## Ethnicity
 model_ethn <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Demog_Ethnicity_Rec + (1|ID), data = data_paper2)
 summary(model_ethn)
+confint(model_ethn, method = "Wald")
 
 ## SmokePerday
 model_smoke <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Lifestyle_SmokePerday + (1|ID), data = data_paper2)
 summary(model_smoke)
+confint(model_smoke, method = "Wald")
 
 ## Meds_Acetaminophen
 model_acetam <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Acetaminophen + (1|ID), data = data_paper2)
 summary(model_acetam)
+confint(model_acetam, method = "Wald")
 
 ## NSAID
 model_NSAID <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_NSAID + (1|ID), data = data_paper2)
 summary(model_NSAID)
+confint(model_NSAID, method = "Wald")
 
 ## Cox2
 model_cox2 <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Cox2 + (1|ID), data = data_paper2)
 summary(model_cox2)
+confint(model_cox2, method = "Wald")
 
 ## Antidepressants
 model_antidep <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Antidepressants + (1|ID), data = data_paper2)
 summary(model_antidep)
+confint(model_antidep, method = "Wald")
 
 ## Baseline_Meds_Anxiolytics
 model_anxioly <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Anxiolytics + (1|ID), data = data_paper2)
 summary(model_anxioly)
+confint(model_anxioly, method = "Wald")
 
 ## MuscleRelaxants
 model_musclerelax <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_MuscleRelaxants + (1|ID), data = data_paper2)
 summary(model_musclerelax)
+confint(model_musclerelax, method = "Wald")
 
 ## Baseline_Meds_Opioids
 model_opioid <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Opioids + (1|ID), data = data_paper2)
 summary(model_opioid)
+confint(model_opioid, method = "Wald")
 
 ## Baseline_Meds_Anticonvulsants
 model_anticonv <- lmer(IndexLev1_PainAverage_RawChange ~ Baseline_Meds_Anticonvulsants + (1|ID), data = data_paper2)
 summary(model_anticonv)
+confint(model_anticonv, method = "Wald")
 ```
 
 ## Level 2 covariates
@@ -381,18 +425,23 @@ The below will examine if PPTh, TSP, and CPM are significantly associated with t
 ## PPTh
 model_PPTh <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
 summary(model_PPTh)
+confint(model_PPTh, method = "Wald")
+
 
 ## TSP 
 model_TSP <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_QST_TSPAve + (1|ID), data = data_paper2)
 summary(model_TSP)
+confint(model_TSP, method = "Wald")
 
 ## CPM
 model_CPM <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_QST_CpmTrialAve + (1|ID), data = data_paper2)
 summary(model_CPM)
+confint(model_CPM, method = "Wald")
 
 ## Adjusted model
 model_adjusted_lev2 <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
 summary(model_adjusted_lev2)
+confint(model_adjusted_lev2, method = "Wald")
 ```
 
 ## Level 1 covariates
@@ -403,28 +452,35 @@ The following will examine if DailyCatastro, DailyNA, Daily PosAffect, DailyPhys
 ## Daily Catastro
 model_catastro <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
 summary(model_catastro) # Significant!
+confint(model_catastro, method = "Wald")
 
 ## DailyNA
 model_DailyNA <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2)
 summary(model_DailyNA) # Significant!
+confint(model_DailyNA, method = "Wald")
 
 ## PosAffect
 model_PosAffect <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev1_PositiveAffect_Total + (1|ID), data = data_paper2)
 summary(model_PosAffect)
+confint(model_PosAffect, method = "Wald")
 
 ## DailyPhysExcersice
 model_PhysExercise <- lmer(IndexLev1_PainAverage_RawChange ~ Level1_Even_PhysActiv + (1|ID), data = data_paper2)
 summary(model_PhysExercise) # Significant! 
+confint(model_PhysExercise, method = "Wald")
 
 ## Adjusted level 1
 model_adj_lev1 <- lmer(IndexLev1_PainAverage_RawChange ~ Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
 summary(model_adj_lev1) # Catastro significant! 
+confint(model_adj_lev1, method = "Wald")
 
 ## Both level 1 and level 2
-model_adj_all <- lmer(IndexLev1_PainAverage_RawChange ~ Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + Wave_Day + (1|ID), data = data_paper2)
+model_adj_all <- lmer(IndexLev1_PainAverage_RawChange ~ Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
 summary(model_adj_all)
+confint(model_adj_all, method = "Wald")
 
 summary(data_paper2$IndexLev1_PainAverage_RawChange)
+icc(model_adj_all)
 
 
 
@@ -478,42 +534,55 @@ summary(pois_model)
 ## Age
 model_painave_age <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_Age + (1|ID), data = data_paper2)
 summary(model_painave_age) #Significant
+confint(model_painave_age, method = "Wald")
 ## Sex
 model_painave_sex <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_Sex + (1|ID), data = data_paper2)
 summary(model_painave_sex)
+confint(model_painave_sex, method = "Wald")
 ## BMI
 model_painave_BMI <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_BMI + (1|ID), data = data_paper2)
 summary(model_painave_BMI)#Significant
+confint(model_painave_BMI, method = "Wald")
 ## Ethnicity
 model_painave_eth <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_Ethnicity_Rec + (1|ID), data = data_paper2)
 summary(model_painave_eth)
+confint(model_painave_eth, method = "Wald")
 ## Smoke per day
 model_painave_smoke <- lmer(IndexLev1_PainAverage ~ Baseline_Lifestyle_SmokePerday + (1|ID), data = data_paper2)
 summary(model_painave_smoke)
+confint(model_painave_smoke, method = "Wald")
 ## Acetaminophen
 model_painave_ace <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Acetaminophen + (1|ID), data = data_paper2)
 summary(model_painave_ace)
+confint(model_painave_ace, method = "Wald")
 ## NSAID
 model_painave_NSAID <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_NSAID + (1|ID), data = data_paper2)
 summary(model_painave_NSAID)#Significant
+confint(model_painave_NSAID, method = "Wald")
 ## Cox2
 model_painave_cox2 <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Cox2 + (1|ID), data = data_paper2)
 summary(model_painave_cox2)
+confint(model_painave_cox2, method = "Wald")
 ## Antidepressant
 model_painave_antidep <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Antidepressants + (1|ID), data = data_paper2)
 summary(model_painave_antidep)
+confint(model_painave_antidep, method = "Wald")
 ## Anxiolytics
 model_painave_anxio <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Anxiolytics + (1|ID), data = data_paper2)
 summary(model_painave_anxio)
+confint(model_painave_anxio, method = "Wald")
 ## Muscle Relaxants
 model_painave_muscle <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_MuscleRelaxants + (1|ID), data = data_paper2)
 summary(model_painave_muscle)
+confint(model_painave_muscle, method = "Wald")
 ## Opioids
 model_painave_opioids <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Opioids + (1|ID), data = data_paper2)
 summary(model_painave_opioids)
+confint(model_painave_opioids, method = "Wald")
 ## Anticonvulsants
 model_painave_anticon <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Anticonvulsants + (1|ID), data = data_paper2)
 summary(model_painave_anticon)#Significant
+confint(model_painave_anticon, method = "Wald")
 
 
 
@@ -527,18 +596,23 @@ summary(model_painave_anticon)#Significant
 ## IndexLev2_QST_BaselinePPTh 
 model_painave_ppth <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
 summary(model_painave_ppth)
+confint(model_painave_ppth, method = "Wald")
 ## IndexLev2_QST_TSPAve 
 model_painave_TSP <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_TSPAve + (1|ID), data = data_paper2)
 summary(model_painave_TSP)
+confint(model_painave_TSP, method = "Wald")
 ## IndexLev2_QST_CpmTrialAve
 model_painave_CPM <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_CpmTrialAve + (1|ID), data = data_paper2)
 summary(model_painave_CPM)
+confint(model_painave_CPM, method = "Wald")
 ## Adjusted
 model_painave_lev2adj <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve + Baseline_Demog_Age + Baseline_Demog_BMI + Baseline_Meds_NSAID + Baseline_Meds_Anticonvulsants + (1|ID), data = data_paper2)
 summary(model_painave_lev2adj)
+confint(model_painave_lev2adj, method = "Wald")
 ## Adjusted with only main factors
 model_painave_lev2adj_main <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve + (1|ID), data = data_paper2)
 summary(model_painave_lev2adj_main)
+confint(model_painave_lev2adj_main, method = "Wald")
 
 ```
 
@@ -547,22 +621,29 @@ summary(model_painave_lev2adj_main)
 ## Daily Catastro
 model_painave_cata <- lmer(IndexLev1_PainAverage ~  IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
 summary(model_painave_cata)
+confint(model_painave_cata, method = "Wald")
 ## Daily NA
 model_painave_NA <- lmer(IndexLev1_PainAverage ~  IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2)
 summary(model_painave_NA)
+confint(model_painave_NA, method = "Wald")
 ## Daily PA
 model_painave_PA <- lmer(IndexLev1_PainAverage ~  IndexLev1_PositiveAffect_Total + (1|ID), data = data_paper2)
 summary(model_painave_PA)
+confint(model_painave_PA, method = "Wald")
 ## Daily Phys Exercise
 model_painave_PhyEx <- lmer(IndexLev1_PainAverage ~  Level1_Even_PhysActiv + (1|ID), data = data_paper2)
 summary(model_painave_PhyEx)
+confint(model_painave_PhyEx, method = "Wald")
 ## Adjusted
 model_painave_lvl1adj <- lmer(IndexLev1_PainAverage ~  Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
 summary(model_painave_lvl1adj)
+confint(model_painave_lvl1adj, method = "Wald")
 
 ## Level 1 and Level 2 together
 model_painave_lvl1and2 <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve + Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
 summary(model_painave_lvl1and2)
+confint(model_painave_lvl1and2, method = "Wald")
+icc(model_painave_lvl1and2)
 ```
 
 ```{r}
@@ -586,56 +667,187 @@ data_paper2 <- data_paper2 |>
 beta_PPTh <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_BaselinePPTh + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_PPTh)
+confint(beta_PPTh, method = "Wald")
+exp(c(0.008154675, 0.8440168521))
+exp(c(-0.001585121, 0.0002889412))
 ## IndexLev2_QST_TSPAve 
 beta_TSP <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_TSPAve + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_TSP)
+confint(beta_TSP, method = "Wald")
+exp(c(-0.198449697, 0.24899849))
+exp(c(-0.001178379, 0.01749171))
 
 ## IndexLev2_QST_CpmTrialAve
 beta_CPM <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_CpmTrialAve + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_CPM)
+confint(beta_CPM, method = "Wald")
+exp(c(-0.703915601, 0.92173256))
+exp(c(-0.005913656, 0.00690423))
 
 ## Adjusted with only main factors
 beta_level2_adj <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_level2_adj)
+confint(beta_level2_adj, method = "Wald")
+exp(c(-0.006201108, 0.0073500749))
+exp(c(-0.003835235, 0.0171577888))
+exp(c(-0.001339993, 0.0008318547))
 
 ## Level 1 covariates
 ## Daily Catastro
 beta_cata <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_Catastrophizing_Total + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_cata)
+confint(beta_cata, method = "Wald")
+exp(confint(beta_cata, method = "Wald"))
+
 ## Daily NA
 beta_NA <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_NegativeAffect_Total + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_NA)
+confint(beta_NA, method = "Wald")
+exp(confint(beta_NA, method = "Wald"))
 ## Daily PA
 beta_PA <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_PositiveAffect_Total + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_PA)
+confint(beta_PA, method = "Wald")
+exp(confint(beta_PA, method = "Wald"))
 ## Daily Phys Exercise
 beta_PhysEx <- glmmTMB(Level1_Even_Percent_Transf ~ Level1_Even_PhysActiv + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_PhysEx)
+confint(beta_PhysEx, method = "Wald")
+exp(confint(beta_PhysEx, method = "Wald"))
 ## Adjusted
 beta_level1_adj <- glmmTMB(Level1_Even_Percent_Transf ~ Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_level1_adj)
+confint(beta_level1_adj, method = "Wald")
+exp(confint(beta_level1_adj, method = "Wald"))
 
 ## Level 1 and Level 2 together
 beta_adj_lvl1and2 <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), family = beta_family(), data = data_paper2, control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_adj_lvl1and2)
-confint(beta_adj_lvl1and2)
+confint(beta_adj_lvl1and2, method = "Wald")
+exp(confint(beta_adj_lvl1and2, method = "Wald"))
 
 ## ICC
-beta_ICC <- glmmTMB(Level1_Even_Percent_Transf ~ 1 + (1|ID), family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_ICC)
-VarCorr(beta_ICC,"sc")
+icc(beta_adj_lvl1and2)
 ```
 
 This represents the multiplicative change in the odds of the response variable for a one-unit increase in the predictor (`IndexLev2_QST_CpmTrialAve`). If the slope is not significant, it indicates that the predictor does not have a significant effect on the odds of the response variable being in a higher category.
+
+
+## May 14 2024
+
+```{r}
+## Check normality of distributions for 3 main outcomes
+## Beta regression - Level1_Even_Percent_Transf
+data_paper2 |> ggplot(aes(x = Level1_Even_Percent_Transf)) +
+  geom_density(color = "darkblue", fill = "lightblue") +
+  labs(title = "Beta Regression - Percentage of the Day", 
+       x = "Percentage", 
+       y = "Density") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+
+ggsave("OA Paper; Density; Percentage of the Day that suffers pain.jpeg")
+
+## Linear regression - Pain average
+ggplot(data_paper2, aes(x = IndexLev1_PainAverage)) +
+  geom_density(color = "darkblue", fill = "lightblue") +
+  labs(title = "Linear Regression - Pain Average", 
+       x = "Pain Average", 
+       y = "Density") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+
+ggsave("OA Paper; Density; Pain Average.jpeg")
+
+## Linear Regression - IndexLev1_PainAverage_RawChange
+ggplot(data_paper2, aes(x = IndexLev1_PainAverage_RawChange)) +
+  geom_density(color = "darkblue", fill = "lightblue") +
+  labs(title = "Linear Regression - Change of Pain Average", 
+       x = "Change of Pain Average", 
+       y = "Density") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) # Witches' hat
+
+ggsave("OA Paper; Density; Change in Pain Average.jpeg")
+
+```
+
+```{r}
+## Centering of Lev1 Predictors
+data_paper2 <- data_paper2 |>
+  mutate(cLevel1_Catastrophizing = IndexLev1_Catastrophizing_Total - IndexLev2_Agg_Catastrophizing,
+         cLevel1_NegativeAffect = IndexLev1_NegativeAffect_Total - IndexLev2_Agg_NegativeAffect,
+         cLevel1_PositiveAffect = IndexLev1_PositiveAffect_Total - IndexLev2_Agg_PositiveAffect,
+         cLevel1_PhysicalActiv = Level1_Even_PhysActiv - IndexLev2_Agg_PhysicallyActiv)
+
+## Centering of Lev2 predictors
+means <- data_paper2 |>
+  group_by(ID) |>
+  summarise(PPTh_first = mean(IndexLev2_QST_BaselinePPTh, na.rm = TRUE),
+            TSP_first = mean(IndexLev2_QST_TSPAve, na.rm = TRUE), 
+            CPM_first = mean(IndexLev2_QST_CpmTrialAve, na.rm = TRUE)) |>
+  summarise(PPTh_mean = mean(PPTh_first, na.rm = TRUE), 
+            TSP_mean = mean(TSP_first, na.rm = TRUE), 
+            CPM_mean = mean(CPM_first, na.rm = TRUE))
+
+data_paper2 <- data_paper2 |>
+  mutate(cLevel2_PPTh = IndexLev2_QST_BaselinePPTh - means$PPTh_mean,
+         cLevel2_TSP = IndexLev2_QST_TSPAve - means$TSP_mean, 
+         cLevel2_CPM = IndexLev2_QST_CpmTrialAve - means$CPM_mean)
+```
+
+```{r}
+## Centered scores; Confirm significant findings 
+## Level 1
+## Beta Regression - outcome Level1_Even_Percent_Transf
+beta_level1_adj_c <- glmmTMB(Level1_Even_Percent_Transf ~ cLevel1_PhysicalActiv + cLevel1_PositiveAffect + cLevel1_NegativeAffect + cLevel1_Catastrophizing + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_level1_adj_c)
+confint(beta_level1_adj_c, method = "Wald")
+exp(confint(beta_level1_adj_c, method = "Wald"))
+
+## Linear regression - outcome IndexLev1_PainAverage
+model_painave_c <- lmer(IndexLev1_PainAverage ~  cLevel1_PhysicalActiv + cLevel1_PositiveAffect + cLevel1_NegativeAffect + cLevel1_Catastrophizing + (1|ID), data = data_paper2)
+summary(model_painave_c)
+confint(model_painave_c, method = "Wald")
+
+## Linear regression - outcome IndexLev1_PainAverage_RawChange
+model_adj_lev1_c <- lmer(IndexLev1_PainAverage_RawChange ~ cLevel1_PhysicalActiv + cLevel1_PositiveAffect + cLevel1_NegativeAffect + cLevel1_Catastrophizing + (1|ID), data = data_paper2)
+summary(model_adj_lev1_c) 
+confint(model_adj_lev1_c, method = "Wald")
+
+
+## Level 2
+## Beta Regression - outcome Level1_Even_Percent_Transf
+beta_level2_adj_c <- glmmTMB(Level1_Even_Percent_Transf ~ cLevel2_CPM + cLevel2_TSP + cLevel2_PPTh + (1|ID), family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_level2_adj_c)
+confint(beta_level2_adj_c, method = "Wald")
+exp(confint(beta_level2_adj_c, method = "Wald"))
+## Linear regression - outcome IndexLev1_PainAverage
+model_painave_lvl2c <- lmer(IndexLev1_PainAverage ~  cLevel2_CPM + cLevel2_TSP + cLevel2_PPTh + (1|ID), data = data_paper2)
+summary(model_painave_lvl2c)
+confint(model_painave_lvl2c, method = "Wald")
+
+## Linear regression - outcome IndexLev1_PainAverage_RawChange
+model_adj_lev2_c <- lmer(IndexLev1_PainAverage_RawChange ~ cLevel2_CPM + cLevel2_TSP + cLevel2_PPTh + (1|ID), data = data_paper2)
+summary(model_adj_lev2_c) 
+confint(model_adj_lev2_c, method = "Wald")
+
+
+```
+
+
+
+
 
 
 
