@@ -846,6 +846,20 @@ confint(model_adj_lev2_c, method = "Wald")
 ```
 
 
+```{r}
+## Total number of 
+data_paper2 <- data_paper2 |>
+  mutate(IndexLev1_PainLocation_Tot = Level1_Even_PainFeet + Level1_Even_PainKnee + Level1_Even_PainLegs + Level1_Even_PainHips + Level1_Even_PainAbdom + Level1_Even_PainBack + Level1_Even_PainChest + Level1_Even_PainArms + Level1_Even_PainHands + Level1_Even_PainShoulder + Level1_Even_PainNeck + Level1_Even_PainHead)
+summary(data_paper2$IndexLev1_PainLocation_Tot)
+
+data_paper2 |> 
+  ggplot(aes(x = IndexLev1_PainLocation_Tot)) +
+  geom_bar()
+
+poisson_painloc <- glmer(IndexLev1_PainLocation_Tot ~ cLevel1_PhysicalActiv + cLevel1_PositiveAffect + cLevel1_NegativeAffect + cLevel1_Catastrophizing + (1|ID), data = data_paper2, family = poisson())
+summary(poisson_painloc)
+```
+
 
 
 
