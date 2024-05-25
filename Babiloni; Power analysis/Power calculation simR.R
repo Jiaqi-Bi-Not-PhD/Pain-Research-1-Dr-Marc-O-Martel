@@ -54,7 +54,7 @@ Bab1.4 <- Bab1.4 |>
 names(Bab1.4)
 model_full <- glmer(Lev2_PainFlareAMPM ~ Lev2_Agg_NA + Lev2_Agg_PA + Lev2_Agg_Sleep + Lev2_Agg_PCS + (1|ID), data = Bab1.4, family = binomial())
 summary(model_full)
-powerSim(model_full, fixed("Lev2_Agg_NA", "z"), nsim = 100)
+powerSim(model_full, simr::fixed("Lev2_Agg_NA", "z"), nsim = 100)
 
 model_moreID <- extend(model_full, along = "ID", n = 100)
 plot_power <- powerCurve(model_moreID, fixed("Lev2_Agg_NA"), along = "ID")

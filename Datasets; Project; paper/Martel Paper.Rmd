@@ -847,7 +847,7 @@ confint(model_adj_lev2_c, method = "Wald")
 
 
 ```{r}
-## Total number of 
+## Total number of Pain Location
 data_paper2 <- data_paper2 |>
   mutate(IndexLev1_PainLocation_Tot = Level1_Even_PainFeet + Level1_Even_PainKnee + Level1_Even_PainLegs + Level1_Even_PainHips + Level1_Even_PainAbdom + Level1_Even_PainBack + Level1_Even_PainChest + Level1_Even_PainArms + Level1_Even_PainHands + Level1_Even_PainShoulder + Level1_Even_PainNeck + Level1_Even_PainHead)
 summary(data_paper2$IndexLev1_PainLocation_Tot)
@@ -859,6 +859,27 @@ data_paper2 |>
 poisson_painloc <- glmer(IndexLev1_PainLocation_Tot ~ cLevel1_PhysicalActiv + cLevel1_PositiveAffect + cLevel1_NegativeAffect + cLevel1_Catastrophizing + (1|ID), data = data_paper2, family = poisson())
 summary(poisson_painloc)
 ```
+
+## Effect size estimates
+
+```{r}
+library(simr)
+## Effect size calculation - Daily Pain Intensity - model_painave_lvl1adj
+## model_painave_lvl1adj <- lmer(IndexLev1_PainAverage ~  Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
+powerSim(model_painave_lvl1adj, simr::fixed("IndexLev1_Catastrophizing_Total", "z"), nsim = 1000)
+model_moreID <- extend(model_painave_lvl1and2, along = "ID", n = 500)
+plot_power <- powerCurve(model_moreID, test = fcompare(IndexLev1_PainAverage ~ IndexLev1_Catastrophizing_Total), along = "ID")
+plot(plot_power)
+
+
+```
+
+
+```{r}
+## Generating graphs
+
+```
+
 
 
 
