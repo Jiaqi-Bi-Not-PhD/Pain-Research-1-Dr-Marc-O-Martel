@@ -866,9 +866,23 @@ summary(poisson_painloc)
 library(simr)
 ## Effect size calculation - Daily Pain Intensity - model_painave_lvl1adj
 ## model_painave_lvl1adj <- lmer(IndexLev1_PainAverage ~  Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
-powerSim(model_painave_lvl1adj, simr::fixed("IndexLev1_Catastrophizing_Total", "z"), nsim = 1000)
-model_moreID <- extend(model_painave_lvl1and2, along = "ID", n = 500)
-plot_power <- powerCurve(model_moreID, test = fcompare(IndexLev1_PainAverage ~ IndexLev1_Catastrophizing_Total), along = "ID")
+## model_painave_lvl1and2 <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve + Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
+## model_painave_cata <- lmer(IndexLev1_PainAverage ~  IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
+data_poweruse <- data_paper2 |>
+  filter(across(c(IndexLev1_PainAverage, IndexLev2_QST_BaselinePPTh, IndexLev2_QST_TSPAve, IndexLev2_QST_CpmTrialAve, Level1_Even_PhysActiv, IndexLev1_PositiveAffect_Total, IndexLev1_NegativeAffect_Total, IndexLev1_Catastrophizing_Total), ~ !is.na(.)))
+
+data_poweruse <- data_paper2 |>
+  filter(!is.na(IndexLev1_Catastrophizing_Total))
+
+model_painave_c <- lmer(IndexLev1_PainAverage ~ IndexLev1_Catastrophizing_Total + (1|ID), data = data_poweruse)
+
+summary(model_painave_c)
+
+powerSim(model_painave_c, fixed("IndexLev1_Catastrophizing_Total", "t"))
+
+model_moreID <- extend(model_painave_c, along = "ID", n = 500)
+model_moredayswithinID <- extend(model_painave_c, within = "ID+IndexLev1_Catastrophizing_Total", n = 20)
+plot_power <- powerCurve(model_moredayswithinID, within = "ID+IndexLev1_Catastrophizing_Total")
 plot(plot_power)
 
 
@@ -877,8 +891,110 @@ plot(plot_power)
 
 ```{r}
 ## Generating graphs
+data_paper2 |>
+  ggplot(aes(x = IndexLev1_Catastrophizing_Total, y = IndexLev1_PainAverage)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Catastrophizing Score vs. Pain Average", 
+       x = "Catastrophizing Score", 
+       y = "Pain Average") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) # scatter plot - cata vs painave
+
+data_paper2 |>
+  ggplot(aes(x = IndexLev1_PositiveAffect_Total, y = IndexLev1_PainAverage)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Daily Positive Affect vs. Pain Average", 
+       x = "Daily Positive Affect", 
+       y = "Pain Average") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) # scatter plot - PA vs painave
+
+data_paper2 |>
+  ggplot(aes(x = IndexLev1_NegativeAffect_Total, y = IndexLev1_PainAverage)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Daily Negative Affect vs. Pain Average", 
+       x = "Daily Negative Affect", 
+       y = "Pain Average") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) # scatter plot - NA vs painave
+```
+
+```{r}
+## Data visualization - multilevel linear plot with Cata vs PainAve - model_painave_cata
+library(tidyverse)
+library(haven)
+library(lme4)
+library(lmerTest)
+library(ggplot2)
+library(dplyr)
+library(modelr)
+library(broom)
+## Plot - Method 1
+data_paper2_elimna <- data_paper2 |>
+  filter(!is.na(IndexLev1_Catastrophizing_Total) & !is.na(IndexLev1_PainAverage))
+new_data <- expand.grid(
+  IndexLev1_Catastrophizing_Total = seq(min(data_paper2_elimna$IndexLev1_Catastrophizing_Total, na.rm = TRUE), 
+                              max(data_paper2_elimna$IndexLev1_Catastrophizing_Total, na.rm = TRUE), length.out = 100),
+  ID = unique(data_paper2_elimna$ID)
+)
+
+new_data$predicted <- predict(model_painave_cata, newdata = new_data, re.form = NULL) 
+
+## The mean line
+average_predictions <- new_data |>
+  group_by(IndexLev1_Catastrophizing_Total) |>
+  summarise(mean_predicted = mean(predicted, na.rm = TRUE))
+
+ggplot() +
+  geom_line(data = new_data, aes(x = IndexLev1_Catastrophizing_Total, y = predicted, group = ID), color = "grey") +
+  geom_line(data = average_predictions, aes(x = IndexLev1_Catastrophizing_Total, y = mean_predicted), color = "black", size = 1) +
+  labs(title = "Association between catastrophizing and daily average pain", 
+       x = "Catastrophizing", 
+       y = "Pain Average") +
+  ylim(0,100) +
+  theme_minimal() +
+  theme(element_blank()) +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+```
+
+```{r}
+## Data visualization - multilevel beta regression - Level1_Even_Percent_Transf - beta_cata
+data_paper2_elimna <- data_paper2 |>
+  filter(!is.na(IndexLev1_Catastrophizing_Total) & !is.na(Level1_Even_Percent_Transf))
+new_data <- expand.grid(
+  IndexLev1_Catastrophizing_Total = seq(min(data_paper2_elimna$IndexLev1_Catastrophizing_Total, na.rm = TRUE), 
+                              max(data_paper2_elimna$IndexLev1_Catastrophizing_Total, na.rm = TRUE), length.out = 100),
+  ID = unique(data_paper2_elimna$ID)
+)
+
+new_data$predicted <- predict(beta_cata, newdata = new_data, re.form = NULL) 
+
+## The mean line
+average_predictions <- new_data |>
+  group_by(IndexLev1_Catastrophizing_Total) |>
+  summarise(mean_predicted = mean(predicted, na.rm = TRUE))
+
+ggplot() +
+  geom_line(data = new_data, aes(x = IndexLev1_Catastrophizing_Total, y = exp(predicted)/(1+exp(predicted)), group = ID), color = "grey") +
+  geom_line(data = average_predictions, aes(x = IndexLev1_Catastrophizing_Total, y = exp(mean_predicted)/(1+exp(mean_predicted))), color = "black", size = 1) +
+  labs(title = "Association between catastrophizing and perceved % of daily time in pain", 
+       x = "Catastrophizing", 
+       y = "% of daily time in pain (1 means 100%)") +
+  ylim(0,1) +
+  theme_minimal() +
+  theme(element_blank()) +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
 
 ```
+
+
 
 
 

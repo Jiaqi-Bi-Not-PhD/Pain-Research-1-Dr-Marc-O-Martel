@@ -24,7 +24,8 @@ summary(model_glmm)
 model_glmm_PCS <- glmer(Lev2_FlareAMPM ~ Lev2_PCS + (1 | ID), data = Bab, family = binomial())
 fixef(model_glmm_PCS)["Lev2_PCS"] <- log(1.5) # This line sets the desired effect size, may skip
 summary(model_glmm_PCS)
-powerSim(model_glmm_PCS)
+powerSim(model_glmm_PCS, nsim = 100)
+powerSim(model_glmm, fixed("Lev2_PCS", "z"), nsim = 100)
 
 model_glmm_PCS_n80 <- extend(model_glmm_PCS, along = "ID", n = 80)
 powerSim(model_glmm_PCS_n80)
