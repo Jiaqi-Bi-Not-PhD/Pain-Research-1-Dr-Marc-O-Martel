@@ -748,7 +748,7 @@ This represents the multiplicative change in the odds of the response variable f
 ## Beta regression - Level1_Even_Percent_Transf
 data_paper2 |> ggplot(aes(x = Level1_Even_Percent_Transf)) +
   geom_density(color = "darkblue", fill = "lightblue") +
-  labs(title = "Beta Regression - Percentage of the Day", 
+  labs(title = "Percent (%) of day in pain", 
        x = "Percentage", 
        y = "Density") +
   theme_minimal() +
@@ -952,14 +952,77 @@ ggplot() +
   geom_line(data = new_data, aes(x = IndexLev1_Catastrophizing_Total, y = predicted, group = ID), color = "grey") +
   geom_line(data = average_predictions, aes(x = IndexLev1_Catastrophizing_Total, y = mean_predicted), color = "black", size = 1) +
   labs(title = "Association between catastrophizing and daily average pain", 
-       x = "Catastrophizing", 
-       y = "Pain Average") +
+       x = "Daily catastrophizing", 
+       y = "Daily pain intensity") +
   ylim(0,100) +
   theme_minimal() +
   theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
         axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
   theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+############### PA
+data_paper2_elimna <- data_paper2 |>
+  filter(!is.na(IndexLev1_PositiveAffect_Total) & !is.na(IndexLev1_PainAverage))
+new_data <- expand.grid(
+  IndexLev1_PositiveAffect_Total = seq(min(data_paper2_elimna$IndexLev1_PositiveAffect_Total, na.rm = TRUE), 
+                              max(data_paper2_elimna$IndexLev1_PositiveAffect_Total, na.rm = TRUE), length.out = 100),
+  ID = unique(data_paper2_elimna$ID)
+)
+
+new_data$predicted <- predict(model_painave_PA, newdata = new_data, re.form = NULL) 
+
+## The mean line
+average_predictions <- new_data |>
+  group_by(IndexLev1_PositiveAffect_Total) |>
+  summarise(mean_predicted = mean(predicted, na.rm = TRUE))
+
+ggplot() +
+  geom_line(data = new_data, aes(x = IndexLev1_PositiveAffect_Total, y = predicted, group = ID), color = "grey") +
+  geom_line(data = average_predictions, aes(x = IndexLev1_PositiveAffect_Total, y = mean_predicted), color = "black", size = 1) +
+  labs(title = "Association between PA and daily average pain", 
+       x = "Daily positive affect", 
+       y = "Daily pain intensity") +
+  ylim(0,100) +
+  theme_minimal() +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+############### NA
+data_paper2_elimna <- data_paper2 |>
+  filter(!is.na(IndexLev1_NegativeAffect_Total) & !is.na(IndexLev1_PainAverage))
+new_data <- expand.grid(
+  IndexLev1_NegativeAffect_Total = seq(min(data_paper2_elimna$IndexLev1_NegativeAffect_Total, na.rm = TRUE), 
+                              max(data_paper2_elimna$IndexLev1_NegativeAffect_Total, na.rm = TRUE), length.out = 100),
+  ID = unique(data_paper2_elimna$ID)
+)
+
+new_data$predicted <- predict(model_painave_NA, newdata = new_data, re.form = NULL) 
+
+## The mean line
+average_predictions <- new_data |>
+  group_by(IndexLev1_NegativeAffect_Total) |>
+  summarise(mean_predicted = mean(predicted, na.rm = TRUE))
+
+ggplot() +
+  geom_line(data = new_data, aes(x = IndexLev1_NegativeAffect_Total, y = predicted, group = ID), color = "grey") +
+  geom_line(data = average_predictions, aes(x = IndexLev1_NegativeAffect_Total, y = mean_predicted), color = "black", size = 1) +
+  labs(title = "Association between NA and daily average pain", 
+       x = "Daily negative affect", 
+       y = "Daily pain intensity") +
+  ylim(0,100) +
+  theme_minimal() +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 ```
 
 ```{r}
@@ -983,16 +1046,157 @@ ggplot() +
   geom_line(data = new_data, aes(x = IndexLev1_Catastrophizing_Total, y = exp(predicted)/(1+exp(predicted)), group = ID), color = "grey") +
   geom_line(data = average_predictions, aes(x = IndexLev1_Catastrophizing_Total, y = exp(mean_predicted)/(1+exp(mean_predicted))), color = "black", size = 1) +
   labs(title = "Association between catastrophizing and perceved % of daily time in pain", 
-       x = "Catastrophizing", 
-       y = "% of daily time in pain (1 means 100%)") +
+       x = "Daily catastrophizing", 
+       y = "% of daily time in pain") +
   ylim(0,1) +
   theme_minimal() +
   theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) + # Remove background grids
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+
+#################### PA
+## Data visualization - multilevel beta regression - Level1_Even_Percent_Transf - beta_cata
+data_paper2_elimna <- data_paper2 |>
+  filter(!is.na(IndexLev1_PositiveAffect_Total) & !is.na(Level1_Even_Percent_Transf))
+new_data <- expand.grid(
+  IndexLev1_PositiveAffect_Total = seq(min(data_paper2_elimna$IndexLev1_PositiveAffect_Total, na.rm = TRUE), 
+                              max(data_paper2_elimna$IndexLev1_PositiveAffect_Total, na.rm = TRUE), length.out = 100),
+  ID = unique(data_paper2_elimna$ID)
+)
+
+new_data$predicted <- predict(beta_PA, newdata = new_data, re.form = NULL) 
+
+## The mean line
+average_predictions <- new_data |>
+  group_by(IndexLev1_PositiveAffect_Total) |>
+  summarise(mean_predicted = mean(predicted, na.rm = TRUE))
+
+ggplot() +
+  geom_line(data = new_data, aes(x = IndexLev1_PositiveAffect_Total, y = exp(predicted)/(1+exp(predicted)), group = ID), color = "grey") +
+  geom_line(data = average_predictions, aes(x = IndexLev1_PositiveAffect_Total, y = exp(mean_predicted)/(1+exp(mean_predicted))), color = "black", size = 1) +
+  labs(title = "Association between daily PA and perceved % of daily time in pain", 
+       x = "Daily positive affect", 
+       y = "% of daily time in pain") +
+  ylim(0,1) +
+  theme_minimal() +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) + # Remove background grids
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+#################### NA
+## Data visualization - multilevel beta regression - Level1_Even_Percent_Transf - beta_cata
+data_paper2_elimna <- data_paper2 |>
+  filter(!is.na(IndexLev1_NegativeAffect_Total) & !is.na(Level1_Even_Percent_Transf))
+new_data <- expand.grid(
+  IndexLev1_NegativeAffect_Total = seq(min(data_paper2_elimna$IndexLev1_NegativeAffect_Total, na.rm = TRUE), 
+                              max(data_paper2_elimna$IndexLev1_NegativeAffect_Total, na.rm = TRUE), length.out = 100),
+  ID = unique(data_paper2_elimna$ID)
+)
+
+new_data$predicted <- predict(beta_NA, newdata = new_data, re.form = NULL) 
+
+## The mean line
+average_predictions <- new_data |>
+  group_by(IndexLev1_NegativeAffect_Total) |>
+  summarise(mean_predicted = mean(predicted, na.rm = TRUE))
+
+ggplot() +
+  geom_line(data = new_data, aes(x = IndexLev1_NegativeAffect_Total, y = exp(predicted)/(1+exp(predicted)), group = ID), color = "grey") +
+  geom_line(data = average_predictions, aes(x = IndexLev1_NegativeAffect_Total, y = exp(mean_predicted)/(1+exp(mean_predicted))), color = "black", size = 1) +
+  labs(title = "Association between daily NA and perceved % of daily time in pain", 
+       x = "Daily negative affect", 
+       y = "% of daily time in pain") +
+  ylim(0,1) +
+  theme_minimal() +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) + # Remove background grids
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
         axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
   theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
 
 ```
+
+```{r}
+## Data visualization - boxplot
+data_paper2_boxplot_vars <- data_paper2 |>
+  distinct(ID, .keep_all = TRUE) |>
+  select(c(ID, IndexLev2_Agg_PainAverage, IndexLev2_Agg_Catastrophizing,
+         IndexLev2_Agg_PositiveAffect, IndexLev2_Agg_NegativeAffect)) |>
+  pivot_longer(cols = c("IndexLev2_Agg_PainAverage", "IndexLev2_Agg_Catastrophizing",
+                        "IndexLev2_Agg_PositiveAffect", "IndexLev2_Agg_NegativeAffect"),
+               names_to = "Variable",
+               values_to = "Value")
+
+## Boxplot
+data_paper2_boxplot_vars |>
+  ggplot(aes(x = Variable, y = Value, fill = Variable)) +
+  geom_boxplot() +
+  geom_jitter(color="black", size=0.4, alpha=0.9) +
+  scale_x_discrete(labels = c("Catastrophizing", "Negative Affect", "Pain Average", "Positive Affect")) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) + # Remove background grids
+  ggtitle("Boxplot of daily diary scores") +
+  xlab("Daily diary subject")
+
+## Violin Plot
+data_paper2_boxplot_vars |>
+  ggplot(aes(x = Variable, y = Value, fill = Variable)) +
+  geom_violin() +
+  geom_jitter(color="black", size=0.4, alpha=0.9) +
+  scale_x_discrete(labels = c("Catastrophizing", "Negative Affect", "Pain Average", "Positive Affect")) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) + # Remove background grids
+  ggtitle("Boxplot of daily diary scores") +
+  xlab("Daily diary subject")
+
+## Data visualization - IndexLev1_PainAverage_RawChange ~ NA and PA
+data_paper2 |>
+  ggplot(aes(x = IndexLev1_NegativeAffect_Total, y = IndexLev1_PainAverage_RawChange)) +
+  geom_smooth(method = "lm", level = 0.95) +
+  labs(title = "Negative affect vs. Pain change", 
+       x = "Daily negative affect", 
+       y = "Pain change") +
+  theme_minimal() +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+
+data_paper2 |>
+  ggplot(aes(y = IndexLev1_PainAverage_RawChange)) +
+  geom_smooth(aes(x = IndexLev1_PositiveAffect_Total, y = IndexLev1_PainAverage_RawChange,
+                  color = "Positve affect"), 
+              method = "lm", level = 0.95) +
+  geom_smooth(aes(x = IndexLev1_NegativeAffect_Total, y = IndexLev1_PainAverage_RawChange,
+                   color = "Negative affect"), 
+              method = "lm", level = 0.95) +
+  scale_color_manual(name = "Daily diary variable", values = c("blue", "red")) +
+  labs(title = "Daily diary variable vs. Pain change", 
+       x = "Daily diary variable", 
+       y = "Pain change") +
+  theme_minimal() +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+  
+
+
+
+```
+
 
 
 
