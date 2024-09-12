@@ -542,65 +542,52 @@ summary(pois_model)
 model_painave_age <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_Age + (1|ID), data = data_paper2)
 summary(model_painave_age) #Significant
 confint(model_painave_age, method = "Wald")
-icc(model_painave_age)
 ## Sex
 model_painave_sex <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_Sex + (1|ID), data = data_paper2)
 summary(model_painave_sex)
 confint(model_painave_sex, method = "Wald")
-icc(model_painave_sex)
 ## BMI
 model_painave_BMI <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_BMI + (1|ID), data = data_paper2)
 summary(model_painave_BMI)#Significant
 confint(model_painave_BMI, method = "Wald")
-icc(model_painave_BMI)
 ## Ethnicity
 model_painave_eth <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_Ethnicity_Rec + (1|ID), data = data_paper2)
 summary(model_painave_eth)
 confint(model_painave_eth, method = "Wald")
-icc(model_painave_eth)
 ## Smoke per day
 model_painave_smoke <- lmer(IndexLev1_PainAverage ~ Baseline_Lifestyle_SmokePerday + (1|ID), data = data_paper2)
 summary(model_painave_smoke)
 confint(model_painave_smoke, method = "Wald")
-icc(model_painave_smoke)
 ## Acetaminophen
 model_painave_ace <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Acetaminophen + (1|ID), data = data_paper2)
 summary(model_painave_ace)
 confint(model_painave_ace, method = "Wald")
-icc(model_painave_ace)
 ## NSAID
 model_painave_NSAID <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_NSAID + (1|ID), data = data_paper2)
 summary(model_painave_NSAID)#Significant
 confint(model_painave_NSAID, method = "Wald")
-icc(model_painave_NSAID)
 ## Cox2
 model_painave_cox2 <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Cox2 + (1|ID), data = data_paper2)
 summary(model_painave_cox2)
 confint(model_painave_cox2, method = "Wald")
-icc(model_painave_cox2)
 ## Antidepressant
 model_painave_antidep <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Antidepressants + (1|ID), data = data_paper2)
 summary(model_painave_antidep)
 confint(model_painave_antidep, method = "Wald")
-icc(model_painave_antidep)
 ## Anxiolytics
 model_painave_anxio <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Anxiolytics + (1|ID), data = data_paper2)
 summary(model_painave_anxio)
 confint(model_painave_anxio, method = "Wald")
-icc(model_painave_anxio)
 ## Muscle Relaxants
 model_painave_muscle <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_MuscleRelaxants + (1|ID), data = data_paper2)
-icc(model_painave_muscle)
 summary(model_painave_muscle)
 confint(model_painave_muscle, method = "Wald")
 ## Opioids
 model_painave_opioids <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Opioids + (1|ID), data = data_paper2)
-icc(model_painave_opioids)
 summary(model_painave_opioids)
 confint(model_painave_opioids, method = "Wald")
 ## Anticonvulsants
 model_painave_anticon <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Anticonvulsants + (1|ID), data = data_paper2)
-icc(model_painave_anticon)
 summary(model_painave_anticon)#Significant
 confint(model_painave_anticon, method = "Wald")
 
@@ -615,27 +602,22 @@ confint(model_painave_anticon, method = "Wald")
 ## Main level 2 analysis - IndexLev1_PainAverage as the outcome
 ## IndexLev2_QST_BaselinePPTh 
 model_painave_ppth <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + (1|ID), data = data_paper2)
-icc(model_painave_ppth)
 summary(model_painave_ppth)
 confint(model_painave_ppth, method = "Wald")
 ## IndexLev2_QST_TSPAve 
 model_painave_TSP <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_TSPAve + (1|ID), data = data_paper2)
-icc(model_painave_TSP)
 summary(model_painave_TSP)
 confint(model_painave_TSP, method = "Wald")
 ## IndexLev2_QST_CpmTrialAve
 model_painave_CPM <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_CpmTrialAve + (1|ID), data = data_paper2)
-icc(model_painave_CPM)
 summary(model_painave_CPM)
 confint(model_painave_CPM, method = "Wald")
 ## Adjusted
 model_painave_lev2adj <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve + Baseline_Demog_Age + Baseline_Demog_BMI + Baseline_Meds_NSAID + Baseline_Meds_Anticonvulsants + (1|ID), data = data_paper2)
-icc(model_painave_lev2adj)
 summary(model_painave_lev2adj)
 confint(model_painave_lev2adj, method = "Wald")
 ## Adjusted with only main factors
 model_painave_lev2adj_main <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve + (1|ID), data = data_paper2)
-icc(model_painave_lev2adj_main)
 summary(model_painave_lev2adj_main)
 confint(model_painave_lev2adj_main, method = "Wald")
 
@@ -645,33 +627,27 @@ confint(model_painave_lev2adj_main, method = "Wald")
 ## Outcome IndexLev1_PainAverage - Level 1
 ## Daily Catastro
 model_painave_cata <- lmer(IndexLev1_PainAverage ~  IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
-icc(model_painave_cata)
 summary(model_painave_cata)
 confint(model_painave_cata, method = "Wald")
 ## Daily NA
 model_painave_NA <- lmer(IndexLev1_PainAverage ~  IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2)
-icc(model_painave_NA)
 summary(model_painave_NA)
 confint(model_painave_NA, method = "Wald")
 ## Daily PA
 model_painave_PA <- lmer(IndexLev1_PainAverage ~  IndexLev1_PositiveAffect_Total + (1|ID), data = data_paper2)
-icc(model_painave_PA)
 summary(model_painave_PA)
 confint(model_painave_PA, method = "Wald")
 ## Daily Phys Exercise
 model_painave_PhyEx <- lmer(IndexLev1_PainAverage ~  Level1_Even_PhysActiv + (1|ID), data = data_paper2)
-icc(model_painave_PhyEx)
 summary(model_painave_PhyEx)
 confint(model_painave_PhyEx, method = "Wald")
 ## Adjusted
 model_painave_lvl1adj <- lmer(IndexLev1_PainAverage ~  Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
-icc(model_painave_lvl1adj)
 summary(model_painave_lvl1adj)
 confint(model_painave_lvl1adj, method = "Wald")
 
 ## Level 1 and Level 2 together
 model_painave_lvl1and2 <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve + Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
-icc(model_painave_lvl1and2)
 summary(model_painave_lvl1and2)
 confint(model_painave_lvl1and2, method = "Wald")
 icc(model_painave_lvl1and2)
@@ -697,7 +673,6 @@ data_paper2 <- data_paper2 |>
 ## IndexLev2_QST_BaselinePPTh
 beta_PPTh <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_BaselinePPTh + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_PPTh)
 summary(beta_PPTh)
 confint(beta_PPTh, method = "Wald")
 exp(c(0.008154675, 0.8440168521))
@@ -705,7 +680,6 @@ exp(c(-0.001585121, 0.0002889412))
 ## IndexLev2_QST_TSPAve 
 beta_TSP <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_TSPAve + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_TSP)
 summary(beta_TSP)
 confint(beta_TSP, method = "Wald")
 exp(c(-0.198449697, 0.24899849))
@@ -714,7 +688,6 @@ exp(c(-0.001178379, 0.01749171))
 ## IndexLev2_QST_CpmTrialAve
 beta_CPM <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_CpmTrialAve + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_CPM)
 summary(beta_CPM)
 confint(beta_CPM, method = "Wald")
 exp(c(-0.703915601, 0.92173256))
@@ -723,7 +696,6 @@ exp(c(-0.005913656, 0.00690423))
 ## Adjusted with only main factors
 beta_level2_adj <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_level2_adj)
 summary(beta_level2_adj)
 confint(beta_level2_adj, method = "Wald")
 exp(c(-0.006201108, 0.0073500749))
@@ -734,7 +706,6 @@ exp(c(-0.001339993, 0.0008318547))
 ## Daily Catastro
 beta_cata <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_Catastrophizing_Total + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_cata)
 summary(beta_cata)
 confint(beta_cata, method = "Wald")
 exp(confint(beta_cata, method = "Wald"))
@@ -742,35 +713,30 @@ exp(confint(beta_cata, method = "Wald"))
 ## Daily NA
 beta_NA <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_NegativeAffect_Total + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_NA)
 summary(beta_NA)
 confint(beta_NA, method = "Wald")
 exp(confint(beta_NA, method = "Wald"))
 ## Daily PA
 beta_PA <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_PositiveAffect_Total + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_PA)
 summary(beta_PA)
 confint(beta_PA, method = "Wald")
 exp(confint(beta_PA, method = "Wald"))
 ## Daily Phys Exercise
 beta_PhysEx <- glmmTMB(Level1_Even_Percent_Transf ~ Level1_Even_PhysActiv + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_PhysEx)
 summary(beta_PhysEx)
 confint(beta_PhysEx, method = "Wald")
 exp(confint(beta_PhysEx, method = "Wald"))
 ## Adjusted
 beta_level1_adj <- glmmTMB(Level1_Even_Percent_Transf ~ Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_level1_adj)
 summary(beta_level1_adj)
 confint(beta_level1_adj, method = "Wald")
 exp(confint(beta_level1_adj, method = "Wald"))
 
 ## Level 1 and Level 2 together
 beta_adj_lvl1and2 <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_TSPAve + IndexLev2_QST_BaselinePPTh + Level1_Even_PhysActiv + IndexLev1_PositiveAffect_Total + IndexLev1_NegativeAffect_Total + IndexLev1_Catastrophizing_Total + (1|ID), family = beta_family(), data = data_paper2, control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_adj_lvl1and2)
 summary(beta_adj_lvl1and2)
 confint(beta_adj_lvl1and2, method = "Wald")
 exp(confint(beta_adj_lvl1and2, method = "Wald"))
@@ -851,14 +817,12 @@ data_paper2 <- data_paper2 |>
 ## Beta Regression - outcome Level1_Even_Percent_Transf
 beta_level1_adj_c <- glmmTMB(Level1_Even_Percent_Transf ~ cLevel1_PhysicalActiv + cLevel1_PositiveAffect + cLevel1_NegativeAffect + cLevel1_Catastrophizing + (1|ID), family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_level1_adj_c)
 summary(beta_level1_adj_c)
 confint(beta_level1_adj_c, method = "Wald")
 exp(confint(beta_level1_adj_c, method = "Wald"))
 
 ## Linear regression - outcome IndexLev1_PainAverage
 model_painave_c <- lmer(IndexLev1_PainAverage ~  cLevel1_PhysicalActiv + cLevel1_PositiveAffect + cLevel1_NegativeAffect + cLevel1_Catastrophizing + (1|ID), data = data_paper2)
-icc(model_painave_c)
 summary(model_painave_c)
 confint(model_painave_c, method = "Wald")
 
@@ -901,7 +865,6 @@ confint(model_adj_lev1_c_Cata, method = "Wald")
 beta_level2_adj_c <- glmmTMB(Level1_Even_Percent_Transf ~ cLevel2_CPM + cLevel2_TSP + cLevel2_PPTh + (1|ID), 
                              family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-icc(beta_level2_adj_c)
 summary(beta_level2_adj_c)
 confint(beta_level2_adj_c, method = "Wald")
 exp(confint(beta_level2_adj_c, method = "Wald"))
@@ -959,7 +922,6 @@ exp(confint(beta_level2_adj_c, method = "Wald"))
 
 ## Linear regression - outcome IndexLev1_PainAverage
 model_painave_lvl2c <- lmer(IndexLev1_PainAverage ~  cLevel2_CPM + cLevel2_TSP + cLevel2_PPTh + (1|ID), data = data_paper2)
-icc(model_painave_lvl2c)
 summary(model_painave_lvl2c)
 confint(model_painave_lvl2c, method = "Wald")
 
@@ -1135,21 +1097,6 @@ ggplot() +
   theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 
 ############### NA
-model_painave_NA <- lmer(IndexLev1_PainAverage ~  IndexLev1_NegativeAffect_Total + (IndexLev1_NegativeAffect_Total|ID), data = data_paper2)
-summary(model_painave_NA)
-
-data_paper2_temp <- data_paper2 |>
-  distinct(ID, .keep_all = TRUE) 
-median_Baseline_Demog_BMI <- median(data_paper2_temp$Baseline_Demog_BMI, na.rm = TRUE)
-
-data_above_median <- data_paper2 %>% filter(Baseline_Demog_BMI > median_Baseline_Demog_BMI)
-length(data_above_median$ID)
-data_below_median <- data_paper2 %>% filter(Baseline_Demog_BMI <= median_Baseline_Demog_BMI)
-length(data_below_median$ID)
-data_paper2 <- data_paper2 |>
-  mutate(above_med = ifelse(ID %in% data_above_median$ID,1,0))
-
-
 data_paper2_elimna <- data_paper2 |>
   filter(!is.na(IndexLev1_NegativeAffect_Total) & !is.na(IndexLev1_PainAverage))
 new_data <- expand.grid(
@@ -1159,22 +1106,16 @@ new_data <- expand.grid(
 )
 
 new_data$predicted <- predict(model_painave_NA, newdata = new_data, re.form = NULL) 
-new_data <- merge(new_data, data_paper2[,c("ID","above_med")], by = "ID", all.x = TRUE)
 
 ## The mean line
-average_predictions_above <- new_data |>
-  filter(above_med == 1) |>
-  group_by(IndexLev1_NegativeAffect_Total) |>
-  summarise(mean_predicted = mean(predicted, na.rm = TRUE))
-average_predictions_below <- new_data |>
-  filter(above_med == 0) |>
+average_predictions <- new_data |>
   group_by(IndexLev1_NegativeAffect_Total) |>
   summarise(mean_predicted = mean(predicted, na.rm = TRUE))
 
 ggplot() +
-  geom_line(data = new_data, aes(x = IndexLev1_NegativeAffect_Total, y = predicted, group = ID, color = factor(above_med)), linetype = "dashed", alpha = 0.5) +
-  geom_line(data = average_predictions_above, aes(x = IndexLev1_NegativeAffect_Total, y = mean_predicted), size = 1, color = "blue") +
-  geom_line(data = average_predictions_below, aes(x = IndexLev1_NegativeAffect_Total, y = mean_predicted), size = 1, color = "red") +
+  geom_line(data = new_data, aes(x = IndexLev1_NegativeAffect_Total, y = predicted, group = ID), 
+            color = "grey", linetype = "dashed") +
+  geom_line(data = average_predictions, aes(x = IndexLev1_NegativeAffect_Total, y = mean_predicted), color = "black", size = 1) +
   labs(title = "Association between NA and daily average pain", 
        x = "Daily negative affect", 
        y = "Daily pain intensity") +
@@ -1713,503 +1654,39 @@ anova(model_painave_PA, model_painave_PA_norand)
 #summary(model_painave_PA)
 ```
 
-```{r}
-## IndexLev1_PainAverage_RawChange
-## Daily Cata
-model_painave_cata <- lmer(IndexLev1_PainAverage_RawChange ~  IndexLev1_Catastrophizing_Total + (IndexLev1_Catastrophizing_Total|ID), data = data_paper2)
-model_painave_cata_norand <- lm(IndexLev1_PainAverage_RawChange ~  IndexLev1_Catastrophizing_Total, data = data_paper2)
-anova(model_painave_cata, model_painave_cata_norand)
-#summary(model_painave_cata)
-
-## Daily NA
-model_painave_NA <- lmer(IndexLev1_PainAverage_RawChange ~  IndexLev1_NegativeAffect_Total + (IndexLev1_NegativeAffect_Total|ID), data = data_paper2)
-model_painave_NA_norand <- lm(IndexLev1_PainAverage_RawChange ~  IndexLev1_NegativeAffect_Total, data = data_paper2)
-anova(model_painave_NA, model_painave_NA_norand)
-#summary(model_painave_NA)
-
-
-## Daily PA
-model_painave_PA <- lmer(IndexLev1_PainAverage_RawChange ~  IndexLev1_PositiveAffect_Total + (IndexLev1_PositiveAffect_Total|ID), data = data_paper2)
-model_painave_PA_norand <- lm(IndexLev1_PainAverage_RawChange ~  IndexLev1_PositiveAffect_Total, data = data_paper2)
-anova(model_painave_PA, model_painave_PA_norand)
-```
-
-```{r}
-library(betareg)
-library(lmtest)
-## Daily Catastro
-beta_cata <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_Catastrophizing_Total + (IndexLev1_Catastrophizing_Total|ID), family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-beta_cata_norand <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_Catastrophizing_Total,
-                            family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-AIC(beta_cata, beta_cata_norand)
-lrtest(beta_cata, beta_cata_norand)
-
-
-## Daily NA
-beta_NA <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_NegativeAffect_Total + (IndexLev1_NegativeAffect_Total|ID), 
-                   family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-beta_NA_norand <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_NegativeAffect_Total,
-                          family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-lrtest(beta_NA, beta_NA_norand)
-
-## Daily PA
-beta_PA <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_PositiveAffect_Total + (IndexLev1_PositiveAffect_Total|ID), 
-                   family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-beta_PA_norand <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_PositiveAffect_Total , 
-                   family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-lrtest(beta_PA, beta_PA_norand)
-
-```
-
-```{r}
-## Testing the baseline/charac variables for beta regression
-beta_Age <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Age + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_Age)
-
-beta_Sex <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Sex + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_Sex)
-
-beta_BMI <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_BMI + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_BMI)
-
-beta_Eth <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Ethnicity_Rec + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_Eth)
-
-beta_Smoke <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Lifestyle_SmokePerday + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_Smoke)
-
-beta_Acetam <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Meds_Acetaminophen + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_Acetam)
-
-beta_NSAID <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Meds_NSAID + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_NSAID)
-
-beta_AntiDep <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Meds_Antidepressants + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_AntiDep)
-
-beta_Anxio <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Meds_Anxiolytics + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_Anxio)
-
-beta_Muscle <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Meds_MuscleRelaxants + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_Muscle)
-
-beta_Opioids <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Meds_Opioids + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_Opioids)
-
-beta_AntiConv <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Meds_Anticonvulsants + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_AntiConv)
-
-beta_Cox2 <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Meds_Cox2 + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_Cox2)
-
-```
-
-```{r}
-## Pain Percent interaction check
-beta_cata <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_Catastrophizing_Total*IndexLev2_QST_CpmTrialAve + (1|ID), family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_cata)
-
-beta_PA <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_PositiveAffect_Total*IndexLev2_QST_CpmTrialAve + (1|ID), 
-                   family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_PA)
-
-beta_NA <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev1_NegativeAffect_Total*IndexLev2_QST_CpmTrialAve + (1|ID), 
-                   family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_NA)
-
-```
-
-
-```{r}
-## Pain Ave interaction checking
-model_painave_age_inter <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_QST_BaselinePPTh*IndexLev1_PositiveAffect_Total + (1|ID), data = data_paper2)
-summary(model_painave_age_inter) 
-
-model_painave_age_inter <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_QST_BaselinePPTh*IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2)
-summary(model_painave_age_inter) 
-
-model_painave_age_inter <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_QST_BaselinePPTh*IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
-summary(model_painave_age_inter) 
-
-
-model_painave_bmi_inter <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_BMI*IndexLev1_PositiveAffect_Total + (1|ID), data = data_paper2)
-summary(model_painave_bmi_inter) 
-
-model_painave_bmi_inter <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_BMI*IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2)
-summary(model_painave_bmi_inter) #Significant
-
-data_paper2_temp <- data_paper2 |>
-  filter(above_med == 1)
-model_painave_bmi_inter <- lmer(IndexLev1_PainAverage ~ IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2_temp)
-summary(model_painave_bmi_inter) #Significant
-data_paper2_temp <- data_paper2 |>
-  filter(above_med == 0)
-model_painave_bmi_inter <- lmer(IndexLev1_PainAverage ~ IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2_temp)
-summary(model_painave_bmi_inter) #Significant
-
-
-
-model_painave_bmi_inter <- lmer(IndexLev1_PainAverage ~ Baseline_Demog_BMI*IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
-summary(model_painave_bmi_inter) 
-
-model_painave_NSAID_inter <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_NSAID*IndexLev1_PositiveAffect_Total + (1|ID), data = data_paper2)
-summary(model_painave_NSAID_inter) 
-
-model_painave_NSAID_inter <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_NSAID*IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2)
-summary(model_painave_NSAID_inter) 
-
-model_painave_NSAID_inter <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_NSAID*IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
-summary(model_painave_NSAID_inter) 
-
-model_painave_AntiConv_inter <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Anticonvulsants*IndexLev1_PositiveAffect_Total + (1|ID), data = data_paper2)
-summary(model_painave_AntiConv_inter) 
-
-model_painave_AntiConv_inter <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Anticonvulsants*IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2)
-summary(model_painave_AntiConv_inter) 
-
-model_painave_AntiConv_inter <- lmer(IndexLev1_PainAverage ~ Baseline_Meds_Anticonvulsants*IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
-summary(model_painave_AntiConv_inter) 
-
-```
-
-
-
-
-
 Comparing the more complex model to the null model (Less complex model). The null hypothesis in this case is "Using the random effect model does not improve the model fit compared to the model without the random effect".  
 
 
 ```{r}
 ## Density plot for three QST measures
-data_paper_temp <- data_paper2 |>
-  distinct(ID, .keep_all = TRUE)
-ggplot(data_paper_temp, aes(x = IndexLev2_QST_BaselinePPTh)) + 
+ggplot(data_paper, aes(x = IndexLev2_QST_BaselinePPTh)) + 
+  geom_histogram(aes(y=..density..), color = "black", fill = "white") +
   geom_density(alpha = 0.2, fill = "#FF6666") +
   labs(title = "Density of PPTh", 
        x = "PPTh", 
        y = "Density") +
-  scale_x_continuous(breaks = seq(0, 1200, by = 150)) +
   theme_minimal() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
-        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
 
-ggplot(data_paper_temp, aes(x = IndexLev2_QST_TSPAve)) + 
+ggplot(data_paper, aes(x = IndexLev2_QST_TSPAve)) + 
+  geom_histogram(aes(y=..density..), color = "black", fill = "white") +
   geom_density(alpha = 0.2, fill = "green") +
   labs(title = "Density of TSP", 
        x = "TSP", 
        y = "Density") +
-  scale_x_continuous(breaks = seq(0, 95, by = 5)) +
   theme_minimal() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
-        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
 
-ggplot(data_paper_temp, aes(x = IndexLev2_QST_CpmTrialAve)) + 
+ggplot(data_paper, aes(x = IndexLev2_QST_CpmTrialAve)) + 
+  geom_histogram(aes(y=..density..), color = "black", fill = "white") +
   geom_density(alpha = 0.2, fill = "orange") +
   labs(title = "Density of CPM", 
        x = "CPM", 
        y = "Density") +
-  scale_x_continuous(breaks = seq(0, 255, by = 15)) +
   theme_minimal() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
-        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
   
 ```
-
-```{r}
-## Moon Paper - R code for computing individual mean, MSSD, and PAC
-library(foreign)
-library(psych)
-
-varim <- function(filename,idv,tv,xv,ac,tint){
-  # Read data file
-  if (grepl(".dat",filename,fixed=T)){
-    mydata0 <- read.table(filename,sep="\t",fileEncoding="UTF-8-BOM")
-    filetype <- 1
-  } else if (grepl(".csv",filename,fixed=T)){
-    mydata0 <- read.table(filename,sep=",", fileEncoding="UTF-8-BOM")
-    filetype <- 2
-  } else if (grepl(".sav",filename,fixed=T)){
-    mydata0 <- read.spss(filename,to.data.frame=T,use.missings=T,use.value.labels=F)
-    filetype <- 3
-  } else if (grepl(".xpt",filename,fixed=T)){
-    mydata0 <- read.xport(filename)
-    filetype <- 4
-  } else {
-    stop("unrecognized file type")
-  }
-  # Select id, time, x variables only.
-  mydata = data.frame(id=mydata0[,idv],time=mydata0[,tv],x=mydata0[,xv])
-  # Calculate variability measures
-  mydata.v <- round(vm(data0=mydata,idv="id",xv="x",tv="time",tint=tint,ac=ac),4)
-  # Save the variability measures data
-  now <- Sys.time()
-  if (filetype==1){
-    filename.r <- paste("varim_",format(now, "%m%d%Y_%H%M%S"),".dat")
-    write.table(x=mydata.v,file=filename.r,row.names=F,col.names=T,sep="\t")
-  } else if (filetype==2){
-    filename.r <- paste("varim_",format(now, "%m%d%Y_%H%M%S"),".csv")
-    write.table(x=mydata.v,file=filename.r,row.names=F,col.names=T,sep=",")
-  } else if (filetype==3){
-    filename.data <- paste("varim_",format(now, "%m%d%Y_%H%M%S"),".txt")
-    filename.code <- paste("varim_",format(now, "%m%d%Y_%H%M%S"),".sps")
-    write.foreign(df=mydata.v,datafile=filename.data,codefile=filename.code,package="SPSS")
-  } else if (filetype==4){
-    filename.data <- paste("varim_",format(now, "%m%d%Y_%H%M%S"),".txt")
-    filename.code <- paste("varim_",format(now, "%m%d%Y_%H%M%S"),".sas")
-    
-  write.foreign(df=mydata.v,datafile=filename.data,codefile=filename.code,package="SAS")
-  }
-}
-# vm function: Calculate variability measures and return a data frame
-vm <- function(data0,idv,xv,tv,tint,ac){
- 
-  data <- data0
-  id <- data[,idv]
-  x <- data[,xv]
-  t <- data[,tv]
- 
-  unique.id <- unique(id)
-  mydata <- c()
- 
-  for(j in 1:length(unique.id)){
-    t.j <- t[id==unique.id[j]]
-    x.j <- x[id==unique.id[j]]
-    t.new <- seq(min(t.j),max(t.j),by=tint)
-    x.new <- rep(NA,times=length(t.new))
-    id.new <- rep(unique.id[j],times=length(t.new))
- 
-    index <- which((t.new %in% t.j))
-    x.new[index] <- x.j
- 
-    data.new <- data.frame(id=id.new,t=t.new,x=x.new)
-    mydata <- rbind(mydata,data.new)
-  }
- 
-  # Calculate variability measures for each person
-  MEAN <- tapply(X=mydata$x,INDEX=mydata$id,function(x) mean(x,na.rm=T))
-  MSSD <- tapply(X=mydata$x,INDEX=mydata$id,function(x) mean(diff(x,lag=1)^2,na.rm=T))
-  PAC <- tapply(X=mydata$x,INDEX=mydata$id,function(x) 
-  mean(abs(diff(x,lag=1))>ac,na.rm=T))
- 
-  # Create data frame
-  id <- as.numeric(rownames(MEAN))
-  vm <- data.frame(id,MEAN,MSSD,PAC)
- 
-  colnames(vm) <- c("ID","MEAN","MSSD","PAC")
- 
-  return(vm)
-}
-###############
-##### End #####
-###############
-varim(filename = "data_paper2.sav", idv = "ID", tv = "Wave_Day", xv = "IndexLev1_PainAverage",
-      ac = 20, tint = 1)
-data_MSSD <- readr::read_delim("varim_ 07292024_011555 .txt", delim = ",", col_names = c("ID", "MEAN", "MSSD", "PAC", "Ignore"))
-data_MSSD <- data_MSSD |> select(-"Ignore")
-data_paper2_temp <- data_paper2 |>
-  distinct(ID, .keep_all = TRUE)
-data_paper2_withMSSD <- merge(data_paper2_temp, data_MSSD, by = "ID")
-model_MSSD_CPM <- lm(MSSD ~ IndexLev2_QST_CpmTrialAve, data = data_paper2_withMSSD)
-model_MSSD_CPM_controlpain <- lm(MSSD ~ IndexLev2_QST_CpmTrialAve + IndexLev2_Agg_PainAverage, data = data_paper2_withMSSD)
-
-model_MSSD_PPTh <- lm(MSSD ~ IndexLev2_QST_BaselinePPTh, data = data_paper2_withMSSD)
-model_MSSD_PPTh_controlpain <- lm(MSSD ~ IndexLev2_QST_BaselinePPTh + IndexLev2_Agg_PainAverage, data = data_paper2_withMSSD)
-
-model_MSSD_TSP <- lm(MSSD ~ IndexLev2_QST_TSPAve, data = data_paper2_withMSSD)
-model_MSSD_TSP_controlpain <- lm(MSSD ~ IndexLev2_QST_TSPAve + IndexLev2_Agg_PainAverage, data = data_paper2_withMSSD)
-
-
-model_MSSD_PA <- lm(MSSD ~ IndexLev2_Agg_PositiveAffect, data = data_paper2_withMSSD)
-model_MSSD_NA <- lm(MSSD ~ IndexLev2_Agg_NegativeAffect, data = data_paper2_withMSSD)
-model_MSSD_Cata <- lm(MSSD ~ IndexLev2_Agg_Catastrophizing, data = data_paper2_withMSSD)
-model_MSSD <- lm(MSSD ~ IndexLev2_QST_CpmTrialAve + IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve,
-                 data = data_paper2_withMSSD)
-summary(model_MSSD_CPM)
-summary(model_MSSD_PPTh)
-summary(model_MSSD_TSP)
-
-
-summary(model_MSSD_CPM_controlpain)
-summary(model_MSSD_PPTh_controlpain)
-summary(model_MSSD_TSP_controlpain)
-
-summary(model_MSSD_PA)
-summary(model_MSSD_NA)
-summary(model_MSSD_Cata)
-
-summary(model_MSSD)
-```
-
-```{r}
-## Re-classify the BMI into categorical using CDC index
-data_paper2 <- data_paper2 |>
-  mutate(IndexLev2_Categorized_BMI = case_when(
-    Baseline_Demog_BMI < 18.5 ~ "Underweight",
-    Baseline_Demog_BMI >= 18.5 & Baseline_Demog_BMI < 25 ~ "Healthy Weight",
-    Baseline_Demog_BMI >= 25 & Baseline_Demog_BMI < 30 ~ "Overweight",
-    Baseline_Demog_BMI >= 30 ~ "Obesity"
-  )) # Nobody underweight
-
-## Re-run the analyses that involved with BMI
-
-## Pain Raw Change
-model_bmi <- lmer(IndexLev1_PainAverage_RawChange ~ IndexLev2_Categorized_BMI + (1|ID), data = data_paper2)
-summary(model_bmi)
-confint(model_bmi, method = "Wald")
-icc(model_bmi)
-
-## Pain Average
-model_painave_BMI <- lmer(IndexLev1_PainAverage ~ IndexLev2_Categorized_BMI + (1|ID), data = data_paper2)
-summary(model_painave_BMI)#Significant
-confint(model_painave_BMI, method = "Wald")
-icc(model_painave_BMI)
-
-## Adjusted Pain Average
-model_painave_lev2adj <- lmer(IndexLev1_PainAverage ~ IndexLev2_QST_BaselinePPTh + IndexLev2_QST_TSPAve + IndexLev2_QST_CpmTrialAve + Baseline_Demog_Age + IndexLev2_Categorized_BMI + Baseline_Meds_NSAID + Baseline_Meds_Anticonvulsants + (1|ID), data = data_paper2)
-summary(model_painave_lev2adj)
-confint(model_painave_lev2adj, method = "Wald")
-icc(model_painave_lev2adj)
-
-## Percent Pain
-beta_BMI <- glmmTMB(Level1_Even_Percent_Transf ~ IndexLev2_Categorized_BMI + (1|ID), 
-                     family = beta_family(), data = data_paper2, 
-                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(beta_BMI)
-confint(beta_BMI, method = "Wald") # log OR
-exp(confint(beta_BMI, method = "Wald")) # OR
-icc(beta_BMI)
-
-## Pain Average - NA PA Cata interaction with BMI
-model_painave_bmi_inter <- lmer(IndexLev1_PainAverage ~ IndexLev2_Categorized_BMI*IndexLev1_PositiveAffect_Total + (1|ID), data = data_paper2)
-summary(model_painave_bmi_inter) 
-confint(model_painave_bmi_inter, method = "Wald")
-icc(model_painave_bmi_inter)
-
-model_painave_bmi_inter <- lmer(IndexLev1_PainAverage ~ IndexLev2_Categorized_BMI*IndexLev1_NegativeAffect_Total + (1|ID), data = data_paper2)
-summary(model_painave_bmi_inter) 
-confint(model_painave_bmi_inter, method = "Wald")
-icc(model_painave_bmi_inter)
-
-model_painave_bmi_inter <- lmer(IndexLev1_PainAverage ~ IndexLev2_Categorized_BMI*IndexLev1_Catastrophizing_Total + (1|ID), data = data_paper2)
-summary(model_painave_bmi_inter) 
-confint(model_painave_bmi_inter, method = "Wald")
-icc(model_painave_bmi_inter)
-
-data_paper2_temp <- data_paper2 |>
-  distinct(ID, .keep_all = TRUE)
-table(data_paper2_temp$IndexLev2_Categorized_BMI)
-data_paper2_temp <- data_paper2_temp |>
-  filter(!is.na(IndexLev2_Categorized_BMI))
-
-data_paper2_temp |>
-  ggplot(aes(x = factor(IndexLev2_Categorized_BMI, levels = c("Healthy Weight", "Overweight", "Obesity")), fill = factor(IndexLev2_Categorized_BMI, levels = c("Healthy Weight", "Overweight", "Obesity")))) +
-  geom_bar() +
-  labs(fill = "BMI", x = "BMI", y = "Count") +
-  theme_minimal() +
-  theme(element_blank()) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
-        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
-```
-
-
-```{r}
-############### NA interaction with BMI
-model_painave_NA <- lmer(IndexLev1_PainAverage ~  IndexLev1_NegativeAffect_Total + (IndexLev1_NegativeAffect_Total|ID), data = data_paper2)
-summary(model_painave_NA)
-
-data_paper2_temp <- data_paper2 |>
-  distinct(ID, .keep_all = TRUE) 
-median_Baseline_Demog_BMI <- median(data_paper2_temp$Baseline_Demog_BMI, na.rm = TRUE)
-
-data_above_median <- data_paper2 %>% filter(Baseline_Demog_BMI > median_Baseline_Demog_BMI)
-length(data_above_median$ID)
-data_below_median <- data_paper2 %>% filter(Baseline_Demog_BMI <= median_Baseline_Demog_BMI)
-length(data_below_median$ID)
-data_paper2 <- data_paper2 |>
-  mutate(above_med = ifelse(ID %in% data_above_median$ID,1,0))
-
-
-data_paper2_elimna <- data_paper2 |>
-  filter(!is.na(IndexLev1_NegativeAffect_Total) & !is.na(IndexLev1_PainAverage))
-new_data <- expand.grid(
-  IndexLev1_NegativeAffect_Total = seq(min(data_paper2_elimna$IndexLev1_NegativeAffect_Total, na.rm = TRUE), 
-                              max(data_paper2_elimna$IndexLev1_NegativeAffect_Total, na.rm = TRUE), length.out = 100),
-  ID = unique(data_paper2_elimna$ID)
-)
-
-new_data$predicted <- predict(model_painave_NA, newdata = new_data, re.form = NULL) 
-new_data <- merge(new_data, data_paper2[,c("ID","above_med")], by = "ID", all.x = TRUE)
-
-## The mean line
-average_predictions_above <- new_data |>
-  filter(above_med == 1) |>
-  group_by(IndexLev1_NegativeAffect_Total) |>
-  summarise(mean_predicted = mean(predicted, na.rm = TRUE))
-average_predictions_below <- new_data |>
-  filter(above_med == 0) |>
-  group_by(IndexLev1_NegativeAffect_Total) |>
-  summarise(mean_predicted = mean(predicted, na.rm = TRUE))
-
-ggplot() +
-  geom_line(data = new_data, aes(x = IndexLev1_NegativeAffect_Total, y = predicted, group = ID, color = factor(above_med)), linetype = "dashed", alpha = 0.5) +
-  geom_line(data = average_predictions_above, aes(x = IndexLev1_NegativeAffect_Total, y = mean_predicted), size = 1, color = "blue") +
-  geom_line(data = average_predictions_below, aes(x = IndexLev1_NegativeAffect_Total, y = mean_predicted), size = 1, color = "red") +
-  labs(title = "Association between NA and daily average pain", 
-       x = "Daily negative affect", 
-       y = "Daily pain intensity") +
-  ylim(0,100) +
-  theme_minimal() +
-  theme(element_blank()) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
-        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
-```
-
-
-
 
 
 

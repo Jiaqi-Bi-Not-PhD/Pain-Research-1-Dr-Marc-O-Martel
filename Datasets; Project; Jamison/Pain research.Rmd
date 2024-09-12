@@ -1,0 +1,552 @@
+---
+title: "Pain Research - Dr. Marc O. Martel"
+author: "Jiaqi Bi"
+date: "2023-07-31"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include = FALSE}
+# Two different files
+#setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Martel")
+#setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison")
+```
+
+```{r}
+## Load packages
+library(tidyverse)
+library(ggplot2)
+library(tidyr)
+library(haven) ## This library provides functions to read sav file into R
+library(lme4)
+library(lmerTest)
+```
+
+```{r, include = FALSE}
+## Baseline data
+df1 <- read_sav("Dataset; Jamison project; Baseline.sav")
+df1 <- read_sav("Dataset; Jamison project; Baseline_Excluded.sav")
+#df1 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
+## Daily data
+df2_check <- read_sav("Dataset; Jamison project; Daily.sav")
+#df2 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
+
+
+
+## Examine the duplicated observation
+df1$ID[which(duplicated(df1$ID))]
+df2$StudyID[which(duplicated(df2$StudyID))]
+
+df1 <- df1 |>
+  filter(!duplicated(ID))
+
+df1 <- df1 |> filter(Exclud_MissingBoth2 == 0)
+df2 <- df2 |>
+  filter(!duplicated(StudyID)) |>
+  rename(ID = StudyID)
+
+## Time variable to numerical day (consecutive)
+date_cols <- grep("^Date", names(df2), value = TRUE)
+
+df2 <- df2 %>%
+  mutate(across(all_of(date_cols), as.Date, format = "%Y-%m-%d"))
+
+## Correct abberrant years
+df2 <- df2 %>%
+  rowwise() %>%
+  mutate(across(all_of(date_cols), ~ {
+    if (. != Date1 && !is.na(.)) {
+      day_diff <- as.numeric(. - Date1)
+      if (day_diff < 0) {
+        update(., year = year(Date1))
+      } else {
+        .
+      }
+    } else {
+      .
+    }
+  })) %>%
+  ungroup()
+
+####### Below investigates the rest of aberrant objects #######
+##### Above does not solve those entering a new year ##########
+df2_investigate <- df2 |>
+  pivot_longer(
+  cols = starts_with("Date"), 
+  names_to = "Date_Number", 
+  values_to = "Date_Value"
+) |>
+  select(ID, Date_Value)
+
+print(n = 36, df2_investigate[df2_investigate$ID == 673,])
+###############################################################
+
+## Below solved all objects date problem
+df2$Date8[df2$ID == 610] <- "2023-01-01"
+df2$Date8[df2$ID == 703] <- "2022-01-09"
+df2$Date8[df2$ID == 741] <- "2021-01-10"
+df2$Date8[df2$ID == 680] <- "2023-01-09"
+df2$Date28[df2$ID == 673] <- "2023-02-02"
+
+## Convert the date to number
+df2 <- df2 |>
+  mutate(across(all_of(date_cols[-1]), ~ as.numeric(. - df2$Date1 + 1)))
+
+df2$Date1 <- 1
+all_cols <- names(df2)
+
+#for (i in 2:length(date_cols)) {
+#  if (any(df2[[date_cols[i]]] == 1, na.rm = TRUE)) {
+#    same_day_cols <- grep(paste0("_", i), all_cols, value = TRUE)
+#    df2[df2[[date_cols[i]]] == 1 & !is.na(df2_test[[date_cols[i]]]), same_day_cols] <- NA
+#  }
+#}
+
+## Wide to long
+df2_long <- df2 |>
+  pivot_longer(cols = -ID,
+               names_to = c(".value", "day"),
+               names_pattern = "([A-Za-z]+)(\\d+)") |>
+  select(-day) |>
+  rename(Day = Date) |>
+  filter(Day <= 30 & !is.na(Day)) |>
+  group_by(ID) |>
+  distinct(Day, .keep_all = TRUE) |>
+  complete(Day = seq(1,30))
+
+## replace all -1 to NA
+df2_long <- df2_long |>
+  mutate_all(~if_else(. < 0, NA_real_, .))
+
+df2_long <- df2_long |>
+  rename(GlobalImprovement = Changed)
+
+## Calculate the lagged variable
+df2_long <- df2_long |>
+  group_by(ID) |>
+  arrange(ID, Day) |>
+  mutate(AvePain_Change = AvePain - lag(AvePain), 
+         ActivityInt_Change = ActivityInt - lag(ActivityInt), 
+         Mood_Change = Mood - lag(Mood)) 
+
+df2_greaterthan7 <- df2_long |>
+  group_by(ID) %>%
+  summarise(NonMissingGI = sum(!is.na(GlobalImprovement))) %>%
+  filter(NonMissingGI >= 7) %>%
+  inner_join(df2_long, by = "ID")
+
+## Add level 2 age, gender, and PCS to the longitudinal data
+df1_temporary <- df1 |>
+  select(c(B_Demog_Age, B_Demog_Gender, B_Psych_PCS, ID))
+df1_temporary <- df1
+
+df_new <- merge(df2_greaterthan7, df1_temporary, by = "ID")
+df_total <- merge(df2_greaterthan7, df1, by = "ID")
+
+## Global improvement 10 to 1, 9 to 2, ...
+df_new <- df_new |>
+  mutate(GlobalImprovement = 11-GlobalImprovement)
+
+df_new <- df_new |> filter(ID %in% df1$ID)
+write_sav(df_new, "Data; Jamison data; Long format (Stacked).sav")
+
+df_new <- df_new |>
+  group_by(ID) |>
+  mutate(across(c(AvePain, Sleep, Mood), ~. - mean(., na.rm = TRUE),
+                .names = "{.col}_c"))
+
+df_new <- df_new |>
+  group_by(ID) |>
+  mutate(LastDay_PainAve_c = lag(AvePain_c), 
+         NextDay_PainAve_c = lead(AvePain_c), 
+         Today_PainAve_c = AvePain_c,
+         LastDay_Sleep_c = Sleep_c,
+         Today_Sleep_c = lead(Sleep_c),
+         LastDay_Mood_c = lag(Mood_c),
+         Today_Mood_c = Mood_c
+         )
+
+df_new <- df_new |>
+  group_by(ID) |>
+  mutate(across(c(NextDay_PainAve, LastDay_PainAve, Today_PainAve, LastDay_Sleep, Today_Sleep, LastDay_Mood, Today_Mood), ~ .-mean(., na.rm = TRUE),
+                .names = "{.col}_c"))
+
+```
+
+## Objective 1.1 Day-to-day (Concurrent) associations
+
+```{r}
+#Analyses; Day-to-day; Univariate multilevel linear regressions 
+#- Outcome: Lev1 daily pain intensity 
+#- Examine Lev1 association; between daily mood and pain (Same-day Lev1 units) 
+#- Examine Lev1 association; between daily sleep and pain (Same-day Lev1 units) 
+#- All these multlev must be done with Lev1 centered data 
+model_Pain1 <- lmer(Today_PainAve ~ Today_Mood_c  + (1|ID), data = df_new)
+summary(model_Pain1)
+model_Pain2 <- lmer(Today_PainAve ~ Today_Sleep_c  + (1|ID), data = df_new)
+summary(model_Pain2)
+
+# Analyses; Multivariable models   
+#- Outcome: Lev1 daily pain intensity 
+#- Ivs entered simulatenously: daily (Lev1) mood, sleep 
+#- All these multlev must be done with Lev1 centered data 
+#- Same-day Lev1 units 
+model_Pain3 <- lmer(Today_PainAve ~ Today_Sleep_c + Today_Mood_c + (1|ID), data = df_new)
+summary(model_Pain3)
+
+# Analyses; Day-to-day; Univariate multilevel linear regressions 
+#-Outcome: Lev1 Sleep 
+#-Examine Lev1 association; between daily mood and sleep (Same-day Lev1 units) 
+#-Examine Lev1 association; between daily pain and sleep (Same-day Lev1 units) 
+#-All these multlev must be done with Lev1 centered data 
+model_Pain4 <- lmer(Today_Sleep ~ Today_Mood_c + (1|ID), data = df_new)
+summary(model_Pain4)
+model_Pain5 <- lmer(Today_Sleep ~ Today_PainAve_c + (1|ID), data = df_new)
+summary(model_Pain5)
+
+# Analyses; Multivariable models   
+#- Outcome: Lev1 sleep 
+#- Ivs entered simulatenously: daily (Lev1) mood, pain 
+#- All these multlev must be done with Lev1 centered data 
+#- Same-day Lev1 units 
+model_Pain6 <- lmer(Today_Sleep ~ Today_PainAve_c + Today_Mood_c + (1|ID), data = df_new)
+summary(model_Pain6)
+```
+
+## Objective 1.2: Time-lag effects 
+
+```{r}
+# Yesterday sleep -> Toady Pain
+model_SleepPain <- lmer(Today_PainAve ~ LastDay_Sleep_c + (1|ID), data = df_new)
+summary(model_SleepPain)
+confint(model_SleepPain)
+# Yesterday pain -> Today sleep
+model_PainSleep <- lmer(Today_Sleep ~ LastDay_PainAve_c + (1|ID), data = df_new)
+summary(model_PainSleep)
+confint(model_PainSleep)
+```
+
+
+
+
+```{r}
+model_GI <- lmer(Sleep ~ LastDay_PainAve * B_Psych_PCS + (1|ID), data = df_new)
+summary(model_GI)
+
+model_GI <- lmer(AvePain ~ LastDay_Sleep * B_Psych_PCS + (1|ID), data = df_new)
+summary(model_GI)
+
+model_GI <- lmer(GlobalImprovement ~ AvePain * B_Psych_PCS + (1|ID), data = df_new)
+summary(model_GI)
+
+model_GI <- lmer(GlobalImprovement ~ B_Psych_PCS + (1|ID), data = df_new)
+summary(model_GI)
+```
+
+
+```{r}
+model_sleepvsGI <- lmer(GlobalImprovement ~ Sleep * Day + (Day|ID), data = df_new)
+summary(model_sleepvsGI)
+
+model_sleepvsNextPain <- lmer(NextDay_PainAve ~ Sleep * Day + (Day|ID), data = df_new)
+summary(model_sleepvsNextPain)
+
+model_PainvsNextSleep <- lmer(NextDay_Sleep ~ AvePain * Day + (Day|ID), data = df_new)
+summary(model_PainvsNextSleep)
+```
+
+
+```{r}
+## lmer Analysis (GlobImp vs. AvePain_Change)
+model_1 <- lmer(GlobalImprovement ~ AvePain_Change + Day + (1|ID), data = df2_greaterthan7) # Random intercept only
+summary(model_1)
+model_2 <- lmer(GlobalImprovement ~ AvePain_Change + Day + (Day|ID), data = df2_greaterthan7) # Random slope + Random intercept
+summary(model_2)
+model_3 <- lmer(GlobalImprovement ~ AvePain_Change + Mood_Change + Day + (1|ID), data = df2_greaterthan7) # Adjust AvePain_Change and Mood_Change
+summary(model_3)
+model_4 <- lmer(GlobalImprovement ~ AvePain_Change + Mood_Change + Day + (Day|ID), data = df2_greaterthan7) # Add random slope
+summary(model_4)
+
+## Model comparison for above analysis
+anova(model_1, model_2)
+anova(model_3, model_4)
+
+## lmer Analysis (GlobImp vs. Mood_Change)
+model_5 <- lmer(GlobalImprovement ~ Mood_Change + Day + (1|ID), data = df2_greaterthan7) # random intercept only
+summary(model_5)
+model_6 <- lmer(GlobalImprovement ~ Mood_Change + Day + (Day|ID), data = df2_greaterthan7) # Add random slope
+summary(model_6)
+anova(model_5, model_6) # prefer random slope + intercept
+```
+
+```{r}
+model_4plus <- lmer(GlobalImprovement ~ AvePain_Change + Mood_Change + Sleep + Day + (Day|ID), 
+                    data = df2_greaterthan7)
+summary(model_4plus)
+confint(model_4plus)
+```
+
+```{r}
+model_4plus_level2 <- lmer(GlobalImprovement ~ AvePain_Change + Mood_Change + Sleep + B_Demog_Age + B_Demog_Gender + B_Psych_PCS + Day + (Day|ID), 
+                    data = df_new)
+
+model_test1 <- lmer(GlobalImprovement ~ B_Demog_Age + Day + (Day|ID), 
+                    data = df_new)
+summary(model_test1)
+
+model_test2 <- lmer(GlobalImprovement ~ B_Demog_Age + AvePain_Change + Mood_Change + Sleep + Day + (Day|ID), 
+                    data = df_new)
+summary(model_test2)
+
+model_test3 <- lmer(GlobalImprovement ~ B_Psych_PCS + Day + (Day|ID), 
+                    data = df_new)
+summary(model_test3)
+
+model_test4 <- lmer(GlobalImprovement ~ B_Psych_PCS + AvePain_Change + Mood_Change + Sleep + Day + (Day|ID), 
+                    data = df_new)
+summary(model_test4)
+
+model_test5 <- lmer(GlobalImprovement ~ Mood_Change*B_Demog_Gender + Day + (Day|ID), data = df_new)
+summary(model_test5)
+
+model_test6 <- lmer(GlobalImprovement ~ B_Demog_Gender*AvePain_Change + Day + (Day|ID),
+                    data = df_new)
+summary(model_test6)
+
+model_test7 <- lmer(GlobalImprovement ~ B_Demog_Age*AvePain_Change + Day + (Day|ID),
+                    data = df_new)
+summary(model_test7)
+
+model_test8 <- lmer(GlobalImprovement ~ B_Demog_Age*Mood_Change + Day + (Day|ID),
+                    data = df_new)
+summary(model_test8)
+
+#### PCS * AvePain_Change ####
+model_test9 <- lmer(GlobalImprovement ~ B_Psych_PCS*AvePain_Change + Day + (Day|ID),
+                    data = df_new)
+summary(model_test9)
+
+model_test10 <- lmer(GlobalImprovement ~ B_Psych_PCS*Mood_Change + Day + (Day|ID),
+                    data = df_new)
+summary(model_test10)
+```
+
+## June 20, 2024, Meeting
+
+```{r}
+## Pie Chart
+df_baseline_wide <- df1
+gender <- factor(df_baseline_wide$B_Demog_Gender)
+value <- c(sum(gender == 1), sum(gender ==2 ))
+gender <- unique(gender)
+
+pie_data <- data.frame(group = gender,
+                       value = value)
+
+ggplot(pie_data, aes(x = "", y = value, fill = gender)) +
+  geom_bar(stat="identity", width = 1, color = "white") +
+  coord_polar("y", start = 0) +
+  theme_void()
+
+## Bar plot shoing % of patient with specific pain conditions
+df_baseline_wide_temp <- df_baseline_wide |> filter(!is.na(B_Clin_PainSite)) |> mutate(B_Clin_PainSite = factor(B_Clin_PainSite)) |> mutate(B_Clin_PainSite = case_when(
+  B_Clin_PainSite == 1 ~ "Head/Face",
+  B_Clin_PainSite == 2 ~ "Neck/Upper ext",
+  B_Clin_PainSite == 3 ~ "Chest",
+  B_Clin_PainSite == 4 ~ "Abdo/Pelvic",
+  B_Clin_PainSite == 5 ~ "Low Back",
+  B_Clin_PainSite == 6 ~ "Lower ext",
+  B_Clin_PainSite == 7 ~ "Multiple sites"
+) ) |> group_by(B_Clin_PainSite) |> summarise(count = n()) |> mutate(perc = count/sum(count))
+ggplot(df_baseline_wide_temp, aes(x = B_Clin_PainSite, y = perc*100, fill = B_Clin_PainSite)) +
+  geom_bar(stat = "identity") +
+  scale_fill_discrete(name = "Pain Location") +
+  labs(title = "Pain Location Count Data", 
+       x = "Pain Location", 
+       y = "% of Count") +
+  theme_minimal() +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+## Violin Plot
+data_boxplot_vars <- df_total |>
+  select(c(ID, AvePain, Sleep, Mood)) |>
+  group_by(ID) |>
+  summarise(mean_AvePain = mean(AvePain, na.rm = TRUE),
+            mean_Sleep = mean(Sleep, na.rm = TRUE),
+            mean_Mood = mean(Mood, na.rm = TRUE)) |>
+  pivot_longer(cols = c("mean_AvePain", "mean_Sleep", "mean_Mood"),
+               names_to = "Variable",
+               values_to = "Value")
+
+data_boxplot_vars |>
+  ggplot(aes(x = Variable, y = Value, fill = Variable)) +
+  geom_violin() +
+  geom_jitter(color="black", size=0.4, alpha=0.9) +
+  scale_x_discrete(labels = c("AvePain", "Sleep", "Mood")) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) + # Remove background grids
+  ggtitle("Average Score among 30 days for pain, sleep and mood") +
+  xlab("Daily diary subject")
+```
+
+```{r}
+## Multilevel plot
+library(broom.mixed)
+Model_pain <- lmer(GlobalImprovement ~ AvePain + (1|ID), data = df_new)
+summary(Model_pain)
+
+new_data <- expand.grid(AvePain = seq(min(df_new$AvePain, na.rm = TRUE), max(df_new$AvePain, na.rm = TRUE), length.out = 100))
+new_data$fit <- predict(Model_pain, new_data, re.form = NA)
+pred <- predict(Model_pain, new_data, re.form = NA, se.fit = TRUE)
+new_data$se <- pred$se.fit
+new_data <- new_data %>%
+  mutate(lower = fit - 1.96 * se, upper = fit + 1.96 * se)
+ggplot(new_data, aes(x = AvePain, y = fit)) +
+  geom_line(color = "blue") +
+  #geom_jitter(data = df_new, aes(x = AvePain, y = GlobalImprovement), color = "black", size = 0.2) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "gray", alpha = 0.5) +
+  scale_y_continuous(limits=c(0, 10), breaks = seq(0, 10, 1)) +
+  scale_x_continuous(limits=c(0, 10), breaks = seq(0, 10, 1)) +
+  theme_minimal() +
+  labs(x = "AvePain", y = "Global Improvement", 
+       title = "Fitted Line and 95% CI for AvePain vs. Global Improvement") +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+
+## Sleep
+Model_sleep <- lmer(GlobalImprovement ~ Sleep + (1|ID), data = df_new)
+summary(Model_sleep)
+
+new_data <- expand.grid(Sleep = seq(min(df_new$Sleep, na.rm = TRUE), max(df_new$Sleep, na.rm = TRUE), length.out = 100))
+new_data$fit <- predict(Model_sleep, new_data, re.form = NA)
+pred <- predict(Model_sleep, new_data, re.form = NA, se.fit = TRUE)
+new_data$se <- pred$se.fit
+new_data <- new_data %>%
+  mutate(lower = fit - 1.96 * se, upper = fit + 1.96 * se)
+ggplot(new_data, aes(x = Sleep, y = fit)) +
+  geom_line(color = "blue") +
+  #geom_jitter(data = df_new, aes(x = Sleep, y = GlobalImprovement), color = "black", size = 0.2) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "gray", alpha = 0.5) +
+  scale_y_continuous(limits=c(0, 10), breaks = seq(0, 10, 1)) +
+  scale_x_continuous(limits=c(0, 10), breaks = seq(0, 10, 1)) +
+  theme_minimal() +
+  labs(x = "Sleep", y = "Global Improvement", 
+       title = "Fitted Line and 95% CI for Sleep vs. Global Improvement") +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+## Mood
+Model_mood <- lmer(GlobalImprovement ~ Mood + (1|ID), data = df_new)
+summary(Model_mood)
+
+new_data <- expand.grid(Mood = seq(min(df_new$Mood, na.rm = TRUE), max(df_new$Mood, na.rm = TRUE), length.out = 100))
+new_data$fit <- predict(Model_mood, new_data, re.form = NA)
+pred <- predict(Model_mood, new_data, re.form = NA, se.fit = TRUE)
+new_data$se <- pred$se.fit
+new_data <- new_data %>%
+  mutate(lower = fit - 1.96 * se, upper = fit + 1.96 * se)
+ggplot(new_data, aes(x = Mood, y = fit)) +
+  geom_line(color = "blue") +
+  #geom_jitter(data = df_new, aes(x = Mood, y = GlobalImprovement), color = "black", size = 0.2) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "gray", alpha = 0.5) +
+  scale_y_continuous(limits=c(0, 10), breaks = seq(0, 10, 1)) +
+  scale_x_continuous(limits=c(0, 10), breaks = seq(0, 10, 1)) +
+  theme_minimal() +
+  labs(x = "Mood", y = "Global Improvement", 
+       title = "Fitted Line and 95% CI for Mood vs. Global Improvement") +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+```
+
+```{r}
+median_B_Psych_PCS <- median(df_new$B_Psych_PCS, na.rm = TRUE)
+
+data_above_median <- df_new %>% filter(B_Psych_PCS > median_B_Psych_PCS)
+data_below_median <- df_new %>% filter(B_Psych_PCS <= median_B_Psych_PCS)
+
+model_above <- lmer(GlobalImprovement ~ AvePain + (1 | ID), data = data_above_median)
+model_below <- lmer(GlobalImprovement ~ AvePain + (1 | ID), data = data_below_median)
+
+new_data_above <- data_above_median %>%
+  group_by(AvePain) %>%
+  summarize(B_Psych_PCS = median(B_Psych_PCS), .groups = 'drop')
+
+new_data_below <- data_below_median %>%
+  group_by(AvePain) %>%
+  summarize(B_Psych_PCS = median(B_Psych_PCS), .groups = 'drop')
+
+new_data_above <- new_data_above %>%
+  mutate(Predicted = predict(model_above, newdata = new_data_above, re.form = NA),
+         se = sqrt(predict(model_above, newdata = new_data_above, re.form = NA, se.fit = TRUE)$se.fit))
+
+new_data_below <- new_data_below %>%
+  mutate(Predicted = predict(model_below, newdata = new_data_below, re.form = NA),
+         se = sqrt(predict(model_below, newdata = new_data_below, re.form = NA, se.fit = TRUE)$se.fit))
+
+new_data_above <- new_data_above %>%
+  mutate(Lower = Predicted - 1.96 * se,
+         Upper = Predicted + 1.96 * se,
+         Catastrophizing = "Above Median")
+
+new_data_below <- new_data_below %>%
+  mutate(Lower = Predicted - 1.96 * se,
+         Upper = Predicted + 1.96 * se,
+         Catastrophizing = "Below Median")
+
+plot_data <- bind_rows(new_data_above, new_data_below)
+
+ggplot(plot_data, aes(x = AvePain, y = Predicted, color = Catastrophizing)) +
+  geom_line(size = 1) +
+  geom_ribbon(aes(ymin = Lower, ymax = Upper, fill = Catastrophizing), alpha = 0.2) +
+  labs(title = "Association between daily pain intensity (Lev1) and \
+       condition improvement (Lev1) as a function \
+       of catastrophizing (Lev2)",
+       x = "Daily pain intensity (Lev1; 0-10)",
+       y = "Global Improvement (0-10)") +
+  theme_minimal() +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+
+```
+
+
+```{r}
+Model_pain_ef <- tidy(Model_pain, effects = "fixed", conf.int = TRUE)
+ggplot(Model_pain_ef, aes(x = term, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), fill = "gray", alpha = 0.2) +
+  theme_minimal() +
+  labs(x = "Fixed Effects", y = "Estimate", 
+       title = "Fixed Effects with 95% Confidence Intervals",
+       subtitle = "Linear Mixed-Effects Model") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+
+
+
+
+
+
+
