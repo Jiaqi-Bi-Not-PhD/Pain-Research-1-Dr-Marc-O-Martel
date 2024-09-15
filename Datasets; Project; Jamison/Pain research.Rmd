@@ -1,7 +1,7 @@
 ---
-title: "Pain Research - Dr. Marc O. Martel"
+title: "Pain Research - Dr. Jamison Data"
 author: "Jiaqi Bi"
-date: "2023-07-31"
+date: "2023-09-15"
 output: pdf_document
 ---
 
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison")
 ```
 
-```{r}
+```{r, include = FALSE, eval = TRUE, message = FALSE}
 ## Load packages
 library(tidyverse)
 library(ggplot2)
@@ -23,6 +23,7 @@ library(tidyr)
 library(haven) ## This library provides functions to read sav file into R
 library(lme4)
 library(lmerTest)
+library(performance)
 ```
 
 ```{r, include = FALSE}
@@ -31,7 +32,7 @@ df1 <- read_sav("Dataset; Jamison project; Baseline.sav")
 df1 <- read_sav("Dataset; Jamison project; Baseline_Excluded.sav")
 #df1 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
 ## Daily data
-df2_check <- read_sav("Dataset; Jamison project; Daily.sav")
+df2 <- read_sav("Dataset; Jamison project; Daily.sav")
 #df2 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
 
 
@@ -153,10 +154,20 @@ df_new <- df_new |>
 df_new <- df_new |> filter(ID %in% df1$ID)
 write_sav(df_new, "Data; Jamison data; Long format (Stacked).sav")
 
-df_new <- df_new |>
-  group_by(ID) |>
-  mutate(across(c(AvePain, Sleep, Mood), ~. - mean(., na.rm = TRUE),
-                .names = "{.col}_c"))
+#df_new <- df_new |>
+#  group_by(ID) |>
+#  mutate(across(c(AvePain, Sleep, Mood, ActivityInt), ~. - mean(., na.rm = TRUE),
+#                .names = "{.col}_c"))
+
+df_new <- df_new %>%
+  mutate(
+    across(
+      c(AvePain, Sleep, Mood, ActivityInt),
+      ~ . - mean(., na.rm = TRUE),
+      .names = "{.col}_c"
+    )
+  )
+
 
 df_new <- df_new |>
   group_by(ID) |>
@@ -166,13 +177,12 @@ df_new <- df_new |>
          LastDay_Sleep_c = Sleep_c,
          Today_Sleep_c = lead(Sleep_c),
          LastDay_Mood_c = lag(Mood_c),
-         Today_Mood_c = Mood_c
+         Today_Mood_c = Mood_c,
+         Today_PainAve = AvePain,
+         Today_Sleep = lead(Sleep),
+         LastDay_Sleep = Sleep,
+         NextDay_Sleep = lag(Sleep)
          )
-
-df_new <- df_new |>
-  group_by(ID) |>
-  mutate(across(c(NextDay_PainAve, LastDay_PainAve, Today_PainAve, LastDay_Sleep, Today_Sleep, LastDay_Mood, Today_Mood), ~ .-mean(., na.rm = TRUE),
-                .names = "{.col}_c"))
 
 ```
 
@@ -186,8 +196,10 @@ df_new <- df_new |>
 #- All these multlev must be done with Lev1 centered data 
 model_Pain1 <- lmer(Today_PainAve ~ Today_Mood_c  + (1|ID), data = df_new)
 summary(model_Pain1)
+confint(model_Pain1)
 model_Pain2 <- lmer(Today_PainAve ~ Today_Sleep_c  + (1|ID), data = df_new)
 summary(model_Pain2)
+confint(model_Pain2)
 
 # Analyses; Multivariable models   
 #- Outcome: Lev1 daily pain intensity 
@@ -196,6 +208,7 @@ summary(model_Pain2)
 #- Same-day Lev1 units 
 model_Pain3 <- lmer(Today_PainAve ~ Today_Sleep_c + Today_Mood_c + (1|ID), data = df_new)
 summary(model_Pain3)
+confint(model_Pain3)
 
 # Analyses; Day-to-day; Univariate multilevel linear regressions 
 #-Outcome: Lev1 Sleep 
@@ -204,8 +217,10 @@ summary(model_Pain3)
 #-All these multlev must be done with Lev1 centered data 
 model_Pain4 <- lmer(Today_Sleep ~ Today_Mood_c + (1|ID), data = df_new)
 summary(model_Pain4)
+confint(model_Pain4)
 model_Pain5 <- lmer(Today_Sleep ~ Today_PainAve_c + (1|ID), data = df_new)
 summary(model_Pain5)
+confint(model_Pain5)
 
 # Analyses; Multivariable models   
 #- Outcome: Lev1 sleep 
@@ -214,6 +229,7 @@ summary(model_Pain5)
 #- Same-day Lev1 units 
 model_Pain6 <- lmer(Today_Sleep ~ Today_PainAve_c + Today_Mood_c + (1|ID), data = df_new)
 summary(model_Pain6)
+confint(model_Pain6)
 ```
 
 ## Objective 1.2: Time-lag effects 
@@ -229,10 +245,158 @@ summary(model_PainSleep)
 confint(model_PainSleep)
 ```
 
-
-
+## Objective 2: Anayses: Perceived Improvement
 
 ```{r}
+# Analyses; Univariate multilevel linear regressions 
+# Outcome: Lev1 perceived improvement 
+# Examine Lev1 association; between daily pain and perceived improvement (Same-day Lev1 units) 
+model_painimprove <- lmer(GlobalImprovement ~ AvePain_c + (1|ID), data = df_new)
+summary(model_painimprove)
+confint(model_painimprove)
+# Examine Lev1 association; between daily mood and perceived improvement (Same-day Lev1 units) 
+model_moodimprove <- lmer(GlobalImprovement ~ Mood_c + (1|ID), data = df_new)
+summary(model_moodimprove)
+confint(model_moodimprove)
+# Examine Lev1 association; between daily sleep and perceived improvement (Same-day Lev1 unit) 
+model_sleepimprove <- lmer(GlobalImprovement ~ Sleep_c + (1|ID), data = df_new)
+summary(model_sleepimprove)
+confint(model_sleepimprove)
+# Examine Lev1 association; between daily ActivityInt and perceived improvement (Same-day Lev1 unit)
+model_actimprove <- lmer(GlobalImprovement ~ ActivityInt_c + (1|ID), data = df_new)
+summary(model_actimprove)
+confint(model_actimprove)
+# All these multlev must be done with Lev1 centered data 
+
+```
+
+```{r}
+# Analysis; Multvariable/multilevel linear regression 
+# Outcome: Perceived improvement 
+# Ivs entered simulatenously: daily (Lev1) pain, mood, sleep, ActivityInt  
+model_compimprove <- lmer(GlobalImprovement ~ Sleep_c + AvePain_c + Mood_c + ActivityInt_c + (1|ID), data = df_new)
+summary(model_compimprove)
+confint(model_compimprove)
+# All these multlev must be done with Lev1 centered data 
+# Perhaps get some colinearity indicator to know to what extent colinearity is an issue 
+collinear_test <- check_collinearity(model_compimprove)
+print(collinear_test)
+## Some comments on how to read this result: The VIF is around 1 => Low Multicollinearity
+## The VIF is between 2 to 5, Moderate Multicollinearity
+## The VIF >5 (or 10 sometimes), High Multicollinearity
+## Low Tolerance (~ 0), High Multicollinearity
+```
+
+We have low multicollinearity in this case!
+
+## Objective 2.2 Analyses: Moderators of perceived impovement
+
+```{r}
+# Test if any of the baseline (Lev2) socio-demog variables are linked to perceived improvements; Univariate
+# B_Demog_Gender 
+model_genderimprove <- lmer(GlobalImprovement ~ B_Demog_Gender + (1|ID), data = df_new)
+summary(model_genderimprove)
+confint(model_genderimprove)
+# B_Demog_Ethnicity 
+model_ethnimprove <- lmer(GlobalImprovement ~ B_Demog_Ethnicity + (1|ID), data = df_new)
+summary(model_ethnimprove)
+confint(model_ethnimprove)
+# B_Demog_Age
+model_ageimprove <- lmer(GlobalImprovement ~ B_Demog_Age + (1|ID), data = df_new)
+summary(model_ageimprove)
+confint(model_ageimprove)
+```
+
+Age tends to be associated with the improvement, older patients have better improvements. 
+
+```{r}
+# Test if any of the baseline (Lev2) clinical variables are linked to perceived improvements; Univariate 
+# B_Clin_PainDur"
+model_paindurimprove <- lmer(GlobalImprovement ~ B_Clin_PainDur + (1|ID), data = df_new)
+summary(model_paindurimprove)
+confint(model_paindurimprove)
+# B_Clin_BMI"
+model_BMIimprove <- lmer(GlobalImprovement ~ B_Clin_BMI + (1|ID), data = df_new)
+summary(model_BMIimprove)
+confint(model_BMIimprove)
+# All the medications below; 
+# separately/independently; association with perceived improivement; Univariate 
+# B_Med_Tramadol 
+model_Tramadolimprove <- lmer(GlobalImprovement ~ B_Med_Tramadol + (1|ID), data = df_new)
+summary(model_Tramadolimprove)
+confint(model_Tramadolimprove)
+# B_Med_Suboxone 
+model_Suboxoneimprove <- lmer(GlobalImprovement ~ B_Med_Suboxone + (1|ID), data = df_new)
+summary(model_Suboxoneimprove)
+confint(model_Suboxoneimprove)
+# B_Med_Marijuana 
+model_Marijuanaimprove <- lmer(GlobalImprovement ~ B_Med_Marijuana + (1|ID), data = df_new)
+summary(model_Marijuanaimprove)
+confint(model_Marijuanaimprove)
+# B_Med_NSAIDS 
+model_NSAIDSimprove <- lmer(GlobalImprovement ~ B_Med_NSAIDS + (1|ID), data = df_new)
+summary(model_NSAIDSimprove)
+confint(model_NSAIDSimprove)
+# B_Med_Anticonvulsant 
+model_Anticonimprove <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant + (1|ID), data = df_new)
+summary(model_Anticonimprove)
+confint(model_Anticonimprove)
+# B_Med_MuscleRelaxer 
+model_MuscleRelimprove <- lmer(GlobalImprovement ~ B_Med_MuscleRelaxer + (1|ID), data = df_new)
+summary(model_MuscleRelimprove)
+confint(model_MuscleRelimprove)
+# B_Med_Antidepressants 
+model_Antidepimprove <- lmer(GlobalImprovement ~ B_Med_Antidepressants + (1|ID), data = df_new)
+summary(model_Antidepimprove)
+confint(model_Antidepimprove)
+# B_Med_Benzodiazepine 
+model_Benzoimprove <- lmer(GlobalImprovement ~ B_Med_Benzodiazepine + (1|ID), data = df_new)
+summary(model_Benzoimprove)
+confint(model_Benzoimprove)
+# B_Med_Stimulants 
+model_Stimuimprove <- lmer(GlobalImprovement ~ B_Med_Stimulants + (1|ID), data = df_new)
+summary(model_Stimuimprove)
+confint(model_Stimuimprove)
+# B_Med_OtherMed 
+model_OtherMedimprove <- lmer(GlobalImprovement ~ B_Med_OtherMed + (1|ID), data = df_new)
+summary(model_OtherMedimprove)
+confint(model_OtherMedimprove)
+# B_Med_OTC 
+model_OTCimprove <- lmer(GlobalImprovement ~ B_Med_OTC + (1|ID), data = df_new)
+summary(model_OTCimprove)
+confint(model_OTCimprove)
+ 
+```
+
+```{r}
+# Test if any of the baseline (Lev2) psych variables are linked to perceived improvements; Univariate 
+# B_Psych_PCS"
+model_PCSimprove <- lmer(GlobalImprovement ~ B_Psych_PCS + (1|ID), data = df_new)
+summary(model_PCSimprove)
+confint(model_PCSimprove)
+# B_Psych_HADS"
+model_HADSimprove <- lmer(GlobalImprovement ~ B_Psych_HADS + (1|ID), data = df_new)
+summary(model_HADSimprove)
+confint(model_HADSimprove)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r, eval = FALSE, include = FALSE}
 model_GI <- lmer(Sleep ~ LastDay_PainAve * B_Psych_PCS + (1|ID), data = df_new)
 summary(model_GI)
 
@@ -247,7 +411,7 @@ summary(model_GI)
 ```
 
 
-```{r}
+```{r, eval = FALSE, include = FALSE}
 model_sleepvsGI <- lmer(GlobalImprovement ~ Sleep * Day + (Day|ID), data = df_new)
 summary(model_sleepvsGI)
 
@@ -259,7 +423,7 @@ summary(model_PainvsNextSleep)
 ```
 
 
-```{r}
+```{r, eval = FALSE, include = FALSE}
 ## lmer Analysis (GlobImp vs. AvePain_Change)
 model_1 <- lmer(GlobalImprovement ~ AvePain_Change + Day + (1|ID), data = df2_greaterthan7) # Random intercept only
 summary(model_1)
@@ -282,14 +446,14 @@ summary(model_6)
 anova(model_5, model_6) # prefer random slope + intercept
 ```
 
-```{r}
+```{r, eval = FALSE, include = FALSE}
 model_4plus <- lmer(GlobalImprovement ~ AvePain_Change + Mood_Change + Sleep + Day + (Day|ID), 
                     data = df2_greaterthan7)
 summary(model_4plus)
 confint(model_4plus)
 ```
 
-```{r}
+```{r, eval = FALSE, include = FALSE}
 model_4plus_level2 <- lmer(GlobalImprovement ~ AvePain_Change + Mood_Change + Sleep + B_Demog_Age + B_Demog_Gender + B_Psych_PCS + Day + (Day|ID), 
                     data = df_new)
 
@@ -334,9 +498,10 @@ model_test10 <- lmer(GlobalImprovement ~ B_Psych_PCS*Mood_Change + Day + (Day|ID
 summary(model_test10)
 ```
 
-## June 20, 2024, Meeting
 
-```{r}
+
+```{r, eval = FALSE, include = FALSE}
+## June 20, 2024, Meeting
 ## Pie Chart
 df_baseline_wide <- df1
 gender <- factor(df_baseline_wide$B_Demog_Gender)
@@ -398,7 +563,7 @@ data_boxplot_vars |>
   xlab("Daily diary subject")
 ```
 
-```{r}
+```{r, eval = FALSE, include = FALSE}
 ## Multilevel plot
 library(broom.mixed)
 Model_pain <- lmer(GlobalImprovement ~ AvePain + (1|ID), data = df_new)
@@ -474,7 +639,7 @@ ggplot(new_data, aes(x = Mood, y = fit)) +
 
 ```
 
-```{r}
+```{r, eval = FALSE, include = FALSE}
 median_B_Psych_PCS <- median(df_new$B_Psych_PCS, na.rm = TRUE)
 
 data_above_median <- df_new %>% filter(B_Psych_PCS > median_B_Psych_PCS)
@@ -528,7 +693,7 @@ ggplot(plot_data, aes(x = AvePain, y = Predicted, color = Catastrophizing)) +
 ```
 
 
-```{r}
+```{r, eval = FALSE, include = FALSE}
 Model_pain_ef <- tidy(Model_pain, effects = "fixed", conf.int = TRUE)
 ggplot(Model_pain_ef, aes(x = term, y = estimate)) +
   geom_point() +
