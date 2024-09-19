@@ -1,7 +1,7 @@
 ---
 title: "Pain Research - Dr. Jamison Data"
 author: "Jiaqi Bi"
-date: "2023-09-15"
+date: "2023-09-19"
 output: pdf_document
 ---
 
@@ -28,76 +28,76 @@ library(performance)
 
 ```{r, include = FALSE}
 ## Baseline data
-df1 <- read_sav("Dataset; Jamison project; Baseline.sav")
-df1 <- read_sav("Dataset; Jamison project; Baseline_Excluded.sav")
+#df1 <- read_sav("Dataset; Jamison project; Baseline.sav")
+#df1 <- read_sav("Dataset; Jamison project; Baseline_Excluded.sav")
 #df1 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
 ## Daily data
-df2 <- read_sav("Dataset; Jamison project; Daily.sav")
+#df2 <- read_sav("Dataset; Jamison project; Daily.sav")
 #df2 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
 
 
 
 ## Examine the duplicated observation
-df1$ID[which(duplicated(df1$ID))]
-df2$StudyID[which(duplicated(df2$StudyID))]
+#df1$ID[which(duplicated(df1$ID))]
+#df2$StudyID[which(duplicated(df2$StudyID))]
 
-df1 <- df1 |>
-  filter(!duplicated(ID))
+#df1 <- df1 |>
+#  filter(!duplicated(ID))
 
-df1 <- df1 |> filter(Exclud_MissingBoth2 == 0)
-df2 <- df2 |>
-  filter(!duplicated(StudyID)) |>
-  rename(ID = StudyID)
+#df1 <- df1 |> filter(Exclud_MissingBoth2 == 0)
+#df2 <- df2 |>
+#  filter(!duplicated(StudyID)) |>
+#  rename(ID = StudyID)
 
 ## Time variable to numerical day (consecutive)
-date_cols <- grep("^Date", names(df2), value = TRUE)
+#date_cols <- grep("^Date", names(df2), value = TRUE)
 
-df2 <- df2 %>%
-  mutate(across(all_of(date_cols), as.Date, format = "%Y-%m-%d"))
+#df2 <- df2 %>%
+#  mutate(across(all_of(date_cols), as.Date, format = "%Y-%m-%d"))
 
 ## Correct abberrant years
-df2 <- df2 %>%
-  rowwise() %>%
-  mutate(across(all_of(date_cols), ~ {
-    if (. != Date1 && !is.na(.)) {
-      day_diff <- as.numeric(. - Date1)
-      if (day_diff < 0) {
-        update(., year = year(Date1))
-      } else {
-        .
-      }
-    } else {
-      .
-    }
-  })) %>%
-  ungroup()
+#df2 <- df2 %>%
+#  rowwise() %>%
+#  mutate(across(all_of(date_cols), ~ {
+#    if (. != Date1 && !is.na(.)) {
+#      day_diff <- as.numeric(. - Date1)
+#      if (day_diff < 0) {
+#        update(., year = year(Date1))
+#      } else {
+#        .
+#      }
+#    } else {
+ #     .
+#    }
+#  })) %>%
+#  ungroup()
 
 ####### Below investigates the rest of aberrant objects #######
 ##### Above does not solve those entering a new year ##########
-df2_investigate <- df2 |>
-  pivot_longer(
-  cols = starts_with("Date"), 
-  names_to = "Date_Number", 
-  values_to = "Date_Value"
-) |>
-  select(ID, Date_Value)
+#df2_investigate <- df2 |>
+#  pivot_longer(
+#  cols = starts_with("Date"), 
+#  names_to = "Date_Number", 
+#  values_to = "Date_Value"
+#) |>
+#  select(ID, Date_Value)
 
-print(n = 36, df2_investigate[df2_investigate$ID == 673,])
+#print(n = 36, df2_investigate[df2_investigate$ID == 673,])
 ###############################################################
 
 ## Below solved all objects date problem
-df2$Date8[df2$ID == 610] <- "2023-01-01"
-df2$Date8[df2$ID == 703] <- "2022-01-09"
-df2$Date8[df2$ID == 741] <- "2021-01-10"
-df2$Date8[df2$ID == 680] <- "2023-01-09"
-df2$Date28[df2$ID == 673] <- "2023-02-02"
+#df2$Date8[df2$ID == 610] <- "2023-01-01"
+#df2$Date8[df2$ID == 703] <- "2022-01-09"
+#df2$Date8[df2$ID == 741] <- "2021-01-10"
+#df2$Date8[df2$ID == 680] <- "2023-01-09"
+#df2$Date28[df2$ID == 673] <- "2023-02-02"
 
 ## Convert the date to number
-df2 <- df2 |>
-  mutate(across(all_of(date_cols[-1]), ~ as.numeric(. - df2$Date1 + 1)))
+#df2 <- df2 |>
+#  mutate(across(all_of(date_cols[-1]), ~ as.numeric(. - df2$Date1 + 1)))
 
-df2$Date1 <- 1
-all_cols <- names(df2)
+#df2$Date1 <- 1
+#all_cols <- names(df2)
 
 #for (i in 2:length(date_cols)) {
 #  if (any(df2[[date_cols[i]]] == 1, na.rm = TRUE)) {
@@ -107,66 +107,78 @@ all_cols <- names(df2)
 #}
 
 ## Wide to long
-df2_long <- df2 |>
-  pivot_longer(cols = -ID,
-               names_to = c(".value", "day"),
-               names_pattern = "([A-Za-z]+)(\\d+)") |>
-  select(-day) |>
-  rename(Day = Date) |>
-  filter(Day <= 30 & !is.na(Day)) |>
-  group_by(ID) |>
-  distinct(Day, .keep_all = TRUE) |>
-  complete(Day = seq(1,30))
+#df2_long <- df2 |>
+#  pivot_longer(cols = -ID,
+#               names_to = c(".value", "day"),
+#               names_pattern = "([A-Za-z]+)(\\d+)") |>
+#  select(-day) |>
+#  rename(Day = Date) |>
+#  filter(Day <= 30 & !is.na(Day)) |>
+#  group_by(ID) |>
+#  distinct(Day, .keep_all = TRUE) |>
+#  complete(Day = seq(1,30))
 
 ## replace all -1 to NA
-df2_long <- df2_long |>
-  mutate_all(~if_else(. < 0, NA_real_, .))
+#df2_long <- df2_long |>
+#  mutate_all(~if_else(. < 0, NA_real_, .))
 
-df2_long <- df2_long |>
-  rename(GlobalImprovement = Changed)
+#df2_long <- df2_long |>
+#  rename(GlobalImprovement = Changed)
 
 ## Calculate the lagged variable
-df2_long <- df2_long |>
-  group_by(ID) |>
-  arrange(ID, Day) |>
-  mutate(AvePain_Change = AvePain - lag(AvePain), 
-         ActivityInt_Change = ActivityInt - lag(ActivityInt), 
-         Mood_Change = Mood - lag(Mood)) 
+#df2_long <- df2_long |>
+#  group_by(ID) |>
+#  arrange(ID, Day) |>
+#  mutate(AvePain_Change = AvePain - lag(AvePain), 
+#         ActivityInt_Change = ActivityInt - lag(ActivityInt), 
+#         Mood_Change = Mood - lag(Mood)) 
 
-df2_greaterthan7 <- df2_long |>
-  group_by(ID) %>%
-  summarise(NonMissingGI = sum(!is.na(GlobalImprovement))) %>%
-  filter(NonMissingGI >= 7) %>%
-  inner_join(df2_long, by = "ID")
+#df2_greaterthan7 <- df2_long |>
+#  group_by(ID) %>%
+#  summarise(NonMissingGI = sum(!is.na(GlobalImprovement))) %>%
+#  filter(NonMissingGI >= 7) %>%
+#  inner_join(df2_long, by = "ID")
 
 ## Add level 2 age, gender, and PCS to the longitudinal data
-df1_temporary <- df1 |>
-  select(c(B_Demog_Age, B_Demog_Gender, B_Psych_PCS, ID))
-df1_temporary <- df1
+#df1_temporary <- df1 |>
+#  select(c(B_Demog_Age, B_Demog_Gender, B_Psych_PCS, ID))
+#df1_temporary <- df1
 
-df_new <- merge(df2_greaterthan7, df1_temporary, by = "ID")
-df_total <- merge(df2_greaterthan7, df1, by = "ID")
+#df_new <- merge(df2_greaterthan7, df1_temporary, by = "ID")
+#df_total <- merge(df2_greaterthan7, df1, by = "ID")
 
 ## Global improvement 10 to 1, 9 to 2, ...
-df_new <- df_new |>
-  mutate(GlobalImprovement = 11-GlobalImprovement)
+#df_new <- df_new |>
+#  mutate(GlobalImprovement = 11-GlobalImprovement)
 
-df_new <- df_new |> filter(ID %in% df1$ID)
-write_sav(df_new, "Data; Jamison data; Long format (Stacked).sav")
-
+#df_new <- df_new |> filter(ID %in% df1$ID)
+#write_sav(df_new, "Data; Jamison data; Long format (Stacked).sav")
+df_new <- read_sav("File To; Jiaqi; 2024.09.2.sav")
 #df_new <- df_new |>
 #  group_by(ID) |>
 #  mutate(across(c(AvePain, Sleep, Mood, ActivityInt), ~. - mean(., na.rm = TRUE),
 #                .names = "{.col}_c"))
 
-df_new <- df_new %>%
-  mutate(
-    across(
-      c(AvePain, Sleep, Mood, ActivityInt),
-      ~ . - mean(., na.rm = TRUE),
-      .names = "{.col}_c"
-    )
-  )
+group_means <- aggregate(cbind(AvePain, Sleep, Mood, ActivityInt) ~ ID, data = df_new, FUN = function(x) mean(x, na.rm = TRUE))
+
+df_new <- merge(df_new, group_means, by = "ID", suffixes = c("", "_mean"))
+
+df_new$AvePain_c <- df_new$AvePain - df_new$AvePain_mean
+df_new$Sleep_c <- df_new$Sleep - df_new$Sleep_mean
+df_new$Mood_c <- df_new$Mood - df_new$Mood_mean
+df_new$ActivityInt_c <- df_new$ActivityInt - df_new$ActivityInt_mean
+
+df_new <- df_new[, !names(df_new) %in% c("AvePain_mean", "Sleep_mean", "Mood_mean", "ActivityInt_mean")]
+
+
+#df_new <- df_new %>%
+#  mutate(
+#    across(
+#      c(AvePain, Sleep, Mood, ActivityInt),
+#      ~ . - mean(., na.rm = TRUE),
+#      .names = "{.col}_c"
+#    )
+#  )
 
 
 df_new <- df_new |>
@@ -181,7 +193,8 @@ df_new <- df_new |>
          Today_PainAve = AvePain,
          Today_Sleep = lead(Sleep),
          LastDay_Sleep = Sleep,
-         NextDay_Sleep = lag(Sleep)
+         NextDay_Sleep = lag(Sleep),
+         LastDay_PainAve = lag(AvePain)
          )
 
 ```
@@ -197,7 +210,7 @@ df_new <- df_new |>
 model_Pain1 <- lmer(Today_PainAve ~ Today_Mood_c  + (1|ID), data = df_new)
 summary(model_Pain1)
 confint(model_Pain1)
-model_Pain2 <- lmer(Today_PainAve ~ Today_Sleep_c  + (1|ID), data = df_new)
+model_Pain2 <- lmer(Today_PainAve ~ Today_Sleep_c + (1|ID), data = df_new)
 summary(model_Pain2)
 confint(model_Pain2)
 
@@ -237,6 +250,9 @@ confint(model_Pain6)
 ```{r}
 # Yesterday sleep -> Toady Pain
 model_SleepPain <- lmer(Today_PainAve ~ LastDay_Sleep_c + (1|ID), data = df_new)
+model_SleepPain2 <- lmer(Today_PainAve ~ Today_Sleep + (1|ID), data = df_new)
+AIC(model_SleepPain, model_SleepPain2)
+icc(model_SleepPain2)
 summary(model_SleepPain)
 confint(model_SleepPain)
 # Yesterday pain -> Today sleep
@@ -365,6 +381,10 @@ confint(model_OtherMedimprove)
 model_OTCimprove <- lmer(GlobalImprovement ~ B_Med_OTC + (1|ID), data = df_new)
 summary(model_OTCimprove)
 confint(model_OTCimprove)
+# B_Med_OpioidsYN
+model_Opioid_improve <- lmer(GlobalImprovement ~ B_Med_OpioidsYN + (1|ID), data = df_new)
+summary(model_Opioid_improve)
+confint(model_Opioid_improve)
  
 ```
 
