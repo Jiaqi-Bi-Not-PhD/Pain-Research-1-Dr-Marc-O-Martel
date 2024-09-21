@@ -1,7 +1,7 @@
 ---
 title: "Pain Research - Dr. Jamison Data"
 author: "Jiaqi Bi"
-date: "2023-09-19"
+date: "2023-09-21"
 output: pdf_document
 ---
 
@@ -319,7 +319,7 @@ summary(model_ethnimprove)
 confint(model_ethnimprove)
 # B_Demog_Age
 model_ageimprove <- lmer(GlobalImprovement ~ B_Demog_Age + (1|ID), data = df_new)
-summary(model_ageimprove)
+summary(model_ageimprove) # Significant! 
 confint(model_ageimprove)
 ```
 
@@ -339,7 +339,7 @@ confint(model_BMIimprove)
 # separately/independently; association with perceived improivement; Univariate 
 # B_Med_Tramadol 
 model_Tramadolimprove <- lmer(GlobalImprovement ~ B_Med_Tramadol + (1|ID), data = df_new)
-summary(model_Tramadolimprove)
+summary(model_Tramadolimprove) # Significant!
 confint(model_Tramadolimprove)
 # B_Med_Suboxone 
 model_Suboxoneimprove <- lmer(GlobalImprovement ~ B_Med_Suboxone + (1|ID), data = df_new)
@@ -355,7 +355,7 @@ summary(model_NSAIDSimprove)
 confint(model_NSAIDSimprove)
 # B_Med_Anticonvulsant 
 model_Anticonimprove <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant + (1|ID), data = df_new)
-summary(model_Anticonimprove)
+summary(model_Anticonimprove) # Significant!
 confint(model_Anticonimprove)
 # B_Med_MuscleRelaxer 
 model_MuscleRelimprove <- lmer(GlobalImprovement ~ B_Med_MuscleRelaxer + (1|ID), data = df_new)
@@ -383,23 +383,108 @@ summary(model_OTCimprove)
 confint(model_OTCimprove)
 # B_Med_OpioidsYN
 model_Opioid_improve <- lmer(GlobalImprovement ~ B_Med_OpioidsYN + (1|ID), data = df_new)
-summary(model_Opioid_improve)
+summary(model_Opioid_improve) # Significant! 
 confint(model_Opioid_improve)
  
 ```
+
+B_Med_Tramadol, B_Med_Anticonvulsant, and B_Med_OpioidsYN are associated with the Global Improvement! 
 
 ```{r}
 # Test if any of the baseline (Lev2) psych variables are linked to perceived improvements; Univariate 
 # B_Psych_PCS"
 model_PCSimprove <- lmer(GlobalImprovement ~ B_Psych_PCS + (1|ID), data = df_new)
-summary(model_PCSimprove)
+summary(model_PCSimprove) # Significant!
 confint(model_PCSimprove)
 # B_Psych_HADS"
 model_HADSimprove <- lmer(GlobalImprovement ~ B_Psych_HADS + (1|ID), data = df_new)
-summary(model_HADSimprove)
+summary(model_HADSimprove) # Significant! 
 confint(model_HADSimprove)
 
 ```
+
+Both are significant! 
+
+```{r}
+# Then if any of the Lev2 variables above are significantly associated with the outcome (i.e., perceived improvement), then we’ll test the cross-level (Lev2 X Lev1) interaction effects to see if these Lev2 variables moderate the effects of : 
+#1; Sleep on daily improvement 
+model_ageimprove_Sleep <- lmer(GlobalImprovement ~ B_Demog_Age*Sleep_c + (1|ID), data = df_new)
+summary(model_ageimprove_Sleep) 
+confint(model_ageimprove_Sleep)
+model_Tramadolimprove_Sleep <- lmer(GlobalImprovement ~ B_Med_Tramadol*Sleep_c + (1|ID), data = df_new)
+summary(model_Tramadolimprove_Sleep) 
+confint(model_Tramadolimprove_Sleep)
+model_Anticonimprove_Sleep <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*Sleep_c + (1|ID), data = df_new)
+summary(model_Anticonimprove_Sleep) 
+confint(model_Anticonimprove_Sleep)
+model_Opioid_improve_Sleep <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*Sleep_c + (1|ID), data = df_new)
+summary(model_Opioid_improve_Sleep) 
+confint(model_Opioid_improve_Sleep)
+model_PCSimprove_Sleep <- lmer(GlobalImprovement ~ B_Psych_PCS*Sleep_c + (1|ID), data = df_new)
+summary(model_PCSimprove_Sleep) 
+confint(model_PCSimprove_Sleep)
+model_HADSimprove_Sleep <- lmer(GlobalImprovement ~ B_Psych_HADS*Sleep_c + (1|ID), data = df_new)
+summary(model_HADSimprove_Sleep) 
+confint(model_HADSimprove_Sleep)
+#2; Mood on daily improvement 
+model_ageimprove_Mood <- lmer(GlobalImprovement ~ B_Demog_Age*Mood_c + (1|ID), data = df_new)
+summary(model_ageimprove_Mood) 
+confint(model_ageimprove_Mood)
+model_Tramadolimprove_Mood <- lmer(GlobalImprovement ~ B_Med_Tramadol*Mood_c + (1|ID), data = df_new)
+summary(model_Tramadolimprove_Mood) 
+confint(model_Tramadolimprove_Mood)
+model_Anticonimprove_Mood <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*Mood_c + (1|ID), data = df_new)
+summary(model_Anticonimprove_Mood) 
+confint(model_Anticonimprove_Mood)
+model_Opioid_improve_Mood <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*Mood_c + (1|ID), data = df_new)
+summary(model_Opioid_improve_Mood) 
+confint(model_Opioid_improve_Mood)
+model_PCSimprove_Mood <- lmer(GlobalImprovement ~ B_Psych_PCS*Mood_c + (1|ID), data = df_new)
+summary(model_PCSimprove_Mood) 
+confint(model_PCSimprove_Mood)
+model_HADSimprove_Mood <- lmer(GlobalImprovement ~ B_Psych_HADS*Mood_c + (1|ID), data = df_new)
+summary(model_HADSimprove_Mood) 
+confint(model_HADSimprove_Mood)
+#3; Pain on daily improvement 
+model_ageimprove_AvePain <- lmer(GlobalImprovement ~ B_Demog_Age*AvePain_c + (1|ID), data = df_new)
+summary(model_ageimprove_AvePain) 
+confint(model_ageimprove_AvePain)
+model_Tramadolimprove_AvePain <- lmer(GlobalImprovement ~ B_Med_Tramadol*AvePain_c + (1|ID), data = df_new)
+summary(model_Tramadolimprove_AvePain) 
+confint(model_Tramadolimprove_AvePain)
+model_Anticonimprove_AvePain <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*AvePain_c + (1|ID), data = df_new)
+summary(model_Anticonimprove_AvePain) 
+confint(model_Anticonimprove_AvePain)
+model_Opioid_improve_AvePain <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*AvePain_c + (1|ID), data = df_new)
+summary(model_Opioid_improve_AvePain) 
+confint(model_Opioid_improve_AvePain)
+model_PCSimprove_AvePain <- lmer(GlobalImprovement ~ B_Psych_PCS*AvePain_c + (1|ID), data = df_new)
+summary(model_PCSimprove_AvePain) 
+confint(model_PCSimprove_AvePain)
+model_HADSimprove_AvePain <- lmer(GlobalImprovement ~ B_Psych_HADS*AvePain_c + (1|ID), data = df_new)
+summary(model_HADSimprove_AvePain) 
+confint(model_HADSimprove_AvePain)
+#4; ActivInterf on daily improvement 
+model_ageimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Demog_Age*ActivityInt_c + (1|ID), data = df_new)
+summary(model_ageimprove_ActivityInt) 
+confint(model_ageimprove_ActivityInt)
+model_Tramadolimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Med_Tramadol*ActivityInt_c + (1|ID), data = df_new)
+summary(model_Tramadolimprove_ActivityInt) 
+confint(model_Tramadolimprove_ActivityInt)
+model_Anticonimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*ActivityInt_c + (1|ID), data = df_new)
+summary(model_Anticonimprove_ActivityInt) 
+confint(model_Anticonimprove_ActivityInt)
+model_Opioid_improve_ActivityInt <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*ActivityInt_c + (1|ID), data = df_new)
+summary(model_Opioid_improve_ActivityInt) 
+confint(model_Opioid_improve_ActivityInt)
+model_PCSimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Psych_PCS*ActivityInt_c + (1|ID), data = df_new)
+summary(model_PCSimprove_ActivityInt) 
+confint(model_PCSimprove_ActivityInt)
+model_HADSimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Psych_HADS*ActivityInt_c + (1|ID), data = df_new)
+summary(model_HADSimprove_ActivityInt) 
+confint(model_HADSimprove_ActivityInt)
+```
+
 
 
 
