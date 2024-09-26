@@ -249,16 +249,18 @@ confint(model_Pain6)
 
 ```{r}
 # Yesterday sleep -> Toady Pain
+# No lag needed here - LastDay_Sleep_c is equivalent to Sleep_c
 model_SleepPain <- lmer(Today_PainAve ~ LastDay_Sleep_c + (1|ID), data = df_new)
-model_SleepPain2 <- lmer(Today_PainAve ~ Today_Sleep + (1|ID), data = df_new)
-AIC(model_SleepPain, model_SleepPain2)
-icc(model_SleepPain2)
+icc(model_SleepPain)
 summary(model_SleepPain)
 confint(model_SleepPain)
 # Yesterday pain -> Today sleep
+# Today_Sleep is computed using Next Day's Sleep reportings, 
+# LastDay_PainAve_c is computed using Last Day's PainAve_c reportings
 model_PainSleep <- lmer(Today_Sleep ~ LastDay_PainAve_c + (1|ID), data = df_new)
 summary(model_PainSleep)
 confint(model_PainSleep)
+## Both are within cluster/within individual centered
 ```
 
 ## Objective 2: Anayses: Perceived Improvement
@@ -484,6 +486,421 @@ model_HADSimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Psych_HADS*ActivityI
 summary(model_HADSimprove_ActivityInt) 
 confint(model_HADSimprove_ActivityInt)
 ```
+
+## Graphs
+
+```{r}
+# Graphs; Objective 1 
+# Obj1: Graph; Descriptive; Violon plots for 30-day aggregates; Sleep; Mood; Pain; ActivityInt; 
+# All on the same 0-10 scale; follow the order listed here.  
+```
+
+```{r, echo = FALSE}
+data_forgraph <- df_new |>
+  group_by(ID) |>
+  summarise(AggSleep = mean(Sleep, na.rm = TRUE),
+            AggMood = mean(Mood, na.rm = TRUE),
+            AggPain = mean(AvePain, na.rm = TRUE), 
+            AggActivityInt = mean(ActivityInt, na.rm = TRUE))
+data_forgraph <- data_forgraph |>
+  pivot_longer(cols = c(AggSleep, AggMood, AggPain, AggActivityInt),
+               names_to = "Variables",
+               values_to = "Score")
+data_forgraph |>
+  ggplot(aes(x = Variables, y = Score, fill = Variables)) +
+  geom_violin(trim = FALSE, alpha = 0.7) +
+  geom_jitter(aes(color = Variables), size = 1) +
+  geom_boxplot(width = 0.1, alpha = 0.5) +
+  theme_minimal() +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  labs(
+    title = "Violin Plot of Aggregated Variables",
+    x = "Variables",
+    y = "Scores"
+  ) +
+  theme(
+    legend.position = "none",
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    axis.text.x = element_text(
+      margin = margin(t = 10)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+```
+
+```{r}
+# Obj1: Graph; Multilevel linear reg slopes; Lagged effects; (1) Sleep/IV & Pain 
+```
+
+```{r, echo = FALSE}
+fixed_effect <- fixef(model_SleepPain)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["LastDay_Sleep_c"] ## Fixed effects
+
+random_effects <- ranef(model_SleepPain)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$LastDay_Sleep_c, na.rm = TRUE),
+  to = max(df_new$LastDay_Sleep_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(LastDay_Sleep_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * LastDay_Sleep_c)
+
+fixed_line_df <- data.frame(
+  LastDay_Sleep_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = LastDay_Sleep_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = LastDay_Sleep_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$LastDay_Sleep_c), na.rm = TRUE), 
+               max(ceiling(df_new$LastDay_Sleep_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$LastDay_Sleep_c), na.rm = TRUE), 
+                 max(ceiling(df_new$LastDay_Sleep_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Sleep vs. Pain",
+    x = "Last Day Sleep (Centered)",
+    y = "Today Average Pain"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+```{r}
+# Obj1: Graph; Multilevel linear reg slopes; Lagged effects; (2) Pain/IV & Sleep model_PainSleep   
+```
+
+```{r, echo = FALSE}
+fixed_effect <- fixef(model_PainSleep)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["LastDay_PainAve_c"] ## Fixed effects
+
+random_effects <- ranef(model_PainSleep)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$LastDay_PainAve_c, na.rm = TRUE),
+  to = max(df_new$LastDay_PainAve_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(LastDay_PainAve_c = sleep_range) %>%
+  mutate(Today_Sleep = Intercept + Slope * LastDay_PainAve_c)
+
+fixed_line_df <- data.frame(
+  LastDay_PainAve_c = sleep_range,
+  Today_Sleep = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = LastDay_PainAve_c, y = Today_Sleep, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = LastDay_PainAve_c, y = Today_Sleep),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$LastDay_PainAve_c), na.rm = TRUE), 
+               max(ceiling(df_new$LastDay_PainAve_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$LastDay_PainAve_c), na.rm = TRUE), 
+                 max(ceiling(df_new$LastDay_PainAve_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Pain vs. Sleep",
+    x = "Last Day Pain (Centered)",
+    y = "Today Average Sleep"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+```{r}
+# Obj1: Not a graph; but test/analysis of random slopes effects (for both graphs above) 
+# to make sure that we have random slope effects that would justify the use of a figure showing not only bolded lines (fixed effect) but also the random slopes 
+```
+
+```{r, echo = FALSE}
+model_SleepPain_rs <- lmer(Today_PainAve ~ LastDay_Sleep_c + (LastDay_Sleep_c|ID), data = df_new)
+
+fixed_effect <- fixef(model_SleepPain_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["LastDay_Sleep_c"] ## Fixed effects
+
+random_effects <- ranef(model_SleepPain_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "LastDay_Sleep_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$LastDay_Sleep_c, na.rm = TRUE),
+  to = max(df_new$LastDay_Sleep_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(LastDay_Sleep_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * LastDay_Sleep_c)
+
+fixed_line_df <- data.frame(
+  LastDay_Sleep_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = LastDay_Sleep_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = LastDay_Sleep_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$LastDay_Sleep_c), na.rm = TRUE), 
+               max(ceiling(df_new$LastDay_Sleep_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$LastDay_Sleep_c), na.rm = TRUE), 
+                 max(ceiling(df_new$LastDay_Sleep_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Sleep vs. Pain",
+    x = "Last Day Sleep (Centered)",
+    y = "Today Average Pain"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+######
+
+model_PainSleep_rs <- lmer(Today_Sleep ~ LastDay_PainAve_c + (LastDay_PainAve_c|ID), data = df_new)
+
+fixed_effect <- fixef(model_PainSleep_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["LastDay_PainAve_c"] ## Fixed effects
+
+random_effects <- ranef(model_PainSleep_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "LastDay_PainAve_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$LastDay_PainAve_c, na.rm = TRUE),
+  to = max(df_new$LastDay_PainAve_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(LastDay_PainAve_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * LastDay_PainAve_c)
+
+fixed_line_df <- data.frame(
+  LastDay_PainAve_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+```
+
+\newpage
+
+```{r, echo = FALSE}
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = LastDay_PainAve_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = LastDay_PainAve_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$LastDay_PainAve_c), na.rm = TRUE), 
+               max(ceiling(df_new$LastDay_PainAve_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$LastDay_PainAve_c), na.rm = TRUE), 
+                 max(ceiling(df_new$LastDay_PainAve_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Pain vs. Sleep",
+    x = "Last Day Pain (Centered)",
+    y = "Today Average Sleep"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
 
 
 
