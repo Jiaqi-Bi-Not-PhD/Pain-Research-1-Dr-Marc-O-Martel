@@ -507,10 +507,9 @@ data_forgraph <- data_forgraph |>
                names_to = "Variables",
                values_to = "Score")
 data_forgraph |>
-  ggplot(aes(x = Variables, y = Score, fill = Variables)) +
-  geom_violin(trim = FALSE, alpha = 0.7) +
-  geom_jitter(aes(color = Variables), size = 1) +
-  geom_boxplot(width = 0.1, alpha = 0.5) +
+  ggplot(aes(x = Variables, y = Score)) +
+  geom_violin(aes(fill = Variables), trim = FALSE, alpha = 0.7) +
+  geom_jitter(size = 1) +
   theme_minimal() +
   scale_y_continuous(
     limits = c(0, 10),
@@ -901,6 +900,12 @@ ggplot() +
   )
 ```
 
+```{r}
+AIC(model_SleepPain_rs, model_SleepPain)
+AIC(model_PainSleep_rs, model_PainSleep)
+```
+
+Lower AIC indicates a better model fit. Both models with random slope have lower AIC than the randomn intercept only model. This validates our use of random slope plot. 
 
 
 
