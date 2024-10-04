@@ -487,6 +487,8 @@ summary(model_HADSimprove_ActivityInt)
 confint(model_HADSimprove_ActivityInt)
 ```
 
+\newpage
+
 ## Graphs
 
 ```{r}
@@ -544,6 +546,8 @@ data_forgraph |>
   )
 
 ```
+
+\newpage
 
 ```{r}
 # Obj1: Graph; Multilevel linear reg slopes; Lagged effects; (1) Sleep/IV & Pain 
@@ -632,6 +636,8 @@ ggplot() +
   )
 ```
 
+\newpage
+
 ```{r}
 # Obj1: Graph; Multilevel linear reg slopes; Lagged effects; (2) Pain/IV & Sleep model_PainSleep   
 ```
@@ -718,6 +724,8 @@ ggplot() +
     axis.line = element_line(color = "black", linewidth = 0.5)
   )
 ```
+
+\newpage
 
 ```{r}
 # Obj1: Not a graph; but test/analysis of random slopes effects (for both graphs above) 
@@ -906,6 +914,794 @@ AIC(model_PainSleep_rs, model_PainSleep)
 ```
 
 Lower AIC indicates a better model fit. Both models with random slope have lower AIC than the randomn intercept only model. This validates our use of random slope plot. 
+
+\newpage
+
+## Graphs; Objective 2 
+
+```{r}
+## Obj2: Graph; Descriptive: Plot for outcome; Day-to-day improvement
+## Speghetti Plot
+```
+
+```{r, echo = FALSE}
+## Obj2: Graph; Descriptive: Plot for outcome; Day-to-day improvement
+## Speghetti Plot
+df_new |> ggplot(aes(x = Day, y = GlobalImprovement, group = ID)) +
+  geom_line(alpha = 0.3) +  
+  geom_jitter(size = 0.3, alpha = 0.3) +
+  theme_minimal() +
+  labs(title = "Spaghetti Plot of Global Improvement Over Days",
+       x = "Day",
+       y = "Global Improvement") +
+  theme(legend.position = "none") +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(0, 30),
+    breaks = seq(0, 30, by = 3),
+    oob = scales::squish  
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+```
+
+\newpage
+
+```{r}
+# Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; Pain (IV) & Improvement 
+```
+
+```{r, echo = FALSE}
+## model_painimprove: AvePain_c Random Intercept
+fixed_effect <- fixef(model_painimprove)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["AvePain_c"] ## Fixed effects
+
+random_effects <- ranef(model_SleepPain)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$AvePain_c, na.rm = TRUE),
+  to = max(df_new$AvePain_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(AvePain_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * AvePain_c)
+
+fixed_line_df <- data.frame(
+  AvePain_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = AvePain_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = AvePain_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$AvePain_c), na.rm = TRUE), 
+               max(ceiling(df_new$AvePain_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$AvePain_c), na.rm = TRUE), 
+                 max(ceiling(df_new$AvePain_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Pain vs. Global Improvement",
+    x = "Average Pain (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r, echo = FALSE}
+## model_painimprove: AvePain_c Random Slope
+model_painimprove_rs <- lmer(GlobalImprovement ~ AvePain_c + (AvePain_c | ID), data = df_new)
+
+fixed_effect <- fixef(model_painimprove_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["AvePain_c"] ## Fixed effects
+
+random_effects <- ranef(model_painimprove_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "AvePain_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$AvePain_c, na.rm = TRUE),
+  to = max(df_new$AvePain_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(AvePain_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * AvePain_c)
+
+fixed_line_df <- data.frame(
+  AvePain_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = AvePain_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = AvePain_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$AvePain_c), na.rm = TRUE), 
+               max(ceiling(df_new$AvePain_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$AvePain_c), na.rm = TRUE), 
+                 max(ceiling(df_new$AvePain_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Pain vs. Global Improvement",
+    x = "Average Pain (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r}
+## Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; ActInter (IV) & Improvement
+```
+
+```{r, echo = FALSE}
+## model_actimprove: ActivityInt_c Random Intercept
+fixed_effect <- fixef(model_actimprove)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["ActivityInt_c"] ## Fixed effects
+
+random_effects <- ranef(model_actimprove)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$ActivityInt_c, na.rm = TRUE),
+  to = max(df_new$ActivityInt_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(ActivityInt_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * ActivityInt_c)
+
+fixed_line_df <- data.frame(
+  ActivityInt_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = ActivityInt_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = ActivityInt_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$ActivityInt_c), na.rm = TRUE), 
+               max(ceiling(df_new$ActivityInt_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$ActivityInt_c), na.rm = TRUE), 
+                 max(ceiling(df_new$ActivityInt_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Activity Intensivity vs. Global Improvement",
+    x = "Activity Intensivity (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r, echo = TRUE}
+## model_actimprove: ActivityInt_c Random Slope
+model_actimprove_rs <- lmer(GlobalImprovement ~ ActivityInt_c + (ActivityInt_c | ID), data = df_new)
+
+fixed_effect <- fixef(model_actimprove_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["ActivityInt_c"] ## Fixed effects
+
+random_effects <- ranef(model_actimprove_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "ActivityInt_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$ActivityInt_c, na.rm = TRUE),
+  to = max(df_new$ActivityInt_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(ActivityInt_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * ActivityInt_c)
+
+fixed_line_df <- data.frame(
+  ActivityInt_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = ActivityInt_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = ActivityInt_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$ActivityInt_c), na.rm = TRUE), 
+               max(ceiling(df_new$ActivityInt_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$ActivityInt_c), na.rm = TRUE), 
+                 max(ceiling(df_new$ActivityInt_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Pain vs. Global Improvement",
+    x = "Average Pain (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r}
+# Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; Sleep (IV) & Improvement
+```
+
+```{r, echo = FALSE}
+## model_sleepimprove: Sleep_c Random Intercept
+fixed_effect <- fixef(model_sleepimprove)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["Sleep_c"] ## Fixed effects
+
+random_effects <- ranef(model_sleepimprove)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$Sleep_c, na.rm = TRUE),
+  to = max(df_new$Sleep_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(Sleep_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * Sleep_c)
+
+fixed_line_df <- data.frame(
+  Sleep_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = Sleep_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = Sleep_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$Sleep_c), na.rm = TRUE), 
+               max(ceiling(df_new$Sleep_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$Sleep_c), na.rm = TRUE), 
+                 max(ceiling(df_new$Sleep_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Sleep vs. Global Improvement",
+    x = "Sleep (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r, echo = FALSE}
+## model_sleepimprove: Sleep_c Random Slope
+model_sleepimprove_rs <- lmer(GlobalImprovement ~ Sleep_c + (Sleep_c | ID), data = df_new)
+
+fixed_effect <- fixef(model_sleepimprove_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["Sleep_c"] ## Fixed effects
+
+random_effects <- ranef(model_sleepimprove_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "Sleep_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$Sleep_c, na.rm = TRUE),
+  to = max(df_new$Sleep_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(Sleep_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * Sleep_c)
+
+fixed_line_df <- data.frame(
+  Sleep_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = Sleep_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = Sleep_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$Sleep_c), na.rm = TRUE), 
+               max(ceiling(df_new$Sleep_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$Sleep_c), na.rm = TRUE), 
+                 max(ceiling(df_new$Sleep_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Sleep vs. Global Improvement",
+    x = "Sleep (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r}
+# Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; Mood (IV) & Improvement
+```
+
+```{r}
+## model_moodimprove: Mood_c Random Intercept
+fixed_effect <- fixef(model_moodimprove)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["Mood_c"] ## Fixed effects
+
+random_effects <- ranef(model_moodimprove)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$Mood_c, na.rm = TRUE),
+  to = max(df_new$Mood_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(Mood_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * Mood_c)
+
+fixed_line_df <- data.frame(
+  Mood_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = Mood_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = Mood_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$Mood_c), na.rm = TRUE), 
+               max(ceiling(df_new$Mood_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$Mood_c), na.rm = TRUE), 
+                 max(ceiling(df_new$Mood_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Mood vs. Global Improvement",
+    x = "Mood (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r, echo = FALSE}
+## model_moodimprove: Mood_c Random Slope
+model_moodimprove_rs <- lmer(GlobalImprovement ~ Mood_c + (Mood_c | ID), data = df_new)
+
+fixed_effect <- fixef(model_moodimprove_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["Mood_c"] ## Fixed effects
+
+random_effects <- ranef(model_moodimprove_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "Mood_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$Mood_c, na.rm = TRUE),
+  to = max(df_new$Mood_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(Mood_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * Mood_c)
+
+fixed_line_df <- data.frame(
+  Mood_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = Mood_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = Mood_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$Mood_c), na.rm = TRUE), 
+               max(ceiling(df_new$Mood_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$Mood_c), na.rm = TRUE), 
+                 max(ceiling(df_new$Mood_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Mood vs. Global Improvement",
+    x = "Mood (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+```{r}
+## Obj1: Not a graph; but test/analysis of random slopes effects (for 4 graphs above) to make sure that we have random slope effects that would justify the use of a figure showing not only bolded lines (fixed effect) but also the random slopes 
+AIC(model_painimprove, model_painimprove_rs)
+AIC(model_actimprove, model_actimprove_rs)
+AIC(model_sleepimprove, model_sleepimprove_rs)
+AIC(model_moodimprove, model_moodimprove_rs)
+```
+
+Random slope model always has lower AICs among these four models. 
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
