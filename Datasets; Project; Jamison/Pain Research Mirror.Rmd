@@ -1,0 +1,2000 @@
+---
+title: "Pain Research - Dr. Jamison Data"
+author: "Jiaqi Bi"
+date: "2023-09-21"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include = FALSE}
+# Two different files
+#setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Martel")
+#setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison")
+```
+
+```{r, include = FALSE, eval = TRUE, message = FALSE}
+## Load packages
+library(tidyverse)
+library(ggplot2)
+library(tidyr)
+library(haven) ## This library provides functions to read sav file into R
+library(lme4)
+library(lmerTest)
+library(performance)
+library(viridis)
+```
+
+```{r, include = FALSE}
+## Baseline data
+#df1 <- read_sav("Dataset; Jamison project; Baseline.sav")
+#df1 <- read_sav("Dataset; Jamison project; Baseline_Excluded.sav")
+#df1 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Baseline.sav")
+## Daily data
+#df2 <- read_sav("Dataset; Jamison project; Daily.sav")
+#df2 <- read_sav("E:/UWO/DR Marc O Martel data/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison/Dataset; Jamison project; Daily.sav")
+
+
+
+## Examine the duplicated observation
+#df1$ID[which(duplicated(df1$ID))]
+#df2$StudyID[which(duplicated(df2$StudyID))]
+
+#df1 <- df1 |>
+#  filter(!duplicated(ID))
+
+#df1 <- df1 |> filter(Exclud_MissingBoth2 == 0)
+#df2 <- df2 |>
+#  filter(!duplicated(StudyID)) |>
+#  rename(ID = StudyID)
+
+## Time variable to numerical day (consecutive)
+#date_cols <- grep("^Date", names(df2), value = TRUE)
+
+#df2 <- df2 %>%
+#  mutate(across(all_of(date_cols), as.Date, format = "%Y-%m-%d"))
+
+## Correct abberrant years
+#df2 <- df2 %>%
+#  rowwise() %>%
+#  mutate(across(all_of(date_cols), ~ {
+#    if (. != Date1 && !is.na(.)) {
+#      day_diff <- as.numeric(. - Date1)
+#      if (day_diff < 0) {
+#        update(., year = year(Date1))
+#      } else {
+#        .
+#      }
+#    } else {
+ #     .
+#    }
+#  })) %>%
+#  ungroup()
+
+####### Below investigates the rest of aberrant objects #######
+##### Above does not solve those entering a new year ##########
+#df2_investigate <- df2 |>
+#  pivot_longer(
+#  cols = starts_with("Date"), 
+#  names_to = "Date_Number", 
+#  values_to = "Date_Value"
+#) |>
+#  select(ID, Date_Value)
+
+#print(n = 36, df2_investigate[df2_investigate$ID == 673,])
+###############################################################
+
+## Below solved all objects date problem
+#df2$Date8[df2$ID == 610] <- "2023-01-01"
+#df2$Date8[df2$ID == 703] <- "2022-01-09"
+#df2$Date8[df2$ID == 741] <- "2021-01-10"
+#df2$Date8[df2$ID == 680] <- "2023-01-09"
+#df2$Date28[df2$ID == 673] <- "2023-02-02"
+
+## Convert the date to number
+#df2 <- df2 |>
+#  mutate(across(all_of(date_cols[-1]), ~ as.numeric(. - df2$Date1 + 1)))
+
+#df2$Date1 <- 1
+#all_cols <- names(df2)
+
+#for (i in 2:length(date_cols)) {
+#  if (any(df2[[date_cols[i]]] == 1, na.rm = TRUE)) {
+#    same_day_cols <- grep(paste0("_", i), all_cols, value = TRUE)
+#    df2[df2[[date_cols[i]]] == 1 & !is.na(df2_test[[date_cols[i]]]), same_day_cols] <- NA
+#  }
+#}
+
+## Wide to long
+#df2_long <- df2 |>
+#  pivot_longer(cols = -ID,
+#               names_to = c(".value", "day"),
+#               names_pattern = "([A-Za-z]+)(\\d+)") |>
+#  select(-day) |>
+#  rename(Day = Date) |>
+#  filter(Day <= 30 & !is.na(Day)) |>
+#  group_by(ID) |>
+#  distinct(Day, .keep_all = TRUE) |>
+#  complete(Day = seq(1,30))
+
+## replace all -1 to NA
+#df2_long <- df2_long |>
+#  mutate_all(~if_else(. < 0, NA_real_, .))
+
+#df2_long <- df2_long |>
+#  rename(GlobalImprovement = Changed)
+
+## Calculate the lagged variable
+#df2_long <- df2_long |>
+#  group_by(ID) |>
+#  arrange(ID, Day) |>
+#  mutate(AvePain_Change = AvePain - lag(AvePain), 
+#         ActivityInt_Change = ActivityInt - lag(ActivityInt), 
+#         Mood_Change = Mood - lag(Mood)) 
+
+#df2_greaterthan7 <- df2_long |>
+#  group_by(ID) %>%
+#  summarise(NonMissingGI = sum(!is.na(GlobalImprovement))) %>%
+#  filter(NonMissingGI >= 7) %>%
+#  inner_join(df2_long, by = "ID")
+
+## Add level 2 age, gender, and PCS to the longitudinal data
+#df1_temporary <- df1 |>
+#  select(c(B_Demog_Age, B_Demog_Gender, B_Psych_PCS, ID))
+#df1_temporary <- df1
+
+#df_new <- merge(df2_greaterthan7, df1_temporary, by = "ID")
+#df_total <- merge(df2_greaterthan7, df1, by = "ID")
+
+## Global improvement 10 to 1, 9 to 2, ...
+#df_new <- df_new |>
+#  mutate(GlobalImprovement = 11-GlobalImprovement)
+
+#df_new <- df_new |> filter(ID %in% df1$ID)
+#write_sav(df_new, "Data; Jamison data; Long format (Stacked).sav")
+df_new <- read_sav("File To; Jiaqi; 2024.09.2.sav")
+#df_new <- df_new |>
+#  group_by(ID) |>
+#  mutate(across(c(AvePain, Sleep, Mood, ActivityInt), ~. - mean(., na.rm = TRUE),
+#                .names = "{.col}_c"))
+
+group_means <- aggregate(cbind(AvePain, Sleep, Mood, ActivityInt) ~ ID, data = df_new, FUN = function(x) mean(x, na.rm = TRUE))
+
+df_new <- merge(df_new, group_means, by = "ID", suffixes = c("", "_mean"))
+
+df_new$AvePain_c <- df_new$AvePain - df_new$AvePain_mean
+df_new$Sleep_c <- df_new$Sleep - df_new$Sleep_mean
+df_new$Mood_c <- df_new$Mood - df_new$Mood_mean
+df_new$ActivityInt_c <- df_new$ActivityInt - df_new$ActivityInt_mean
+
+df_new <- df_new[, !names(df_new) %in% c("AvePain_mean", "Sleep_mean", "Mood_mean", "ActivityInt_mean")]
+
+
+#df_new <- df_new %>%
+#  mutate(
+#    across(
+#      c(AvePain, Sleep, Mood, ActivityInt),
+#      ~ . - mean(., na.rm = TRUE),
+#      .names = "{.col}_c"
+#    )
+#  )
+
+
+df_new <- df_new |>
+  group_by(ID) |>
+  mutate(LastDay_PainAve_c = lag(AvePain_c), 
+         NextDay_PainAve_c = lead(AvePain_c), 
+         Today_PainAve_c = AvePain_c,
+         LastDay_Sleep_c = Sleep_c,
+         Today_Sleep_c = lead(Sleep_c),
+         LastDay_Mood_c = lag(Mood_c),
+         Today_Mood_c = Mood_c,
+         Today_PainAve = AvePain,
+         Today_Sleep = lead(Sleep),
+         LastDay_Sleep = Sleep,
+         NextDay_Sleep = lag(Sleep),
+         LastDay_PainAve = lag(AvePain)
+         )
+
+```
+
+## Objective 1.1 Day-to-day (Concurrent) associations
+
+```{r}
+#Analyses; Day-to-day; Univariate multilevel linear regressions 
+#- Outcome: Lev1 daily pain intensity 
+#- Examine Lev1 association; between daily mood and pain (Same-day Lev1 units) 
+#- Examine Lev1 association; between daily sleep and pain (Same-day Lev1 units) 
+#- All these multlev must be done with Lev1 centered data 
+model_Pain1 <- lmer(Today_PainAve ~ Today_Mood_c  + (1|ID), data = df_new)
+summary(model_Pain1)
+confint(model_Pain1)
+model_Pain2 <- lmer(Today_PainAve ~ Today_Sleep_c + (1|ID), data = df_new)
+summary(model_Pain2)
+confint(model_Pain2)
+
+# Analyses; Multivariable models   
+#- Outcome: Lev1 daily pain intensity 
+#- Ivs entered simulatenously: daily (Lev1) mood, sleep 
+#- All these multlev must be done with Lev1 centered data 
+#- Same-day Lev1 units 
+model_Pain3 <- lmer(Today_PainAve ~ Today_Sleep_c + Today_Mood_c + (1|ID), data = df_new)
+summary(model_Pain3)
+confint(model_Pain3)
+
+# Analyses; Day-to-day; Univariate multilevel linear regressions 
+#-Outcome: Lev1 Sleep 
+#-Examine Lev1 association; between daily mood and sleep (Same-day Lev1 units) 
+#-Examine Lev1 association; between daily pain and sleep (Same-day Lev1 units) 
+#-All these multlev must be done with Lev1 centered data 
+model_Pain4 <- lmer(Today_Sleep ~ Today_Mood_c + (1|ID), data = df_new)
+summary(model_Pain4)
+confint(model_Pain4)
+model_Pain5 <- lmer(Today_Sleep ~ Today_PainAve_c + (1|ID), data = df_new)
+summary(model_Pain5)
+confint(model_Pain5)
+
+# Analyses; Multivariable models   
+#- Outcome: Lev1 sleep 
+#- Ivs entered simulatenously: daily (Lev1) mood, pain 
+#- All these multlev must be done with Lev1 centered data 
+#- Same-day Lev1 units 
+model_Pain6 <- lmer(Today_Sleep ~ Today_PainAve_c + Today_Mood_c + (1|ID), data = df_new)
+summary(model_Pain6)
+confint(model_Pain6)
+```
+
+## Objective 1.2: Time-lag effects 
+
+```{r}
+# Yesterday sleep -> Toady Pain
+# No lag needed here - LastDay_Sleep_c is equivalent to Sleep_c
+model_SleepPain <- lmer(Today_PainAve ~ LastDay_Sleep_c + (1|ID), data = df_new)
+icc(model_SleepPain)
+summary(model_SleepPain)
+confint(model_SleepPain)
+# Yesterday pain -> Today sleep
+# Today_Sleep is computed using Next Day's Sleep reportings, 
+# LastDay_PainAve_c is computed using Last Day's PainAve_c reportings
+model_PainSleep <- lmer(Today_Sleep ~ LastDay_PainAve_c + (1|ID), data = df_new)
+summary(model_PainSleep)
+confint(model_PainSleep)
+## Both are within cluster/within individual centered
+```
+
+## Objective 2: Anayses: Perceived Improvement
+
+```{r}
+# Analyses; Univariate multilevel linear regressions 
+# Outcome: Lev1 perceived improvement 
+# Examine Lev1 association; between daily pain and perceived improvement (Same-day Lev1 units) 
+model_painimprove <- lmer(GlobalImprovement ~ AvePain_c + (1|ID), data = df_new)
+summary(model_painimprove)
+confint(model_painimprove)
+# Examine Lev1 association; between daily mood and perceived improvement (Same-day Lev1 units) 
+model_moodimprove <- lmer(GlobalImprovement ~ Mood_c + (1|ID), data = df_new)
+summary(model_moodimprove)
+confint(model_moodimprove)
+# Examine Lev1 association; between daily sleep and perceived improvement (Same-day Lev1 unit) 
+model_sleepimprove <- lmer(GlobalImprovement ~ Sleep_c + (1|ID), data = df_new)
+summary(model_sleepimprove)
+confint(model_sleepimprove)
+# Examine Lev1 association; between daily ActivityInt and perceived improvement (Same-day Lev1 unit)
+model_actimprove <- lmer(GlobalImprovement ~ ActivityInt_c + (1|ID), data = df_new)
+summary(model_actimprove)
+confint(model_actimprove)
+# All these multlev must be done with Lev1 centered data 
+
+```
+
+```{r}
+# Analysis; Multvariable/multilevel linear regression 
+# Outcome: Perceived improvement 
+# Ivs entered simulatenously: daily (Lev1) pain, mood, sleep, ActivityInt  
+model_compimprove <- lmer(GlobalImprovement ~ Sleep_c + AvePain_c + Mood_c + ActivityInt_c + (1|ID), data = df_new)
+summary(model_compimprove)
+confint(model_compimprove)
+# All these multlev must be done with Lev1 centered data 
+# Perhaps get some colinearity indicator to know to what extent colinearity is an issue 
+collinear_test <- check_collinearity(model_compimprove)
+print(collinear_test)
+## Some comments on how to read this result: The VIF is around 1 => Low Multicollinearity
+## The VIF is between 2 to 5, Moderate Multicollinearity
+## The VIF >5 (or 10 sometimes), High Multicollinearity
+## Low Tolerance (~ 0), High Multicollinearity
+```
+
+We have low multicollinearity in this case!
+
+## Objective 2.2 Analyses: Moderators of perceived impovement
+
+```{r}
+# Test if any of the baseline (Lev2) socio-demog variables are linked to perceived improvements; Univariate
+# B_Demog_Gender 
+model_genderimprove <- lmer(GlobalImprovement ~ B_Demog_Gender + (1|ID), data = df_new)
+summary(model_genderimprove)
+confint(model_genderimprove)
+# B_Demog_Ethnicity 
+model_ethnimprove <- lmer(GlobalImprovement ~ B_Demog_Ethnicity + (1|ID), data = df_new)
+summary(model_ethnimprove)
+confint(model_ethnimprove)
+# B_Demog_Age
+model_ageimprove <- lmer(GlobalImprovement ~ B_Demog_Age + (1|ID), data = df_new)
+summary(model_ageimprove) # Significant! 
+confint(model_ageimprove)
+```
+
+Age tends to be associated with the improvement, older patients have better improvements. 
+
+```{r}
+# Test if any of the baseline (Lev2) clinical variables are linked to perceived improvements; Univariate 
+# B_Clin_PainDur"
+model_paindurimprove <- lmer(GlobalImprovement ~ B_Clin_PainDur + (1|ID), data = df_new)
+summary(model_paindurimprove)
+confint(model_paindurimprove)
+# B_Clin_BMI"
+model_BMIimprove <- lmer(GlobalImprovement ~ B_Clin_BMI + (1|ID), data = df_new)
+summary(model_BMIimprove)
+confint(model_BMIimprove)
+# All the medications below; 
+# separately/independently; association with perceived improivement; Univariate 
+# B_Med_Tramadol 
+model_Tramadolimprove <- lmer(GlobalImprovement ~ B_Med_Tramadol + (1|ID), data = df_new)
+summary(model_Tramadolimprove) # Significant!
+confint(model_Tramadolimprove)
+# B_Med_Suboxone 
+model_Suboxoneimprove <- lmer(GlobalImprovement ~ B_Med_Suboxone + (1|ID), data = df_new)
+summary(model_Suboxoneimprove)
+confint(model_Suboxoneimprove)
+# B_Med_Marijuana 
+model_Marijuanaimprove <- lmer(GlobalImprovement ~ B_Med_Marijuana + (1|ID), data = df_new)
+summary(model_Marijuanaimprove)
+confint(model_Marijuanaimprove)
+# B_Med_NSAIDS 
+model_NSAIDSimprove <- lmer(GlobalImprovement ~ B_Med_NSAIDS + (1|ID), data = df_new)
+summary(model_NSAIDSimprove)
+confint(model_NSAIDSimprove)
+# B_Med_Anticonvulsant 
+model_Anticonimprove <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant + (1|ID), data = df_new)
+summary(model_Anticonimprove) # Significant!
+confint(model_Anticonimprove)
+# B_Med_MuscleRelaxer 
+model_MuscleRelimprove <- lmer(GlobalImprovement ~ B_Med_MuscleRelaxer + (1|ID), data = df_new)
+summary(model_MuscleRelimprove)
+confint(model_MuscleRelimprove)
+# B_Med_Antidepressants 
+model_Antidepimprove <- lmer(GlobalImprovement ~ B_Med_Antidepressants + (1|ID), data = df_new)
+summary(model_Antidepimprove)
+confint(model_Antidepimprove)
+# B_Med_Benzodiazepine 
+model_Benzoimprove <- lmer(GlobalImprovement ~ B_Med_Benzodiazepine + (1|ID), data = df_new)
+summary(model_Benzoimprove)
+confint(model_Benzoimprove)
+# B_Med_Stimulants 
+model_Stimuimprove <- lmer(GlobalImprovement ~ B_Med_Stimulants + (1|ID), data = df_new)
+summary(model_Stimuimprove)
+confint(model_Stimuimprove)
+# B_Med_OtherMed 
+model_OtherMedimprove <- lmer(GlobalImprovement ~ B_Med_OtherMed + (1|ID), data = df_new)
+summary(model_OtherMedimprove)
+confint(model_OtherMedimprove)
+# B_Med_OTC 
+model_OTCimprove <- lmer(GlobalImprovement ~ B_Med_OTC + (1|ID), data = df_new)
+summary(model_OTCimprove)
+confint(model_OTCimprove)
+# B_Med_OpioidsYN
+model_Opioid_improve <- lmer(GlobalImprovement ~ B_Med_OpioidsYN + (1|ID), data = df_new)
+summary(model_Opioid_improve) # Significant! 
+confint(model_Opioid_improve)
+ 
+```
+
+B_Med_Tramadol, B_Med_Anticonvulsant, and B_Med_OpioidsYN are associated with the Global Improvement! 
+
+```{r}
+# Test if any of the baseline (Lev2) psych variables are linked to perceived improvements; Univariate 
+# B_Psych_PCS"
+model_PCSimprove <- lmer(GlobalImprovement ~ B_Psych_PCS + (1|ID), data = df_new)
+summary(model_PCSimprove) # Significant!
+confint(model_PCSimprove)
+# B_Psych_HADS"
+model_HADSimprove <- lmer(GlobalImprovement ~ B_Psych_HADS + (1|ID), data = df_new)
+summary(model_HADSimprove) # Significant! 
+confint(model_HADSimprove)
+
+```
+
+Both are significant! 
+
+```{r}
+# Then if any of the Lev2 variables above are significantly associated with the outcome (i.e., perceived improvement), then we’ll test the cross-level (Lev2 X Lev1) interaction effects to see if these Lev2 variables moderate the effects of : 
+#1; Sleep on daily improvement 
+model_ageimprove_Sleep <- lmer(GlobalImprovement ~ B_Demog_Age*Sleep_c + (1|ID), data = df_new)
+summary(model_ageimprove_Sleep) 
+confint(model_ageimprove_Sleep)
+model_Tramadolimprove_Sleep <- lmer(GlobalImprovement ~ B_Med_Tramadol*Sleep_c + (1|ID), data = df_new)
+summary(model_Tramadolimprove_Sleep) 
+confint(model_Tramadolimprove_Sleep)
+model_Anticonimprove_Sleep <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*Sleep_c + (1|ID), data = df_new)
+summary(model_Anticonimprove_Sleep) 
+confint(model_Anticonimprove_Sleep)
+model_Opioid_improve_Sleep <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*Sleep_c + (1|ID), data = df_new)
+summary(model_Opioid_improve_Sleep) 
+confint(model_Opioid_improve_Sleep)
+model_PCSimprove_Sleep <- lmer(GlobalImprovement ~ B_Psych_PCS*Sleep_c + (1|ID), data = df_new)
+summary(model_PCSimprove_Sleep) 
+confint(model_PCSimprove_Sleep)
+model_HADSimprove_Sleep <- lmer(GlobalImprovement ~ B_Psych_HADS*Sleep_c + (1|ID), data = df_new)
+summary(model_HADSimprove_Sleep) 
+confint(model_HADSimprove_Sleep)
+#2; Mood on daily improvement 
+model_ageimprove_Mood <- lmer(GlobalImprovement ~ B_Demog_Age*Mood_c + (1|ID), data = df_new)
+summary(model_ageimprove_Mood) 
+confint(model_ageimprove_Mood)
+model_Tramadolimprove_Mood <- lmer(GlobalImprovement ~ B_Med_Tramadol*Mood_c + (1|ID), data = df_new)
+summary(model_Tramadolimprove_Mood) 
+confint(model_Tramadolimprove_Mood)
+model_Anticonimprove_Mood <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*Mood_c + (1|ID), data = df_new)
+summary(model_Anticonimprove_Mood) 
+confint(model_Anticonimprove_Mood)
+model_Opioid_improve_Mood <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*Mood_c + (1|ID), data = df_new)
+summary(model_Opioid_improve_Mood) 
+confint(model_Opioid_improve_Mood)
+model_PCSimprove_Mood <- lmer(GlobalImprovement ~ B_Psych_PCS*Mood_c + (1|ID), data = df_new)
+summary(model_PCSimprove_Mood) 
+confint(model_PCSimprove_Mood)
+model_HADSimprove_Mood <- lmer(GlobalImprovement ~ B_Psych_HADS*Mood_c + (1|ID), data = df_new)
+summary(model_HADSimprove_Mood) 
+confint(model_HADSimprove_Mood)
+#3; Pain on daily improvement 
+model_ageimprove_AvePain <- lmer(GlobalImprovement ~ B_Demog_Age*AvePain_c + (1|ID), data = df_new)
+summary(model_ageimprove_AvePain) 
+confint(model_ageimprove_AvePain)
+model_Tramadolimprove_AvePain <- lmer(GlobalImprovement ~ B_Med_Tramadol*AvePain_c + (1|ID), data = df_new)
+summary(model_Tramadolimprove_AvePain) 
+confint(model_Tramadolimprove_AvePain)
+model_Anticonimprove_AvePain <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*AvePain_c + (1|ID), data = df_new)
+summary(model_Anticonimprove_AvePain) 
+confint(model_Anticonimprove_AvePain)
+model_Opioid_improve_AvePain <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*AvePain_c + (1|ID), data = df_new)
+summary(model_Opioid_improve_AvePain) 
+confint(model_Opioid_improve_AvePain)
+model_PCSimprove_AvePain <- lmer(GlobalImprovement ~ B_Psych_PCS*AvePain_c + (1|ID), data = df_new)
+summary(model_PCSimprove_AvePain) 
+confint(model_PCSimprove_AvePain)
+model_HADSimprove_AvePain <- lmer(GlobalImprovement ~ B_Psych_HADS*AvePain_c + (1|ID), data = df_new)
+summary(model_HADSimprove_AvePain) 
+confint(model_HADSimprove_AvePain)
+#4; ActivInterf on daily improvement 
+model_ageimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Demog_Age*ActivityInt_c + (1|ID), data = df_new)
+summary(model_ageimprove_ActivityInt) 
+confint(model_ageimprove_ActivityInt)
+model_Tramadolimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Med_Tramadol*ActivityInt_c + (1|ID), data = df_new)
+summary(model_Tramadolimprove_ActivityInt) 
+confint(model_Tramadolimprove_ActivityInt)
+model_Anticonimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*ActivityInt_c + (1|ID), data = df_new)
+summary(model_Anticonimprove_ActivityInt) 
+confint(model_Anticonimprove_ActivityInt)
+model_Opioid_improve_ActivityInt <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*ActivityInt_c + (1|ID), data = df_new)
+summary(model_Opioid_improve_ActivityInt) 
+confint(model_Opioid_improve_ActivityInt)
+model_PCSimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Psych_PCS*ActivityInt_c + (1|ID), data = df_new)
+summary(model_PCSimprove_ActivityInt) 
+confint(model_PCSimprove_ActivityInt)
+model_HADSimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Psych_HADS*ActivityInt_c + (1|ID), data = df_new)
+summary(model_HADSimprove_ActivityInt) 
+confint(model_HADSimprove_ActivityInt)
+```
+
+\newpage
+
+## Graphs
+
+```{r}
+# Graphs; Objective 1 
+# Obj1: Graph; Descriptive; Violon plots for 30-day aggregates; Sleep; Mood; Pain; ActivityInt; 
+# All on the same 0-10 scale; follow the order listed here.  
+```
+
+```{r, echo = FALSE}
+data_forgraph <- df_new |>
+  group_by(ID) |>
+  summarise(AggSleep = mean(Sleep, na.rm = TRUE),
+            AggMood = mean(Mood, na.rm = TRUE),
+            AggPain = mean(AvePain, na.rm = TRUE), 
+            AggActivityInt = mean(ActivityInt, na.rm = TRUE))
+data_forgraph <- data_forgraph |>
+  pivot_longer(cols = c(AggSleep, AggMood, AggPain, AggActivityInt),
+               names_to = "Variables",
+               values_to = "Score")
+data_forgraph |>
+  ggplot(aes(x = Variables, y = Score)) +
+  geom_violin(aes(fill = Variables), trim = FALSE, alpha = 0.7) +
+  geom_jitter(size = 1) +
+  theme_minimal() +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  labs(
+    title = "Violin Plot of Aggregated Variables",
+    x = "Variables",
+    y = "Scores"
+  ) +
+  theme(
+    legend.position = "none",
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    axis.text.x = element_text(
+      margin = margin(t = 10)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+```
+
+\newpage
+
+```{r}
+# Obj1: Graph; Multilevel linear reg slopes; Lagged effects; (1) Sleep/IV & Pain 
+```
+
+```{r, echo = FALSE}
+fixed_effect <- fixef(model_SleepPain)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["LastDay_Sleep_c"] ## Fixed effects
+
+random_effects <- ranef(model_SleepPain)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$LastDay_Sleep_c, na.rm = TRUE),
+  to = max(df_new$LastDay_Sleep_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(LastDay_Sleep_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * LastDay_Sleep_c)
+
+fixed_line_df <- data.frame(
+  LastDay_Sleep_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = LastDay_Sleep_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = LastDay_Sleep_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$LastDay_Sleep_c), na.rm = TRUE), 
+               max(ceiling(df_new$LastDay_Sleep_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$LastDay_Sleep_c), na.rm = TRUE), 
+                 max(ceiling(df_new$LastDay_Sleep_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Sleep vs. Pain",
+    x = "Last Day Sleep (Centered)",
+    y = "Today Average Pain"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r}
+# Obj1: Graph; Multilevel linear reg slopes; Lagged effects; (2) Pain/IV & Sleep model_PainSleep   
+```
+
+```{r, echo = FALSE}
+fixed_effect <- fixef(model_PainSleep)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["LastDay_PainAve_c"] ## Fixed effects
+
+random_effects <- ranef(model_PainSleep)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$LastDay_PainAve_c, na.rm = TRUE),
+  to = max(df_new$LastDay_PainAve_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(LastDay_PainAve_c = sleep_range) %>%
+  mutate(Today_Sleep = Intercept + Slope * LastDay_PainAve_c)
+
+fixed_line_df <- data.frame(
+  LastDay_PainAve_c = sleep_range,
+  Today_Sleep = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = LastDay_PainAve_c, y = Today_Sleep, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = LastDay_PainAve_c, y = Today_Sleep),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$LastDay_PainAve_c), na.rm = TRUE), 
+               max(ceiling(df_new$LastDay_PainAve_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$LastDay_PainAve_c), na.rm = TRUE), 
+                 max(ceiling(df_new$LastDay_PainAve_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Pain vs. Sleep",
+    x = "Last Day Pain (Centered)",
+    y = "Today Average Sleep"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r}
+# Obj1: Not a graph; but test/analysis of random slopes effects (for both graphs above) 
+# to make sure that we have random slope effects that would justify the use of a figure showing not only bolded lines (fixed effect) but also the random slopes 
+```
+
+```{r, echo = FALSE}
+model_SleepPain_rs <- lmer(Today_PainAve ~ LastDay_Sleep_c + (LastDay_Sleep_c|ID), data = df_new)
+
+fixed_effect <- fixef(model_SleepPain_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["LastDay_Sleep_c"] ## Fixed effects
+
+random_effects <- ranef(model_SleepPain_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "LastDay_Sleep_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$LastDay_Sleep_c, na.rm = TRUE),
+  to = max(df_new$LastDay_Sleep_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(LastDay_Sleep_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * LastDay_Sleep_c)
+
+fixed_line_df <- data.frame(
+  LastDay_Sleep_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = LastDay_Sleep_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = LastDay_Sleep_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$LastDay_Sleep_c), na.rm = TRUE), 
+               max(ceiling(df_new$LastDay_Sleep_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$LastDay_Sleep_c), na.rm = TRUE), 
+                 max(ceiling(df_new$LastDay_Sleep_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Sleep vs. Pain",
+    x = "Last Day Sleep (Centered)",
+    y = "Today Average Pain"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+######
+
+model_PainSleep_rs <- lmer(Today_Sleep ~ LastDay_PainAve_c + (LastDay_PainAve_c|ID), data = df_new)
+
+fixed_effect <- fixef(model_PainSleep_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["LastDay_PainAve_c"] ## Fixed effects
+
+random_effects <- ranef(model_PainSleep_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "LastDay_PainAve_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$LastDay_PainAve_c, na.rm = TRUE),
+  to = max(df_new$LastDay_PainAve_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(LastDay_PainAve_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * LastDay_PainAve_c)
+
+fixed_line_df <- data.frame(
+  LastDay_PainAve_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+```
+
+\newpage
+
+```{r, echo = FALSE}
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = LastDay_PainAve_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = LastDay_PainAve_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$LastDay_PainAve_c), na.rm = TRUE), 
+               max(ceiling(df_new$LastDay_PainAve_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$LastDay_PainAve_c), na.rm = TRUE), 
+                 max(ceiling(df_new$LastDay_PainAve_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Pain vs. Sleep",
+    x = "Last Day Pain (Centered)",
+    y = "Today Average Sleep"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+```{r}
+AIC(model_SleepPain_rs, model_SleepPain)
+AIC(model_PainSleep_rs, model_PainSleep)
+```
+
+Lower AIC indicates a better model fit. Both models with random slope have lower AIC than the randomn intercept only model. This validates our use of random slope plot. 
+
+\newpage
+
+## Graphs; Objective 2 
+
+```{r}
+## Obj2: Graph; Descriptive: Plot for outcome; Day-to-day improvement
+## Speghetti Plot
+```
+
+```{r, echo = FALSE}
+## Obj2: Graph; Descriptive: Plot for outcome; Day-to-day improvement
+## Speghetti Plot
+df_new |> ggplot(aes(x = Day, y = GlobalImprovement, group = ID)) +
+  geom_line(alpha = 0.3) +  
+  geom_jitter(size = 0.3, alpha = 0.3) +
+  theme_minimal() +
+  labs(title = "Spaghetti Plot of Global Improvement Over Days",
+       x = "Day",
+       y = "Global Improvement") +
+  theme(legend.position = "none") +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(0, 30),
+    breaks = seq(0, 30, by = 3),
+    oob = scales::squish  
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+```
+
+\newpage
+
+```{r}
+# Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; Pain (IV) & Improvement 
+```
+
+```{r, echo = FALSE}
+## model_painimprove: AvePain_c Random Intercept
+fixed_effect <- fixef(model_painimprove)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["AvePain_c"] ## Fixed effects
+
+random_effects <- ranef(model_SleepPain)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$AvePain_c, na.rm = TRUE),
+  to = max(df_new$AvePain_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(AvePain_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * AvePain_c)
+
+fixed_line_df <- data.frame(
+  AvePain_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = AvePain_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = AvePain_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$AvePain_c), na.rm = TRUE), 
+               max(ceiling(df_new$AvePain_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$AvePain_c), na.rm = TRUE), 
+                 max(ceiling(df_new$AvePain_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Pain vs. Global Improvement",
+    x = "Average Pain (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r, echo = FALSE}
+## model_painimprove: AvePain_c Random Slope
+model_painimprove_rs <- lmer(GlobalImprovement ~ AvePain_c + (AvePain_c | ID), data = df_new)
+
+fixed_effect <- fixef(model_painimprove_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["AvePain_c"] ## Fixed effects
+
+random_effects <- ranef(model_painimprove_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "AvePain_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$AvePain_c, na.rm = TRUE),
+  to = max(df_new$AvePain_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(AvePain_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * AvePain_c)
+
+fixed_line_df <- data.frame(
+  AvePain_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = AvePain_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = AvePain_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$AvePain_c), na.rm = TRUE), 
+               max(ceiling(df_new$AvePain_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$AvePain_c), na.rm = TRUE), 
+                 max(ceiling(df_new$AvePain_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Pain vs. Global Improvement",
+    x = "Average Pain (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r}
+## Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; ActInter (IV) & Improvement
+```
+
+```{r, echo = FALSE}
+## model_actimprove: ActivityInt_c Random Intercept
+fixed_effect <- fixef(model_actimprove)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["ActivityInt_c"] ## Fixed effects
+
+random_effects <- ranef(model_actimprove)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$ActivityInt_c, na.rm = TRUE),
+  to = max(df_new$ActivityInt_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(ActivityInt_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * ActivityInt_c)
+
+fixed_line_df <- data.frame(
+  ActivityInt_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = ActivityInt_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = ActivityInt_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$ActivityInt_c), na.rm = TRUE), 
+               max(ceiling(df_new$ActivityInt_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$ActivityInt_c), na.rm = TRUE), 
+                 max(ceiling(df_new$ActivityInt_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Activity Intensivity vs. Global Improvement",
+    x = "Activity Intensivity (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r, echo = TRUE}
+## model_actimprove: ActivityInt_c Random Slope
+model_actimprove_rs <- lmer(GlobalImprovement ~ ActivityInt_c + (ActivityInt_c | ID), data = df_new)
+
+fixed_effect <- fixef(model_actimprove_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["ActivityInt_c"] ## Fixed effects
+
+random_effects <- ranef(model_actimprove_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "ActivityInt_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$ActivityInt_c, na.rm = TRUE),
+  to = max(df_new$ActivityInt_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(ActivityInt_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * ActivityInt_c)
+
+fixed_line_df <- data.frame(
+  ActivityInt_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = ActivityInt_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = ActivityInt_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$ActivityInt_c), na.rm = TRUE), 
+               max(ceiling(df_new$ActivityInt_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$ActivityInt_c), na.rm = TRUE), 
+                 max(ceiling(df_new$ActivityInt_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Pain vs. Global Improvement",
+    x = "Average Pain (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r}
+# Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; Sleep (IV) & Improvement
+```
+
+```{r, echo = FALSE}
+## model_sleepimprove: Sleep_c Random Intercept
+fixed_effect <- fixef(model_sleepimprove)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["Sleep_c"] ## Fixed effects
+
+random_effects <- ranef(model_sleepimprove)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$Sleep_c, na.rm = TRUE),
+  to = max(df_new$Sleep_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(Sleep_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * Sleep_c)
+
+fixed_line_df <- data.frame(
+  Sleep_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = Sleep_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = Sleep_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$Sleep_c), na.rm = TRUE), 
+               max(ceiling(df_new$Sleep_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$Sleep_c), na.rm = TRUE), 
+                 max(ceiling(df_new$Sleep_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Sleep vs. Global Improvement",
+    x = "Sleep (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r, echo = FALSE}
+## model_sleepimprove: Sleep_c Random Slope
+model_sleepimprove_rs <- lmer(GlobalImprovement ~ Sleep_c + (Sleep_c | ID), data = df_new)
+
+fixed_effect <- fixef(model_sleepimprove_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["Sleep_c"] ## Fixed effects
+
+random_effects <- ranef(model_sleepimprove_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "Sleep_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$Sleep_c, na.rm = TRUE),
+  to = max(df_new$Sleep_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(Sleep_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * Sleep_c)
+
+fixed_line_df <- data.frame(
+  Sleep_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = Sleep_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = Sleep_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$Sleep_c), na.rm = TRUE), 
+               max(ceiling(df_new$Sleep_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$Sleep_c), na.rm = TRUE), 
+                 max(ceiling(df_new$Sleep_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Sleep vs. Global Improvement",
+    x = "Sleep (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r}
+# Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; Mood (IV) & Improvement
+```
+
+```{r}
+## model_moodimprove: Mood_c Random Intercept
+fixed_effect <- fixef(model_moodimprove)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["Mood_c"] ## Fixed effects
+
+random_effects <- ranef(model_moodimprove)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = fixed_slope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$Mood_c, na.rm = TRUE),
+  to = max(df_new$Mood_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(Mood_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * Mood_c)
+
+fixed_line_df <- data.frame(
+  Mood_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = Mood_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = Mood_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$Mood_c), na.rm = TRUE), 
+               max(ceiling(df_new$Mood_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$Mood_c), na.rm = TRUE), 
+                 max(ceiling(df_new$Mood_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Intercept Plot: Mood vs. Global Improvement",
+    x = "Mood (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r, echo = FALSE}
+## model_moodimprove: Mood_c Random Slope
+model_moodimprove_rs <- lmer(GlobalImprovement ~ Mood_c + (Mood_c | ID), data = df_new)
+
+fixed_effect <- fixef(model_moodimprove_rs)
+fixed_intercept <- fixed_effect["(Intercept)"]
+fixed_slope <- fixed_effect["Mood_c"] ## Fixed effects
+
+random_effects <- ranef(model_moodimprove_rs)$ID
+random_effects_df <- data.frame(
+  ID = rownames(random_effects),
+  RandomIntercept = random_effects[, "(Intercept)"],
+  RandomSlope = random_effects[, "Mood_c"]
+) ## Random effects
+
+random_lines <- random_effects_df %>%
+  mutate(
+    Intercept = fixed_intercept + RandomIntercept,
+    Slope = RandomSlope
+  ) ## Random intercept lines prep
+
+sleep_range <- seq(
+  from = min(df_new$Mood_c, na.rm = TRUE),
+  to = max(df_new$Mood_c, na.rm = TRUE),
+  length.out = 100
+)  ## Define the range of predictors
+
+prediction_df <- random_lines %>%
+  crossing(Mood_c = sleep_range) %>%
+  mutate(Today_PainAve = Intercept + Slope * Mood_c)
+
+fixed_line_df <- data.frame(
+  Mood_c = sleep_range,
+  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
+)
+
+ggplot() +
+  geom_line(
+    data = prediction_df,
+    aes(x = Mood_c, y = Today_PainAve, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = Mood_c, y = Today_PainAve),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish  
+  ) +
+  scale_x_continuous(
+    limits = c(min(floor(df_new$Mood_c), na.rm = TRUE), 
+               max(ceiling(df_new$Mood_c), na.rm = TRUE)),
+    breaks = seq(min(floor(df_new$Mood_c), na.rm = TRUE), 
+                 max(ceiling(df_new$Mood_c), na.rm = TRUE), by = 1),
+    oob = scales::squish  
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Mood vs. Global Improvement",
+    x = "Mood (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+```{r}
+## Obj1: Not a graph; but test/analysis of random slopes effects (for 4 graphs above) to make sure that we have random slope effects that would justify the use of a figure showing not only bolded lines (fixed effect) but also the random slopes 
+AIC(model_painimprove, model_painimprove_rs)
+AIC(model_actimprove, model_actimprove_rs)
+AIC(model_sleepimprove, model_sleepimprove_rs)
+AIC(model_moodimprove, model_moodimprove_rs)
+```
+
+Random slope model always has lower AICs among these four models. 
+
+\newpage
+
+```{r}
+# Graphs; Objective 2.2 (Moderators of day-to-day perceived improvements)
+# Lev1_PainIntensity (IV) and Lev1_improvement (outcome) 
+# as a function of Lev2_PCS (moderator) 
+```
+
+```{r}
+# Graphs; Objective 2.2 (Moderators of day-to-day perceived improvements)
+model_PainImprove_PCSmod <- lmer(GlobalImprovement ~ AvePain_c * B_Psych_PCS + (1 | ID), data = df_new)
+summary(model_PainImprove_PCSmod)
+```
+
+```{r, echo = FALSE, warning = FALSE}
+## Style 1
+unique_IDs <- unique(df_new$ID) 
+new_data <- expand.grid(
+  AvePain_c = seq(min(df_new$AvePain_c, na.rm = TRUE), max(df_new$AvePain_c, na.rm = TRUE), length.out = 100),
+  B_Psych_PCS = quantile(df_new$B_Psych_PCS, probs = seq(0, 1, length.out = 5)),
+  ID = unique_IDs
+) # Percentiles from 5% to 95%
+
+new_data$predicted_Improvement <- predict(model_PainImprove_PCSmod, newdata = new_data, re.form = NULL)
+
+ggplot(new_data, aes(x = AvePain_c, y = predicted_Improvement, group = interaction(B_Psych_PCS, ID), color = B_Psych_PCS)) +
+  geom_line(size = 0.7, alpha = 0.4) +
+  scale_color_viridis(name = "PCS", option = "plasma", direction = -1) +
+  labs(
+    title = "Cross-Level Moderation of PCS",
+    x = "Pain Intensity",
+    y = "Global Improvement"
+  ) +
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "bottom",
+    panel.background = element_rect(fill = "white", color = NA),
+    panel.grid.major = element_line(color = "grey30"),
+    panel.grid.minor = element_line(color = "grey20"),
+    plot.background = element_rect(fill = "white"),
+    text = element_text(color = "black"),
+    axis.text = element_text(color = "black"),
+    axis.title = element_text(color = "black"),
+    legend.text = element_text(color = "black"),
+    legend.title = element_text(color = "black")
+  ) +
+    theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_line(color = "lightgrey", size = 0.25),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0.25),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+```
+
+```{r, echo = FALSE, including = FALSE, eval = FALSE}
+## Style 2
+model_PainImprove_PCSmod <- lmer(GlobalImprovement ~ AvePain_c * B_Psych_PCS + (1 | ID), data = df_new)
+
+# Extract percentiles of the moderator (PCS)
+percentiles <- quantile(df_new$B_Psych_PCS, probs = c(0, 0.25, 0.5, 0.75, 1))
+
+# Create new data for prediction with different moderator values
+new_data <- expand.grid(AvePain_c = seq(min(df_new$AvePain_c, na.rm = TRUE), max(df_new$AvePain_c, na.rm = TRUE), length.out = 100),
+                        B_Psych_PCS = percentiles,
+                        ID = unique(df_new$ID)[1]) # Use the first ID as a reference
+
+# Make predictions using the fitted model
+predictions <- predict(model_PainImprove_PCSmod, newdata = new_data, re.form = NULL)
+
+# Add predictions to the new data
+new_data$GlobalImprovement <- predictions
+
+# Plot the graph
+ggplot(df_new, aes(x = AvePain_c, y = GlobalImprovement, color = B_Psych_PCS)) +
+  geom_line(data = new_data, aes(group = B_Psych_PCS), size = 1) +
+  scale_color_gradientn(colors = c("darkorchid", "darkblue", "steelblue", "mediumseagreen", "yellow"),
+                        name = "Moderator (PCS)",
+                        limits = range(df_new$B_Psych_PCS)) +
+  labs(title = "Cross-Level Moderation: Pain Intensity and Improvement by PCS",
+       x = "Pain Intensity",
+       y = "Global Improvement") +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_line(color = "lightgrey", size = 0.25),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0.25),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+
+
+```
+
+\newpage
+
+```{r}
+# Lev1_ActivityInt (IV) and Lev1_improvement (outcome) 
+# as a function of Lev2_PCS (moderator) 
+```
+
+```{r}
+model_ActImprove_PCSmod <- lmer(GlobalImprovement ~ ActivityInt_c * B_Psych_PCS + (1 | ID), data = df_new)
+summary(model_ActImprove_PCSmod)
+```
+
+```{r, echo = FALSE, warning = FALSE}
+## Style 1
+unique_IDs <- unique(df_new$ID) 
+new_data <- expand.grid(
+  ActivityInt_c = seq(min(df_new$ActivityInt_c, na.rm = TRUE), max(df_new$ActivityInt_c, na.rm = TRUE), length.out = 100),
+  B_Psych_PCS = quantile(df_new$B_Psych_PCS, probs = seq(0, 1, length.out = 5)),
+  ID = unique_IDs
+) # Percentiles from 5% to 95%
+
+new_data$predicted_Improvement <- predict(model_ActImprove_PCSmod, newdata = new_data, re.form = NULL)
+
+ggplot(new_data, aes(x = ActivityInt_c, y = predicted_Improvement, group = interaction(B_Psych_PCS, ID), color = B_Psych_PCS)) +
+  geom_line(size = 0.7, alpha = 0.4) +
+  scale_color_viridis(name = "PCS", option = "plasma", direction = -1) +
+  labs(
+    title = "Cross-Level Moderation of PCS",
+    x = "Activity Intensity",
+    y = "Global Improvement"
+  ) +
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "bottom",
+    panel.background = element_rect(fill = "white", color = NA),
+    panel.grid.major = element_line(color = "grey30"),
+    panel.grid.minor = element_line(color = "grey20"),
+    plot.background = element_rect(fill = "white"),
+    text = element_text(color = "black"),
+    axis.text = element_text(color = "black"),
+    axis.title = element_text(color = "black"),
+    legend.text = element_text(color = "black"),
+    legend.title = element_text(color = "black")
+  ) +
+    theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_line(color = "lightgrey", size = 0.25),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0.25),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r}
+# Lev1_Sleep (IV) and Lev1_improvement (outcome) 
+# as a function of Lev2_PCS (moderator) 
+model_SleepImprove_PCSmod <- lmer(GlobalImprovement ~ LastDay_Sleep_c * B_Psych_PCS + (1 | ID), data = df_new)
+summary(model_SleepImprove_PCSmod)
+```
+
+```{r, echo = FALSE, warning = FALSE}
+## Style 1
+unique_IDs <- unique(df_new$ID) 
+new_data <- expand.grid(
+  LastDay_Sleep_c = seq(min(df_new$LastDay_Sleep_c, na.rm = TRUE), max(df_new$LastDay_Sleep_c, na.rm = TRUE), length.out = 100),
+  B_Psych_PCS = quantile(df_new$B_Psych_PCS, probs = seq(0, 1, length.out = 5)),
+  ID = unique_IDs
+) 
+
+new_data$predicted_Improvement <- predict(model_SleepImprove_PCSmod, newdata = new_data, re.form = NULL)
+
+ggplot(new_data, aes(x = LastDay_Sleep_c, y = predicted_Improvement, group = interaction(B_Psych_PCS, ID), color = B_Psych_PCS)) +
+  geom_line(size = 0.7, alpha = 0.4) +
+  scale_color_viridis(name = "PCS", option = "plasma", direction = -1) +
+  labs(
+    title = "Cross-Level Moderation of PCS",
+    x = "Sleep",
+    y = "Global Improvement"
+  ) +
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "bottom",
+    panel.background = element_rect(fill = "white", color = NA),
+    panel.grid.major = element_line(color = "grey30"),
+    panel.grid.minor = element_line(color = "grey20"),
+    plot.background = element_rect(fill = "white"),
+    text = element_text(color = "black"),
+    axis.text = element_text(color = "black"),
+    axis.title = element_text(color = "black"),
+    legend.text = element_text(color = "black"),
+    legend.title = element_text(color = "black")
+  ) +
+    theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_line(color = "lightgrey", size = 0.25),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0.25),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+\newpage
+
+```{r}
+# Lev1_Mood (IV) and Lev1_improvement (outcome) 
+# as a function of Lev2_PCS (moderator)
+model_MoodImprove_PCSmod <- lmer(GlobalImprovement ~ Mood_c * B_Psych_PCS + (1 | ID), data = df_new)
+summary(model_MoodImprove_PCSmod)
+```
+
+```{r, echo = FALSE, warning = FALSE}
+## Style 1
+unique_IDs <- unique(df_new$ID) 
+new_data <- expand.grid(
+  Mood_c = seq(min(df_new$Mood_c, na.rm = TRUE), max(df_new$Mood_c, na.rm = TRUE), length.out = 100),
+  B_Psych_PCS = quantile(df_new$B_Psych_PCS, probs = seq(0, 1, length.out = 5)),
+  ID = unique_IDs
+) 
+
+new_data$predicted_Improvement <- predict(model_MoodImprove_PCSmod, newdata = new_data, re.form = NULL)
+
+ggplot(new_data, aes(x = Mood_c, y = predicted_Improvement, group = interaction(B_Psych_PCS, ID), color = B_Psych_PCS)) +
+  geom_line(size = 0.7, alpha = 0.4) +
+  scale_color_viridis(name = "PCS", option = "plasma", direction = -1) +
+  labs(
+    title = "Cross-Level Moderation of PCS",
+    x = "Mood",
+    y = "Global Improvement"
+  ) +
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "bottom",
+    panel.background = element_rect(fill = "white", color = NA),
+    panel.grid.major = element_line(color = "grey30"),
+    panel.grid.minor = element_line(color = "grey20"),
+    plot.background = element_rect(fill = "white"),
+    text = element_text(color = "black"),
+    axis.text = element_text(color = "black"),
+    axis.title = element_text(color = "black"),
+    legend.text = element_text(color = "black"),
+    legend.title = element_text(color = "black")
+  ) +
+    theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,                      
+      hjust = 0.45,                    
+      margin = margin(b = 20)         
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)         
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)         
+    ),
+    panel.grid.major = element_line(color = "lightgrey", size = 0.25),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0.25),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
