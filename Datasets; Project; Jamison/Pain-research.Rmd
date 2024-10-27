@@ -1813,7 +1813,7 @@ ggplot(df_new, aes(x = AvePain_c, y = GlobalImprovement, color = B_Psych_PCS)) +
 \newpage
 
 ```{r}
-# Lev1_ActivityInt (IV) and Lev1_improvement (outcome) 
+# Lev1_PainInterference (IV) and Lev1_improvement (outcome) 
 # as a function of Lev2_PCS (moderator) 
 ```
 
