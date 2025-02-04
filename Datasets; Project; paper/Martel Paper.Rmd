@@ -1773,6 +1773,36 @@ beta_Age <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Age + (1|ID),
                      family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_Age)
+## Age * PPTh
+beta_AgePPTh <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Age*IndexLev2_QST_BaselinePPTh + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_AgePPTh)
+## Age * TSP
+beta_AgeTSP <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Age*IndexLev2_QST_TSPAve + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_AgeTSP)
+## Age * CPM
+beta_AgeCPM <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Age*IndexLev2_QST_CpmTrialAve + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_AgeCPM)
+## Age * PA
+beta_AgePA <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Age*IndexLev1_PositiveAffect_Total + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_AgePA)
+## Age * NA
+beta_AgeNA <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Age*IndexLev1_NegativeAffect_Total + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_AgeNA)
+## Age * Cata
+beta_AgeCata <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Age*IndexLev1_Catastrophizing_Total + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_AgeCata)
 
 beta_Sex <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Sex + (1|ID), 
                      family = beta_family(), data = data_paper2, 
@@ -1783,6 +1813,36 @@ beta_BMI <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_BMI + (1|ID),
                      family = beta_family(), data = data_paper2, 
                      control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(beta_BMI)
+## BMI * PPTh
+beta_BMIPPTh <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_BMI*IndexLev2_QST_BaselinePPTh + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_BMIPPTh)
+## BMI * TSP
+beta_BMITSP <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_BMI*IndexLev2_QST_TSPAve + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_BMITSP)
+## BMI * CPM
+beta_BMICPM <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_BMI*IndexLev2_QST_CpmTrialAve + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_BMICPM)
+## BMI * PA
+beta_BMIPA <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_BMI*IndexLev1_PositiveAffect_Total + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_BMIPA)
+## BMI * NA
+beta_BMINA <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_BMI*IndexLev1_NegativeAffect_Total + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_BMINA)
+## BMI * Cata
+beta_BMICata <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_BMI*IndexLev1_Catastrophizing_Total + (1|ID), 
+                     family = beta_family(), data = data_paper2, 
+                     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(beta_BMICata)
 
 beta_Eth <- glmmTMB(Level1_Even_Percent_Transf ~ Baseline_Demog_Ethnicity_Rec + (1|ID), 
                      family = beta_family(), data = data_paper2, 

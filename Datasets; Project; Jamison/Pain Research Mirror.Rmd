@@ -1613,7 +1613,7 @@ random_effects_df <- data.frame(
 random_lines <- random_effects_df %>%
   mutate(
     Intercept = fixed_intercept + RandomIntercept,
-    Slope = RandomSlope
+    Slope = fixed_slope + RandomSlope
   ) ## Random intercept lines prep
 
 sleep_range <- seq(
@@ -1683,6 +1683,90 @@ ggplot() +
 ```
 
 ```{r}
+# Define the range of Mood_c values
+sleep_range <- seq(
+  from = min(df_new$Mood_c, na.rm = TRUE),
+  to = max(df_new$Mood_c, na.rm = TRUE),
+  length.out = 100
+)
+
+# Create a new data frame with all combinations of ID and Mood_c
+newdata <- expand.grid(ID = unique(df_new$ID), Mood_c = sleep_range)
+
+# Obtain predicted values including random effects
+newdata$Predicted_GlobalImprovement <- predict(
+  model_moodimprove_rs,
+  newdata = newdata,
+  re.form = NULL  # Include all random effects
+)
+
+# Create a data frame for the fixed effects line
+fixed_line_df <- data.frame(Mood_c = sleep_range)
+fixed_line_df$Predicted_GlobalImprovement <- predict(
+  model_moodimprove_rs,
+  newdata = fixed_line_df,
+  re.form = NA  # Exclude random effects
+)
+
+# Plotting
+ggplot() +
+  geom_line(
+    data = newdata,
+    aes(x = Mood_c, y = Predicted_GlobalImprovement, group = ID),
+    color = "grey",
+    linetype = "dashed",
+    alpha = 0.5
+  ) +
+  geom_line(
+    data = fixed_line_df,
+    aes(x = Mood_c, y = Predicted_GlobalImprovement),
+    color = "black",
+    size = 1
+  ) +
+  scale_y_continuous(
+    limits = c(0, 10),
+    breaks = seq(0, 10, by = 1),
+    oob = scales::squish
+  ) +
+  scale_x_continuous(
+    limits = c(
+      min(floor(df_new$Mood_c), na.rm = TRUE),
+      max(ceiling(df_new$Mood_c), na.rm = TRUE)
+    ),
+    breaks = seq(
+      min(floor(df_new$Mood_c), na.rm = TRUE),
+      max(ceiling(df_new$Mood_c), na.rm = TRUE),
+      by = 1
+    ),
+    oob = scales::squish
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Random Slope Plot: Mood vs. Global Improvement",
+    x = "Mood (Centered)",
+    y = "Global Improvement"
+  ) +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(
+      size = 12,
+      hjust = 0.45,
+      margin = margin(b = 20)
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)
+    ),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+```
+
+
+```{r}
 ## Obj1: Not a graph; but test/analysis of random slopes effects (for 4 graphs above) to make sure that we have random slope effects that would justify the use of a figure showing not only bolded lines (fixed effect) but also the random slopes 
 AIC(model_painimprove, model_painimprove_rs)
 AIC(model_actimprove, model_actimprove_rs)
@@ -1708,6 +1792,7 @@ summary(model_PainImprove_PCSmod)
 
 ```{r, echo = FALSE, warning = FALSE}
 ## Style 1
+model_PainImprove_PCSmod <- lmer(GlobalImprovement ~ AvePain_c * B_Psych_PCS + (1 | ID), data = df_new)
 unique_IDs <- unique(df_new$ID) 
 new_data <- expand.grid(
   AvePain_c = seq(min(df_new$AvePain_c, na.rm = TRUE), max(df_new$AvePain_c, na.rm = TRUE), length.out = 100),
@@ -1997,4 +2082,201 @@ ggplot(new_data, aes(x = Mood_c, y = predicted_Improvement, group = interaction(
     panel.grid.minor = element_line(color = "lightgrey", size = 0.25),
     axis.line = element_line(color = "black", linewidth = 0.5)
   )
+
+###### .tif file
 ```
+
+
+```{r}
+## November 2024
+## Violin plot
+df_new_violin <- df_new |>
+  distinct(ID, .keep_all = TRUE) |>
+  select(c(ID, Sleep, Mood,
+         AvePain, ActivityInt)) |>
+  pivot_longer(cols = c("Sleep", "Mood",
+                        "AvePain", "ActivityInt"),
+               names_to = "Variable",
+               values_to = "Value")
+  
+df_new_violin |>
+  ggplot(aes(x = Variable, y = Value, fill = Variable, alpha = 0.7)) +
+  geom_violin() +
+  geom_jitter(color="black", size=0.4, alpha=0.9) +
+  scale_x_discrete(labels = c("Activity", "Pain", "Mood", "Sleep")) +
+  scale_fill_manual(values = c("#55B7E6", "#193E8F", "#E53528", "#F09739")) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  theme(element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),
+        plot.title = element_text(
+        size = 12,
+        hjust = 0.5,
+        margin = margin(b = 20)
+      ),
+      axis.title.x = element_text(
+        margin = margin(t = 15)
+      ),
+      axis.title.y = element_text(
+        margin = margin(r = 15)
+      ),
+      axis.text.x = element_text(
+        size = 25
+      ),
+      axis.text.y = element_text(
+        size = 25
+      )) + # Remove background grids
+  ggtitle("Violin plot of daily diary scores") +
+  xlab("Daily diary subject")
+
+df_new_violin |>
+  ggplot(aes(x = Value, y = Variable, fill = Variable)) +
+  ggdist::stat_halfeye(width = 0.7, .width = 0, justification = -0.2, alpha = 0.6, height = 0.7) +
+  geom_jitter(color = "lightgrey", alpha = 0.3, height = 0.05) +
+  geom_boxplot(width = 0.15, outlier.shape = NA, alpha = 0.5) +
+  scale_y_discrete(labels = c("Activity", "Pain", "Mood", "Sleep")) +
+  scale_fill_manual(values = c("#55B7E6", "#193E8F", "#E53528", "#F09739")) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(), 
+    axis.line = element_line(colour = "black"),
+    plot.title = element_text(
+      size = 12,
+      hjust = 0.5,
+      margin = margin(b = 20)
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)
+    ),
+    axis.text.x = element_text(
+      size = 25
+    ),
+    axis.text.y = element_text(
+      size = 25
+    )
+  ) +
+  ggtitle("Raincloud plot of daily diary scores") +
+  ylab("Daily diary subject") +
+  xlab("Score")
+
+```
+
+```{r}
+## Multilevel Linear Regression Figure - Lev1_ActivInterf and Daily Improve
+source("~/Desktop/PhD Biostatistics/R Packages/ggmultilevel/R/extract_model.R")
+source("~/Desktop/PhD Biostatistics/R Packages/ggmultilevel/R/plot_glmm.R")
+
+model_actimprove_c <- lmer(GlobalImprovement ~ ActivityInt_c + (ActivityInt_c|ID), data = df_new)
+model_sleep_c <- lmer(GlobalImprovement ~ Sleep_c + (Sleep_c|ID), data = df_new)
+model_pain_c <- lmer(GlobalImprovement ~ AvePain_c + (AvePain_c|ID), data = df_new)
+model_mood_c <- lmer(GlobalImprovement ~ Mood_c + (Mood_c|ID), data = df_new)
+plot_glmm(model = model_sleep_c, data = df_new, predictor = "Sleep_c", outcome = "GlobalImprovement",
+          grouping_var = "ID", x_num_size = 25, y_num_size = 25)
+plot_glmm(model = model_pain_c, data = df_new, predictor = "AvePain_c", outcome = "GlobalImprovement",
+          grouping_var = "ID", x_num_size = 25, y_num_size = 25)
+plot_glmm(model = model_mood_c, data = df_new, predictor = "Mood_c", outcome = "GlobalImprovement",
+          grouping_var = "ID", x_num_size = 25, y_num_size = 25)
+
+model_actimprove <- lmer(GlobalImprovement ~ ActivityInt + (ActivityInt|ID), data = df_new)
+```
+
+```{r}
+## Figs; Moderators (Catastro); Median split (non-centered)
+source("~/Desktop/PhD Biostatistics/R Packages/ggmultilevel/R/plot_glmm_interact_contcat.R")
+library(emmeans)
+
+df_new <- df_new |>
+  mutate(B_Psych_PCS_MedianInd = ifelse(B_Psych_PCS <= median(df_new_check$B_Psych_PCS), "Below Median", "Above Median"))
+
+model_sleep_cata <- lmer(GlobalImprovement ~ Sleep * B_Psych_PCS_MedianInd + (Sleep|ID), data = df_new)
+model_mood_cata <- lmer(GlobalImprovement ~ Mood * B_Psych_PCS_MedianInd + (Mood|ID), data = df_new)
+model_pain_cata <- lmer(GlobalImprovement ~ AvePain * B_Psych_PCS_MedianInd + (AvePain|ID), data = df_new)
+model_activ_cata <- lmer(GlobalImprovement ~ ActivityInt * B_Psych_PCS_MedianInd + (ActivityInt|ID), data = df_new)
+
+model_sleep_cata_c <- lmer(GlobalImprovement ~ Sleep_c * B_Psych_PCS_MedianInd + (Sleep_c|ID), data = df_new)
+model_mood_cata_c <- lmer(GlobalImprovement ~ Mood_c * B_Psych_PCS_MedianInd + (Mood_c|ID), data = df_new)
+model_pain_cata_c <- lmer(GlobalImprovement ~ AvePain_c * B_Psych_PCS_MedianInd + (AvePain_c|ID), data = df_new)
+model_activ_cata_c <- lmer(GlobalImprovement ~ ActivityInt_c * B_Psych_PCS_MedianInd + (ActivityInt_c|ID), data = df_new)
+
+plot_glmm_interact_contcat(model = model_sleep_cata, data = df_new, predictor_cont = "Sleep",
+                           predictor_cat = "B_Psych_PCS_MedianInd",
+                           outcome = "GlobalImprovement",
+                           grouping_var = "ID",
+                           family = "gaussian",
+                           x_num_size = 25, y_num_size = 25, colors = c("#104E8B", "#A52A2A"),
+                           legend_name = "PCS"
+                           )
+plot_glmm_interact_contcat(model = model_mood_cata, data = df_new, predictor_cont = "Mood",
+                           predictor_cat = "B_Psych_PCS_MedianInd",
+                           outcome = "GlobalImprovement",
+                           grouping_var = "ID",
+                           family = "gaussian",
+                           x_num_size = 25, y_num_size = 25, colors = c("#104E8B", "#A52A2A"),
+                           legend_name = "PCS"
+                           )
+plot_glmm_interact_contcat(model = model_pain_cata, data = df_new, predictor_cont = "AvePain",
+                           predictor_cat = "B_Psych_PCS_MedianInd",
+                           outcome = "GlobalImprovement",
+                           grouping_var = "ID",
+                           family = "gaussian",
+                           x_num_size = 25, y_num_size = 25, colors = c("#104E8B", "#A52A2A"),
+                           legend_name = "PCS"
+                           )
+plot_glmm_interact_contcat(model = model_activ_cata, data = df_new, predictor_cont = "ActivityInt",
+                           predictor_cat = "B_Psych_PCS_MedianInd",
+                           outcome = "GlobalImprovement",
+                           grouping_var = "ID",
+                           family = "gaussian",
+                           x_num_size = 25, y_num_size = 25, colors = c("#104E8B", "#A52A2A"),
+                           legend_name = "PCS"
+                           )
+
+plot_glmm_interact_contcat(model = model_sleep_cata_c, data = df_new, predictor_cont = "Sleep_c",
+                           predictor_cat = "B_Psych_PCS_MedianInd",
+                           outcome = "GlobalImprovement",
+                           grouping_var = "ID",
+                           family = "gaussian",
+                           x_num_size = 25, y_num_size = 25, colors = c("#104E8B", "#A52A2A"),
+                           legend_name = "PCS", y_limits = c(0, 11), y_breaks = seq(0, 11, by = 2),
+                           x_limits = c(-7, 7), x_breaks = seq(-7, 7, by = 2)
+                           )
+plot_glmm_interact_contcat(model = model_mood_cata_c, data = df_new, predictor_cont = "Mood_c",
+                           predictor_cat = "B_Psych_PCS_MedianInd",
+                           outcome = "GlobalImprovement",
+                           grouping_var = "ID",
+                           family = "gaussian",
+                           x_num_size = 25, y_num_size = 25, colors = c("#104E8B", "#A52A2A"),
+                           legend_name = "PCS", y_limits = c(0, 11), y_breaks = seq(0, 11, by = 2),
+                           x_limits = c(-7, 8), x_breaks = seq(-7, 8, by = 2)
+                           )
+plot_glmm_interact_contcat(model = model_pain_cata_c, data = df_new, predictor_cont = "AvePain_c",
+                           predictor_cat = "B_Psych_PCS_MedianInd",
+                           outcome = "GlobalImprovement",
+                           grouping_var = "ID",
+                           family = "gaussian",
+                           x_num_size = 25, y_num_size = 25, colors = c("#104E8B", "#A52A2A"),
+                           legend_name = "PCS", y_limits = c(0, 11), y_breaks = seq(0, 11, by = 2),
+                           x_limits = c(-8, 7), x_breaks = seq(-8, 7, by = 2)
+                           )
+plot_glmm_interact_contcat(model = model_activ_cata_c, data = df_new, predictor_cont = "ActivityInt_c",
+                           predictor_cat = "B_Psych_PCS_MedianInd",
+                           outcome = "GlobalImprovement",
+                           grouping_var = "ID",
+                           family = "gaussian",
+                           x_num_size = 25, y_num_size = 25, colors = c("#104E8B", "#A52A2A"),
+                           legend_name = "PCS", y_limits = c(0, 11), y_breaks = seq(0, 11, by = 2),
+                           x_limits = c(-9, 7), x_breaks = seq(-9, 7, by = 2), include_random = FALSE
+                           )
+```
+
+
+
+
+
