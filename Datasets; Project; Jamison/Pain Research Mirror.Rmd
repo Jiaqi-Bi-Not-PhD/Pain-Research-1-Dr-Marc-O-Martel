@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, include = FALSE}
+source("~/Desktop/PhD Biostatistics/R Packages/ggmultilevel/R/plot_glmm.R")
+source("~/Desktop/PhD Biostatistics/R Packages/ggmultilevel/R/plot_glmm_interact_contcat.R")
 # Two different files
 #setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Martel")
 #setwd("~/Desktop/Project; Daily diaries; 30-days/Pain-Research-1-Dr-Marc-O-Martel/Datasets; Project; Jamison")
@@ -492,13 +494,13 @@ confint(model_HADSimprove_ActivityInt)
 
 ## Graphs
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 # Graphs; Objective 1 
 # Obj1: Graph; Descriptive; Violon plots for 30-day aggregates; Sleep; Mood; Pain; ActivityInt; 
 # All on the same 0-10 scale; follow the order listed here.  
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 data_forgraph <- df_new |>
   group_by(ID) |>
   summarise(AggSleep = mean(Sleep, na.rm = TRUE),
@@ -550,11 +552,11 @@ data_forgraph |>
 
 \newpage
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 # Obj1: Graph; Multilevel linear reg slopes; Lagged effects; (1) Sleep/IV & Pain 
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 fixed_effect <- fixef(model_SleepPain)
 fixed_intercept <- fixed_effect["(Intercept)"]
 fixed_slope <- fixed_effect["LastDay_Sleep_c"] ## Fixed effects
@@ -639,11 +641,11 @@ ggplot() +
 
 \newpage
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 # Obj1: Graph; Multilevel linear reg slopes; Lagged effects; (2) Pain/IV & Sleep model_PainSleep   
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 fixed_effect <- fixef(model_PainSleep)
 fixed_intercept <- fixed_effect["(Intercept)"]
 fixed_slope <- fixed_effect["LastDay_PainAve_c"] ## Fixed effects
@@ -728,12 +730,12 @@ ggplot() +
 
 \newpage
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 # Obj1: Not a graph; but test/analysis of random slopes effects (for both graphs above) 
 # to make sure that we have random slope effects that would justify the use of a figure showing not only bolded lines (fixed effect) but also the random slopes 
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 model_SleepPain_rs <- lmer(Today_PainAve ~ LastDay_Sleep_c + (LastDay_Sleep_c|ID), data = df_new)
 
 fixed_effect <- fixef(model_SleepPain_rs)
@@ -857,7 +859,7 @@ fixed_line_df <- data.frame(
 
 \newpage
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ggplot() +
   geom_line(
     data = prediction_df,
@@ -909,23 +911,15 @@ ggplot() +
   )
 ```
 
-```{r}
-AIC(model_SleepPain_rs, model_SleepPain)
-AIC(model_PainSleep_rs, model_PainSleep)
-```
-
-Lower AIC indicates a better model fit. Both models with random slope have lower AIC than the randomn intercept only model. This validates our use of random slope plot. 
-
-\newpage
 
 ## Graphs; Objective 2 
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## Obj2: Graph; Descriptive: Plot for outcome; Day-to-day improvement
 ## Speghetti Plot
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## Obj2: Graph; Descriptive: Plot for outcome; Day-to-day improvement
 ## Speghetti Plot
 df_new |> ggplot(aes(x = Day, y = GlobalImprovement, group = ID)) +
@@ -972,13 +966,13 @@ df_new |> ggplot(aes(x = Day, y = GlobalImprovement, group = ID)) +
 # Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; Pain (IV) & Improvement 
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## model_painimprove: AvePain_c Random Intercept
 fixed_effect <- fixef(model_painimprove)
 fixed_intercept <- fixed_effect["(Intercept)"]
 fixed_slope <- fixed_effect["AvePain_c"] ## Fixed effects
 
-random_effects <- ranef(model_SleepPain)$ID
+random_effects <- ranef(model_painimprove)$ID
 random_effects_df <- data.frame(
   ID = rownames(random_effects),
   RandomIntercept = random_effects[, "(Intercept)"]
@@ -1062,96 +1056,29 @@ ggplot() +
 ## model_painimprove: AvePain_c Random Slope
 model_painimprove_rs <- lmer(GlobalImprovement ~ AvePain_c + (AvePain_c | ID), data = df_new)
 
-fixed_effect <- fixef(model_painimprove_rs)
-fixed_intercept <- fixed_effect["(Intercept)"]
-fixed_slope <- fixed_effect["AvePain_c"] ## Fixed effects
+plot_model1 <- plot_glmm(model = model_painimprove_rs, data = df_new, predictor = "AvePain_c", outcome = "GlobalImprovement", grouping_var = "ID",
+          family = "gaussian", y_scale = NULL,
+          x_limits = c(-6,6), y_limits = c(0,10),
+          x_label = NULL, y_label = NULL,
+          plot_title = NULL,
+          x_breaks = seq(-6,6,2), y_breaks = seq(0,10,2),
+          x_num_size = 25, y_num_size = 25)
 
-random_effects <- ranef(model_painimprove_rs)$ID
-random_effects_df <- data.frame(
-  ID = rownames(random_effects),
-  RandomIntercept = random_effects[, "(Intercept)"],
-  RandomSlope = random_effects[, "AvePain_c"]
-) ## Random effects
+ggsave(plot_model1, dpi=1200, filename = "Figure Mar 2025; MLM Plot; Pain vs improve.tif", bg="white")
 
-random_lines <- random_effects_df %>%
-  mutate(
-    Intercept = fixed_intercept + RandomIntercept,
-    Slope = RandomSlope
-  ) ## Random intercept lines prep
 
-sleep_range <- seq(
-  from = min(df_new$AvePain_c, na.rm = TRUE),
-  to = max(df_new$AvePain_c, na.rm = TRUE),
-  length.out = 100
-)  ## Define the range of predictors
 
-prediction_df <- random_lines %>%
-  crossing(AvePain_c = sleep_range) %>%
-  mutate(Today_PainAve = Intercept + Slope * AvePain_c)
 
-fixed_line_df <- data.frame(
-  AvePain_c = sleep_range,
-  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
-)
 
-ggplot() +
-  geom_line(
-    data = prediction_df,
-    aes(x = AvePain_c, y = Today_PainAve, group = ID),
-    color = "grey",
-    linetype = "dashed",
-    alpha = 0.5
-  ) +
-  geom_line(
-    data = fixed_line_df,
-    aes(x = AvePain_c, y = Today_PainAve),
-    color = "black",
-    size = 1
-  ) +
-  scale_y_continuous(
-    limits = c(0, 10),
-    breaks = seq(0, 10, by = 1),
-    oob = scales::squish  
-  ) +
-  scale_x_continuous(
-    limits = c(min(floor(df_new$AvePain_c), na.rm = TRUE), 
-               max(ceiling(df_new$AvePain_c), na.rm = TRUE)),
-    breaks = seq(min(floor(df_new$AvePain_c), na.rm = TRUE), 
-                 max(ceiling(df_new$AvePain_c), na.rm = TRUE), by = 1),
-    oob = scales::squish  
-  ) +
-  theme_minimal() +
-  labs(
-    title = "Random Slope Plot: Pain vs. Global Improvement",
-    x = "Average Pain (Centered)",
-    y = "Global Improvement"
-  ) +
-  theme(
-    text = element_text(size = 12),
-    plot.title = element_text(
-      size = 12,                      
-      hjust = 0.45,                    
-      margin = margin(b = 20)         
-    ),
-    axis.title.x = element_text(
-      margin = margin(t = 15)         
-    ),
-    axis.title.y = element_text(
-      margin = margin(r = 15)         
-    ),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.line = element_line(color = "black", linewidth = 0.5)
-  )
 ```
 
 \newpage
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; ActInter (IV) & Improvement
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## model_actimprove: ActivityInt_c Random Intercept
 fixed_effect <- fixef(model_actimprove)
 fixed_intercept <- fixed_effect["(Intercept)"]
@@ -1237,10 +1164,25 @@ ggplot() +
 
 \newpage
 
-```{r, echo = TRUE}
+```{r, echo = FALSE}
 ## model_actimprove: ActivityInt_c Random Slope
 model_actimprove_rs <- lmer(GlobalImprovement ~ ActivityInt_c + (ActivityInt_c | ID), data = df_new)
 
+plot_model1 <- plot_glmm(model = model_actimprove_rs, data = df_new, predictor = "ActivityInt_c", outcome = "GlobalImprovement", grouping_var = "ID",
+          family = "gaussian", y_scale = NULL,
+          x_limits = c(-6,6), y_limits = c(0,10),
+          x_label = NULL, y_label = NULL,
+          plot_title = NULL,
+          x_breaks = seq(-6,6,2), y_breaks = seq(0,10,2),
+          x_num_size = 25, y_num_size = 25)
+ggsave(plot_model1, dpi=1200, filename = "Figure Mar 2025; MLM Plot; Activity vs improve.tif", bg="white")
+
+```
+
+
+
+
+```{r, include = FALSE, eval = FALSE, echo = FALSE}
 fixed_effect <- fixef(model_actimprove_rs)
 fixed_intercept <- fixed_effect["(Intercept)"]
 fixed_slope <- fixed_effect["ActivityInt_c"] ## Fixed effects
@@ -1326,11 +1268,11 @@ ggplot() +
 
 \newpage
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 # Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; Sleep (IV) & Improvement
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## model_sleepimprove: Sleep_c Random Intercept
 fixed_effect <- fixef(model_sleepimprove)
 fixed_intercept <- fixed_effect["(Intercept)"]
@@ -1420,96 +1362,24 @@ ggplot() +
 ## model_sleepimprove: Sleep_c Random Slope
 model_sleepimprove_rs <- lmer(GlobalImprovement ~ Sleep_c + (Sleep_c | ID), data = df_new)
 
-fixed_effect <- fixef(model_sleepimprove_rs)
-fixed_intercept <- fixed_effect["(Intercept)"]
-fixed_slope <- fixed_effect["Sleep_c"] ## Fixed effects
+plot_model1 <- plot_glmm(model = model_sleepimprove_rs, data = df_new, predictor = "Sleep_c", outcome = "GlobalImprovement", grouping_var = "ID",
+          family = "gaussian", y_scale = NULL,
+          x_limits = c(-6,6), y_limits = c(0,10),
+          x_label = NULL, y_label = NULL,
+          plot_title = NULL,
+          x_breaks = seq(-6,6,2), y_breaks = seq(0,10,2),
+          x_num_size = 25, y_num_size = 25)
+ggsave(plot_model1, dpi=1200, filename = "Figure Mar 2025; MLM Plot; Sleep vs improve.tif", bg="white")
 
-random_effects <- ranef(model_sleepimprove_rs)$ID
-random_effects_df <- data.frame(
-  ID = rownames(random_effects),
-  RandomIntercept = random_effects[, "(Intercept)"],
-  RandomSlope = random_effects[, "Sleep_c"]
-) ## Random effects
-
-random_lines <- random_effects_df %>%
-  mutate(
-    Intercept = fixed_intercept + RandomIntercept,
-    Slope = RandomSlope
-  ) ## Random intercept lines prep
-
-sleep_range <- seq(
-  from = min(df_new$Sleep_c, na.rm = TRUE),
-  to = max(df_new$Sleep_c, na.rm = TRUE),
-  length.out = 100
-)  ## Define the range of predictors
-
-prediction_df <- random_lines %>%
-  crossing(Sleep_c = sleep_range) %>%
-  mutate(Today_PainAve = Intercept + Slope * Sleep_c)
-
-fixed_line_df <- data.frame(
-  Sleep_c = sleep_range,
-  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
-)
-
-ggplot() +
-  geom_line(
-    data = prediction_df,
-    aes(x = Sleep_c, y = Today_PainAve, group = ID),
-    color = "grey",
-    linetype = "dashed",
-    alpha = 0.5
-  ) +
-  geom_line(
-    data = fixed_line_df,
-    aes(x = Sleep_c, y = Today_PainAve),
-    color = "black",
-    size = 1
-  ) +
-  scale_y_continuous(
-    limits = c(0, 10),
-    breaks = seq(0, 10, by = 1),
-    oob = scales::squish  
-  ) +
-  scale_x_continuous(
-    limits = c(min(floor(df_new$Sleep_c), na.rm = TRUE), 
-               max(ceiling(df_new$Sleep_c), na.rm = TRUE)),
-    breaks = seq(min(floor(df_new$Sleep_c), na.rm = TRUE), 
-                 max(ceiling(df_new$Sleep_c), na.rm = TRUE), by = 1),
-    oob = scales::squish  
-  ) +
-  theme_minimal() +
-  labs(
-    title = "Random Slope Plot: Sleep vs. Global Improvement",
-    x = "Sleep (Centered)",
-    y = "Global Improvement"
-  ) +
-  theme(
-    text = element_text(size = 12),
-    plot.title = element_text(
-      size = 12,                      
-      hjust = 0.45,                    
-      margin = margin(b = 20)         
-    ),
-    axis.title.x = element_text(
-      margin = margin(t = 15)         
-    ),
-    axis.title.y = element_text(
-      margin = margin(r = 15)         
-    ),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.line = element_line(color = "black", linewidth = 0.5)
-  )
 ```
 
 \newpage
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 # Obj2: Graph; Multilevel linear reg slopes; random intercept & random slope; Mood (IV) & Improvement
 ```
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## model_moodimprove: Mood_c Random Intercept
 fixed_effect <- fixef(model_moodimprove)
 fixed_intercept <- fixed_effect["(Intercept)"]
@@ -1599,90 +1469,17 @@ ggplot() +
 ## model_moodimprove: Mood_c Random Slope
 model_moodimprove_rs <- lmer(GlobalImprovement ~ Mood_c + (Mood_c | ID), data = df_new)
 
-fixed_effect <- fixef(model_moodimprove_rs)
-fixed_intercept <- fixed_effect["(Intercept)"]
-fixed_slope <- fixed_effect["Mood_c"] ## Fixed effects
-
-random_effects <- ranef(model_moodimprove_rs)$ID
-random_effects_df <- data.frame(
-  ID = rownames(random_effects),
-  RandomIntercept = random_effects[, "(Intercept)"],
-  RandomSlope = random_effects[, "Mood_c"]
-) ## Random effects
-
-random_lines <- random_effects_df %>%
-  mutate(
-    Intercept = fixed_intercept + RandomIntercept,
-    Slope = fixed_slope + RandomSlope
-  ) ## Random intercept lines prep
-
-sleep_range <- seq(
-  from = min(df_new$Mood_c, na.rm = TRUE),
-  to = max(df_new$Mood_c, na.rm = TRUE),
-  length.out = 100
-)  ## Define the range of predictors
-
-prediction_df <- random_lines %>%
-  crossing(Mood_c = sleep_range) %>%
-  mutate(Today_PainAve = Intercept + Slope * Mood_c)
-
-fixed_line_df <- data.frame(
-  Mood_c = sleep_range,
-  Today_PainAve = fixed_intercept + fixed_slope * sleep_range
-)
-
-ggplot() +
-  geom_line(
-    data = prediction_df,
-    aes(x = Mood_c, y = Today_PainAve, group = ID),
-    color = "grey",
-    linetype = "dashed",
-    alpha = 0.5
-  ) +
-  geom_line(
-    data = fixed_line_df,
-    aes(x = Mood_c, y = Today_PainAve),
-    color = "black",
-    size = 1
-  ) +
-  scale_y_continuous(
-    limits = c(0, 10),
-    breaks = seq(0, 10, by = 1),
-    oob = scales::squish  
-  ) +
-  scale_x_continuous(
-    limits = c(min(floor(df_new$Mood_c), na.rm = TRUE), 
-               max(ceiling(df_new$Mood_c), na.rm = TRUE)),
-    breaks = seq(min(floor(df_new$Mood_c), na.rm = TRUE), 
-                 max(ceiling(df_new$Mood_c), na.rm = TRUE), by = 1),
-    oob = scales::squish  
-  ) +
-  theme_minimal() +
-  labs(
-    title = "Random Slope Plot: Mood vs. Global Improvement",
-    x = "Mood (Centered)",
-    y = "Global Improvement"
-  ) +
-  theme(
-    text = element_text(size = 12),
-    plot.title = element_text(
-      size = 12,                      
-      hjust = 0.45,                    
-      margin = margin(b = 20)         
-    ),
-    axis.title.x = element_text(
-      margin = margin(t = 15)         
-    ),
-    axis.title.y = element_text(
-      margin = margin(r = 15)         
-    ),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.line = element_line(color = "black", linewidth = 0.5)
-  )
+plot_model1 <- plot_glmm(model = model_moodimprove_rs, data = df_new, predictor = "Mood_c", outcome = "GlobalImprovement", grouping_var = "ID",
+          family = "gaussian", y_scale = NULL,
+          x_limits = c(-6,6), y_limits = c(0,10),
+          x_label = NULL, y_label = NULL,
+          plot_title = NULL,
+          x_breaks = seq(-6,6,2), y_breaks = seq(0,10,2),
+          x_num_size = 25, y_num_size = 25)
+ggsave(plot_model1, dpi=1200, filename = "Figure Mar 2025; MLM Plot; Mood vs improve.tif", bg="white")
 ```
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 # Define the range of Mood_c values
 sleep_range <- seq(
   from = min(df_new$Mood_c, na.rm = TRUE),
@@ -1708,7 +1505,6 @@ fixed_line_df$Predicted_GlobalImprovement <- predict(
   re.form = NA  # Exclude random effects
 )
 
-# Plotting
 ggplot() +
   geom_line(
     data = newdata,
@@ -1765,7 +1561,6 @@ ggplot() +
   )
 ```
 
-
 ```{r}
 ## Obj1: Not a graph; but test/analysis of random slopes effects (for 4 graphs above) to make sure that we have random slope effects that would justify the use of a figure showing not only bolded lines (fixed effect) but also the random slopes 
 AIC(model_painimprove, model_painimprove_rs)
@@ -1784,13 +1579,58 @@ Random slope model always has lower AICs among these four models.
 # as a function of Lev2_PCS (moderator) 
 ```
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 # Graphs; Objective 2.2 (Moderators of day-to-day perceived improvements)
+library(ggeffects)
 model_PainImprove_PCSmod <- lmer(GlobalImprovement ~ AvePain_c * B_Psych_PCS + (1 | ID), data = df_new)
 summary(model_PainImprove_PCSmod)
+
+df_pred <- ggpredict(
+  model_PainImprove_PCSmod,
+  terms = c(
+    "AvePain_c [-40:40]",  
+    "B_Psych_PCS [10,20,30,40,50]"
+  )
+)
+
+my_colors <- colorRampPalette(c("#299D8F", "#D87659"))(5)
+
+plot2 <- ggplot(df_pred, aes(x = x, y = predicted)) +
+  geom_line(aes(color = group), size = 1.5) +
+  coord_cartesian(
+    xlim = c(-10, 10),                     
+    ylim = c(0,10)  
+  ) +
+  scale_y_continuous(
+    breaks = seq(0,10, by = 2)
+  ) +
+  scale_color_manual(
+    breaks = c("5", "4", "3", "2", "1"),
+    labels = c("10", "20", "30", "40", "50"),
+    values = my_colors
+  ) +
+  labs(
+    title = "Moderation Plot: Global Improvement vs. Average Pain",
+    x = "AvePain_c",
+    y = "Global Improvement",
+    color = "B_Psych_PCS"
+  ) +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(size = 12, hjust = 0.5, margin = margin(b = 20)),
+    axis.title.x = element_text(margin = margin(t = 15)),
+    axis.title.y = element_text(margin = margin(r = 15)),
+    axis.text.x = element_text(size = 25),
+    axis.text.y = element_text(size = 25),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
 ```
 
-```{r, echo = FALSE, warning = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## Style 1
 model_PainImprove_PCSmod <- lmer(GlobalImprovement ~ AvePain_c * B_Psych_PCS + (1 | ID), data = df_new)
 unique_IDs <- unique(df_new$ID) 
@@ -1846,32 +1686,28 @@ ggplot(new_data, aes(x = AvePain_c, y = predicted_Improvement, group = interacti
 ```
 
 ```{r, echo = FALSE, including = FALSE, eval = FALSE}
-## Style 2
+## Style 2****
 model_PainImprove_PCSmod <- lmer(GlobalImprovement ~ AvePain_c * B_Psych_PCS + (1 | ID), data = df_new)
-
-# Extract percentiles of the moderator (PCS)
 percentiles <- quantile(df_new$B_Psych_PCS, probs = c(0, 0.25, 0.5, 0.75, 1))
-
-# Create new data for prediction with different moderator values
 new_data <- expand.grid(AvePain_c = seq(min(df_new$AvePain_c, na.rm = TRUE), max(df_new$AvePain_c, na.rm = TRUE), length.out = 100),
                         B_Psych_PCS = percentiles,
-                        ID = unique(df_new$ID)[1]) # Use the first ID as a reference
+                        ID = unique(df_new$ID)[1]) 
 
-# Make predictions using the fitted model
 predictions <- predict(model_PainImprove_PCSmod, newdata = new_data, re.form = NULL)
 
-# Add predictions to the new data
+## Add predictions to the new data
 new_data$GlobalImprovement <- predictions
 
-# Plot the graph
-ggplot(df_new, aes(x = AvePain_c, y = GlobalImprovement, color = B_Psych_PCS)) +
-  geom_line(data = new_data, aes(group = B_Psych_PCS), size = 1) +
-  scale_color_gradientn(colors = c("darkorchid", "darkblue", "steelblue", "mediumseagreen", "yellow"),
+a <- ggplot(df_new, aes(x = AvePain_c, y = GlobalImprovement, color = B_Psych_PCS)) +
+  geom_line(data = new_data, aes(group = B_Psych_PCS), size = 2.5) +
+  scale_color_gradientn(colors = c("#299D8F", "#E9C46A", "#D87659", "#5382ba", "#b5aad5"),
                         name = "Moderator (PCS)",
                         limits = range(df_new$B_Psych_PCS)) +
   labs(title = "Cross-Level Moderation: Pain Intensity and Improvement by PCS",
        x = "Pain Intensity",
        y = "Global Improvement") +
+  scale_x_continuous(limits = c(-6, 6), breaks = seq(-6, 6, by = 2)) +
+  scale_y_continuous(limits = c(0, 10), breaks = seq(0, 10, by = 2)) +
   theme_minimal() +
   theme(
     text = element_text(size = 12),
@@ -1881,33 +1717,67 @@ ggplot(df_new, aes(x = AvePain_c, y = GlobalImprovement, color = B_Psych_PCS)) +
       margin = margin(b = 20)         
     ),
     axis.title.x = element_text(
-      margin = margin(t = 15)         
+      margin = margin(t = 20)         
     ),
     axis.title.y = element_text(
-      margin = margin(r = 15)         
+      margin = margin(r = 20)         
     ),
-    panel.grid.major = element_line(color = "lightgrey", size = 0.25),
-    panel.grid.minor = element_line(color = "lightgrey", size = 0.25),
+    axis.text.x = element_text(size = 25),  
+    axis.text.y = element_text(size = 25),  
+    panel.grid.major = element_line(color = "lightgrey", size = 0),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0),
     axis.line = element_line(color = "black", linewidth = 0.5)
   )
 
-
+ggsave(a, dpi=1200, filename = "Figure Mar 2025; Moderation plot; pain and global improve by PCS.tif", bg="white")
 
 ```
 
 \newpage
 
 ```{r}
-# Lev1_ActivityInt (IV) and Lev1_improvement (outcome) 
-# as a function of Lev2_PCS (moderator) 
-```
-
-```{r}
+## Style 2 for Activity Intensity model ****
 model_ActImprove_PCSmod <- lmer(GlobalImprovement ~ ActivityInt_c * B_Psych_PCS + (1 | ID), data = df_new)
 summary(model_ActImprove_PCSmod)
+
+percentiles <- quantile(df_new$B_Psych_PCS, probs = c(0, 0.25, 0.5, 0.75, 1))
+
+new_data_act <- expand.grid(ActivityInt_c = seq(min(df_new$ActivityInt_c, na.rm = TRUE),max(df_new$ActivityInt_c, na.rm = TRUE),
+                                                length.out = 100),
+                            B_Psych_PCS = percentiles,
+                            ID = unique(df_new$ID)[1])  
+
+predictions_act <- predict(model_ActImprove_PCSmod, newdata = new_data_act, re.form = NULL)
+new_data_act$GlobalImprovement <- predictions_act
+
+a <- ggplot(df_new, aes(x = ActivityInt_c, y = GlobalImprovement, color = B_Psych_PCS)) +
+  geom_line(data = new_data_act, aes(group = B_Psych_PCS), size = 2.5) +
+  scale_color_gradientn(colors = c("#299D8F", "#E9C46A", "#D87659", "#5382ba", "#b5aad5"),
+                        name = "Moderator (PCS)",
+                        limits = range(df_new$B_Psych_PCS)) +
+  labs(title = "Cross-Level Moderation: Activity Intensity and Improvement by PCS",
+       x = "Activity Intensity",
+       y = "Global Improvement") +
+  scale_x_continuous(limits = c(-6,6),
+                     breaks = seq(-6, 6, 2)) +
+  scale_y_continuous(limits = c(0, 10), breaks = seq(0, 10, by = 2)) +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(size = 12, hjust = 0.45, margin = margin(b = 20)),
+    axis.title.x = element_text(margin = margin(t = 20)),
+    axis.title.y = element_text(margin = margin(r = 20)),
+    axis.text.x = element_text(size = 25),
+    axis.text.y = element_text(size = 25),
+    panel.grid.major = element_line(color = "lightgrey", size = 0),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+ggsave(a, dpi=1200, filename = "Figure Mar 2025; Moderation plot; Activity intensity and global improve by PCS.tif", bg="white")
 ```
 
-```{r, echo = FALSE, warning = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## Style 1
 unique_IDs <- unique(df_new$ID) 
 new_data <- expand.grid(
@@ -1969,7 +1839,7 @@ model_SleepImprove_PCSmod <- lmer(GlobalImprovement ~ LastDay_Sleep_c * B_Psych_
 summary(model_SleepImprove_PCSmod)
 ```
 
-```{r, echo = FALSE, warning = FALSE}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## Style 1
 unique_IDs <- unique(df_new$ID) 
 new_data <- expand.grid(
@@ -2027,11 +1897,97 @@ ggplot(new_data, aes(x = LastDay_Sleep_c, y = predicted_Improvement, group = int
 ```{r}
 # Lev1_Mood (IV) and Lev1_improvement (outcome) 
 # as a function of Lev2_PCS (moderator)
+## Style 2 for Mood model ****
 model_MoodImprove_PCSmod <- lmer(GlobalImprovement ~ Mood_c * B_Psych_PCS + (1 | ID), data = df_new)
 summary(model_MoodImprove_PCSmod)
+
+percentiles <- quantile(df_new$B_Psych_PCS, probs = c(0, 0.25, 0.5, 0.75, 1))
+
+new_data_mood <- expand.grid(Mood_c = seq(min(df_new$Mood_c, na.rm = TRUE),
+                                          max(df_new$Mood_c, na.rm = TRUE),
+                                          length.out = 100),
+                             B_Psych_PCS = percentiles,
+                             ID = unique(df_new$ID)[1])  
+
+predictions_mood <- predict(model_MoodImprove_PCSmod, newdata = new_data_mood, re.form = NULL)
+new_data_mood$GlobalImprovement <- predictions_mood
+
+a <- ggplot(df_new, aes(x = Mood_c, y = GlobalImprovement, color = B_Psych_PCS)) +
+  geom_line(data = new_data_mood, aes(group = B_Psych_PCS), size = 2.5) +
+  scale_color_gradientn(colors = c("#299D8F", "#E9C46A", "#D87659", "#5382ba", "#b5aad5"),
+                        name = "Moderator (PCS)",
+                        limits = range(df_new$B_Psych_PCS)) +
+  labs(title = "Cross-Level Moderation: Mood and Improvement by PCS",
+       x = "Mood",
+       y = "Global Improvement") +
+  scale_x_continuous(limits = c(-6, 6),
+                     breaks = seq(-6, 6, 2)) +
+  scale_y_continuous(limits = c(0, 10), breaks = seq(0, 10, by = 2)) +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(size = 12, hjust = 0.45, margin = margin(b = 20)),
+    axis.title.x = element_text(margin = margin(t = 20)),
+    axis.title.y = element_text(margin = margin(r = 20)),
+    axis.text.x = element_text(size = 25),
+    axis.text.y = element_text(size = 25),
+    panel.grid.major = element_line(color = "lightgrey", size = 0),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+ggsave(a, dpi=1200, filename = "Figure Mar 2025; Moderation plot; Mood and global improve by PCS.tif", bg="white")
+
 ```
 
-```{r, echo = FALSE, warning = FALSE}
+\newpage
+
+```{r}
+# Lev1_Sleep (IV) and Lev1_improvement (outcome) 
+# as a function of Lev2_PCS (moderator)
+## Style 2 for Sleep model ****
+model_sleep_c <- lmer(GlobalImprovement ~ Sleep_c * B_Psych_PCS + (1 | ID), data = df_new)
+summary(model_sleep_c)
+
+percentiles <- quantile(df_new$B_Psych_PCS, probs = c(0, 0.25, 0.5, 0.75, 1))
+
+new_data_sleep <- expand.grid(Sleep_c = seq(min(df_new$Sleep_c, na.rm = TRUE),
+                                            max(df_new$Sleep_c, na.rm = TRUE),
+                                            length.out = 100),
+                              B_Psych_PCS = percentiles,
+                              ID = unique(df_new$ID)[1])  
+
+predictions_sleep <- predict(model_sleep_c, newdata = new_data_sleep, re.form = NULL)
+new_data_sleep$GlobalImprovement <- predictions_sleep
+
+a <- ggplot(df_new, aes(x = Sleep_c, y = GlobalImprovement, color = B_Psych_PCS)) +
+  geom_line(data = new_data_sleep, aes(group = B_Psych_PCS), size = 2.5) +
+  scale_color_gradientn(colors = c("#299D8F", "#E9C46A", "#D87659", "#5382ba", "#b5aad5"),
+                        name = "Moderator (PCS)",
+                        limits = range(df_new$B_Psych_PCS)) +
+  labs(title = "Cross-Level Moderation: Sleep and Improvement by PCS",
+       x = "Sleep",
+       y = "Global Improvement") +
+  scale_x_continuous(limits = c(min(df_new$Sleep_c, na.rm = TRUE), max(df_new$Sleep_c, na.rm = TRUE)),
+                     breaks = scales::pretty_breaks(n = 10)) +
+  scale_y_continuous(limits = c(0, 10), breaks = seq(0, 10, by = 2)) +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(size = 12, hjust = 0.45, margin = margin(b = 20)),
+    axis.title.x = element_text(margin = margin(t = 20)),
+    axis.title.y = element_text(margin = margin(r = 20)),
+    axis.text.x = element_text(size = 25),
+    axis.text.y = element_text(size = 25),
+    panel.grid.major = element_line(color = "lightgrey", size = 0),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+ggsave(a, dpi=1200, filename = "Figure Mar 2025; Moderation plot; Sleep and global improve by PCS.tif", bg="white")
+```
+
+
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## Style 1
 unique_IDs <- unique(df_new$ID) 
 new_data <- expand.grid(
@@ -2168,7 +2124,7 @@ df_new_violin |>
 
 ```
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## Multilevel Linear Regression Figure - Lev1_ActivInterf and Daily Improve
 source("~/Desktop/PhD Biostatistics/R Packages/ggmultilevel/R/extract_model.R")
 source("~/Desktop/PhD Biostatistics/R Packages/ggmultilevel/R/plot_glmm.R")
@@ -2187,7 +2143,7 @@ plot_glmm(model = model_mood_c, data = df_new, predictor = "Mood_c", outcome = "
 model_actimprove <- lmer(GlobalImprovement ~ ActivityInt + (ActivityInt|ID), data = df_new)
 ```
 
-```{r}
+```{r, echo = FALSE, warning = FALSE, eval = FALSE}
 ## Figs; Moderators (Catastro); Median split (non-centered)
 source("~/Desktop/PhD Biostatistics/R Packages/ggmultilevel/R/plot_glmm_interact_contcat.R")
 library(emmeans)
@@ -2277,6 +2233,45 @@ plot_glmm_interact_contcat(model = model_activ_cata_c, data = df_new, predictor_
 ```
 
 
+```{r}
+## Density plot for PCS
+library(ggplot2)
+library(dplyr)
+df_level2 <- df_new |> distinct(ID, .keep_all = TRUE)
+a <- ggplot(df_level2, aes(x = B_Psych_PCS)) +
+  geom_density(fill = "#99d6ff", color = "black") +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(), 
+    axis.line = element_line(colour = "black"),
+    plot.title = element_text(
+      size = 12,
+      hjust = 0.5,
+      margin = margin(b = 20)
+    ),
+    axis.title.x = element_text(
+      margin = margin(t = 15)
+    ),
+    axis.title.y = element_text(
+      margin = margin(r = 15)
+    ),
+    axis.text.x = element_text(
+      size = 25
+    ),
+    axis.text.y = element_text(
+      size = 25
+    )
+  ) +
+  ggtitle("Density Plot for Level 2: B_Psych_PCS") +
+  xlab("B_Psych_PCS") +
+  ylab("Density")
+
+ggsave(a, dpi=1200, filename = "Figure Mar 2025; Density plot; PCS density.tif", bg="white")
+
+```
 
 
 
