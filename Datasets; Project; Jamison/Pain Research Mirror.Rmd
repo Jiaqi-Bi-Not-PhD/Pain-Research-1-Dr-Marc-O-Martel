@@ -1,7 +1,7 @@
 ---
 title: "Pain Research - Dr. Jamison Data"
 author: "Jiaqi Bi"
-date: "2023-09-21"
+date: "2025-03-25"
 output: pdf_document
 ---
 
@@ -202,9 +202,9 @@ df_new <- df_new |>
 
 ```
 
-## Objective 1.1 Day-to-day (Concurrent) associations
+## Objective 1.1 Day-to-day (Concurrent) associations (No longer our objective)
 
-```{r}
+```{r, echo = FALSE, eval = FALSE, include = FALSE}
 #Analyses; Day-to-day; Univariate multilevel linear regressions 
 #- Outcome: Lev1 daily pain intensity 
 #- Examine Lev1 association; between daily mood and pain (Same-day Lev1 units) 
@@ -248,9 +248,9 @@ summary(model_Pain6)
 confint(model_Pain6)
 ```
 
-## Objective 1.2: Time-lag effects 
+## Objective 1.2: Time-lag effects (No longer our objective)
 
-```{r}
+```{r, echo = FALSE, eval = FALSE, include = FALSE}
 # Yesterday sleep -> Toady Pain
 # No lag needed here - LastDay_Sleep_c is equivalent to Sleep_c
 model_SleepPain <- lmer(Today_PainAve ~ LastDay_Sleep_c + (1|ID), data = df_new)
@@ -275,18 +275,22 @@ confint(model_PainSleep)
 model_painimprove <- lmer(GlobalImprovement ~ AvePain_c + (1|ID), data = df_new)
 summary(model_painimprove)
 confint(model_painimprove)
+icc(model_painimprove)
 # Examine Lev1 association; between daily mood and perceived improvement (Same-day Lev1 units) 
 model_moodimprove <- lmer(GlobalImprovement ~ Mood_c + (1|ID), data = df_new)
 summary(model_moodimprove)
 confint(model_moodimprove)
+icc(model_moodimprove)
 # Examine Lev1 association; between daily sleep and perceived improvement (Same-day Lev1 unit) 
 model_sleepimprove <- lmer(GlobalImprovement ~ Sleep_c + (1|ID), data = df_new)
 summary(model_sleepimprove)
 confint(model_sleepimprove)
+icc(model_sleepimprove)
 # Examine Lev1 association; between daily ActivityInt and perceived improvement (Same-day Lev1 unit)
 model_actimprove <- lmer(GlobalImprovement ~ ActivityInt_c + (1|ID), data = df_new)
 summary(model_actimprove)
 confint(model_actimprove)
+icc(model_actimprove)
 # All these multlev must be done with Lev1 centered data 
 
 ```
@@ -298,6 +302,7 @@ confint(model_actimprove)
 model_compimprove <- lmer(GlobalImprovement ~ Sleep_c + AvePain_c + Mood_c + ActivityInt_c + (1|ID), data = df_new)
 summary(model_compimprove)
 confint(model_compimprove)
+icc(model_compimprove)
 # All these multlev must be done with Lev1 centered data 
 # Perhaps get some colinearity indicator to know to what extent colinearity is an issue 
 collinear_test <- check_collinearity(model_compimprove)
@@ -318,14 +323,17 @@ We have low multicollinearity in this case!
 model_genderimprove <- lmer(GlobalImprovement ~ B_Demog_Gender + (1|ID), data = df_new)
 summary(model_genderimprove)
 confint(model_genderimprove)
+icc(model_genderimprove)
 # B_Demog_Ethnicity 
 model_ethnimprove <- lmer(GlobalImprovement ~ B_Demog_Ethnicity + (1|ID), data = df_new)
 summary(model_ethnimprove)
 confint(model_ethnimprove)
+icc(model_ethnimprove)
 # B_Demog_Age
 model_ageimprove <- lmer(GlobalImprovement ~ B_Demog_Age + (1|ID), data = df_new)
 summary(model_ageimprove) # Significant! 
 confint(model_ageimprove)
+icc(model_ageimprove)
 ```
 
 Age tends to be associated with the improvement, older patients have better improvements. 
@@ -336,60 +344,74 @@ Age tends to be associated with the improvement, older patients have better impr
 model_paindurimprove <- lmer(GlobalImprovement ~ B_Clin_PainDur + (1|ID), data = df_new)
 summary(model_paindurimprove)
 confint(model_paindurimprove)
+icc(model_paindurimprove)
 # B_Clin_BMI"
 model_BMIimprove <- lmer(GlobalImprovement ~ B_Clin_BMI + (1|ID), data = df_new)
 summary(model_BMIimprove)
 confint(model_BMIimprove)
+icc(model_BMIimprove)
 # All the medications below; 
 # separately/independently; association with perceived improivement; Univariate 
 # B_Med_Tramadol 
 model_Tramadolimprove <- lmer(GlobalImprovement ~ B_Med_Tramadol + (1|ID), data = df_new)
 summary(model_Tramadolimprove) # Significant!
 confint(model_Tramadolimprove)
+icc(model_Tramadolimprove)
 # B_Med_Suboxone 
 model_Suboxoneimprove <- lmer(GlobalImprovement ~ B_Med_Suboxone + (1|ID), data = df_new)
 summary(model_Suboxoneimprove)
 confint(model_Suboxoneimprove)
+icc(model_Suboxoneimprove)
 # B_Med_Marijuana 
 model_Marijuanaimprove <- lmer(GlobalImprovement ~ B_Med_Marijuana + (1|ID), data = df_new)
 summary(model_Marijuanaimprove)
 confint(model_Marijuanaimprove)
+icc(model_Marijuanaimprove)
 # B_Med_NSAIDS 
 model_NSAIDSimprove <- lmer(GlobalImprovement ~ B_Med_NSAIDS + (1|ID), data = df_new)
 summary(model_NSAIDSimprove)
 confint(model_NSAIDSimprove)
+icc(model_NSAIDSimprove)
 # B_Med_Anticonvulsant 
 model_Anticonimprove <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant + (1|ID), data = df_new)
 summary(model_Anticonimprove) # Significant!
 confint(model_Anticonimprove)
+icc(model_Anticonimprove)
 # B_Med_MuscleRelaxer 
 model_MuscleRelimprove <- lmer(GlobalImprovement ~ B_Med_MuscleRelaxer + (1|ID), data = df_new)
 summary(model_MuscleRelimprove)
 confint(model_MuscleRelimprove)
+icc(model_MuscleRelimprove)
 # B_Med_Antidepressants 
 model_Antidepimprove <- lmer(GlobalImprovement ~ B_Med_Antidepressants + (1|ID), data = df_new)
 summary(model_Antidepimprove)
 confint(model_Antidepimprove)
+icc(model_Antidepimprove)
 # B_Med_Benzodiazepine 
 model_Benzoimprove <- lmer(GlobalImprovement ~ B_Med_Benzodiazepine + (1|ID), data = df_new)
 summary(model_Benzoimprove)
 confint(model_Benzoimprove)
+icc(model_Benzoimprove)
 # B_Med_Stimulants 
 model_Stimuimprove <- lmer(GlobalImprovement ~ B_Med_Stimulants + (1|ID), data = df_new)
 summary(model_Stimuimprove)
 confint(model_Stimuimprove)
+icc(model_Stimuimprove)
 # B_Med_OtherMed 
 model_OtherMedimprove <- lmer(GlobalImprovement ~ B_Med_OtherMed + (1|ID), data = df_new)
 summary(model_OtherMedimprove)
 confint(model_OtherMedimprove)
+icc(model_OtherMedimprove)
 # B_Med_OTC 
 model_OTCimprove <- lmer(GlobalImprovement ~ B_Med_OTC + (1|ID), data = df_new)
 summary(model_OTCimprove)
 confint(model_OTCimprove)
+icc(model_OTCimprove)
 # B_Med_OpioidsYN
 model_Opioid_improve <- lmer(GlobalImprovement ~ B_Med_OpioidsYN + (1|ID), data = df_new)
 summary(model_Opioid_improve) # Significant! 
 confint(model_Opioid_improve)
+icc(model_Opioid_improve)
  
 ```
 
@@ -401,10 +423,12 @@ B_Med_Tramadol, B_Med_Anticonvulsant, and B_Med_OpioidsYN are associated with th
 model_PCSimprove <- lmer(GlobalImprovement ~ B_Psych_PCS + (1|ID), data = df_new)
 summary(model_PCSimprove) # Significant!
 confint(model_PCSimprove)
+icc(model_PCSimprove)
 # B_Psych_HADS"
 model_HADSimprove <- lmer(GlobalImprovement ~ B_Psych_HADS + (1|ID), data = df_new)
 summary(model_HADSimprove) # Significant! 
 confint(model_HADSimprove)
+icc(model_HADSimprove)
 
 ```
 
@@ -416,79 +440,170 @@ Both are significant!
 model_ageimprove_Sleep <- lmer(GlobalImprovement ~ B_Demog_Age*Sleep_c + (1|ID), data = df_new)
 summary(model_ageimprove_Sleep) 
 confint(model_ageimprove_Sleep)
+icc(model_ageimprove_Sleep)
+
 model_Tramadolimprove_Sleep <- lmer(GlobalImprovement ~ B_Med_Tramadol*Sleep_c + (1|ID), data = df_new)
 summary(model_Tramadolimprove_Sleep) 
 confint(model_Tramadolimprove_Sleep)
+icc(model_Tramadolimprove_Sleep)
+
 model_Anticonimprove_Sleep <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*Sleep_c + (1|ID), data = df_new)
 summary(model_Anticonimprove_Sleep) 
 confint(model_Anticonimprove_Sleep)
+icc(model_Anticonimprove_Sleep)
+
 model_Opioid_improve_Sleep <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*Sleep_c + (1|ID), data = df_new)
 summary(model_Opioid_improve_Sleep) 
 confint(model_Opioid_improve_Sleep)
+icc(model_Opioid_improve_Sleep)
+
 model_PCSimprove_Sleep <- lmer(GlobalImprovement ~ B_Psych_PCS*Sleep_c + (1|ID), data = df_new)
 summary(model_PCSimprove_Sleep) 
 confint(model_PCSimprove_Sleep)
+icc(model_PCSimprove_Sleep)
+
 model_HADSimprove_Sleep <- lmer(GlobalImprovement ~ B_Psych_HADS*Sleep_c + (1|ID), data = df_new)
 summary(model_HADSimprove_Sleep) 
 confint(model_HADSimprove_Sleep)
+icc(model_HADSimprove_Sleep)
 #2; Mood on daily improvement 
 model_ageimprove_Mood <- lmer(GlobalImprovement ~ B_Demog_Age*Mood_c + (1|ID), data = df_new)
 summary(model_ageimprove_Mood) 
 confint(model_ageimprove_Mood)
+icc(model_ageimprove_Mood)
+
 model_Tramadolimprove_Mood <- lmer(GlobalImprovement ~ B_Med_Tramadol*Mood_c + (1|ID), data = df_new)
 summary(model_Tramadolimprove_Mood) 
 confint(model_Tramadolimprove_Mood)
+icc(model_Tramadolimprove_Mood)
+
 model_Anticonimprove_Mood <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*Mood_c + (1|ID), data = df_new)
 summary(model_Anticonimprove_Mood) 
 confint(model_Anticonimprove_Mood)
+icc(model_Anticonimprove_Mood)
+
 model_Opioid_improve_Mood <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*Mood_c + (1|ID), data = df_new)
 summary(model_Opioid_improve_Mood) 
 confint(model_Opioid_improve_Mood)
+icc(model_Opioid_improve_Mood)
+
 model_PCSimprove_Mood <- lmer(GlobalImprovement ~ B_Psych_PCS*Mood_c + (1|ID), data = df_new)
 summary(model_PCSimprove_Mood) 
 confint(model_PCSimprove_Mood)
+icc(model_PCSimprove_Mood)
+
 model_HADSimprove_Mood <- lmer(GlobalImprovement ~ B_Psych_HADS*Mood_c + (1|ID), data = df_new)
 summary(model_HADSimprove_Mood) 
 confint(model_HADSimprove_Mood)
+icc(model_HADSimprove_Mood)
 #3; Pain on daily improvement 
 model_ageimprove_AvePain <- lmer(GlobalImprovement ~ B_Demog_Age*AvePain_c + (1|ID), data = df_new)
 summary(model_ageimprove_AvePain) 
 confint(model_ageimprove_AvePain)
+icc(model_ageimprove_AvePain)
+
 model_Tramadolimprove_AvePain <- lmer(GlobalImprovement ~ B_Med_Tramadol*AvePain_c + (1|ID), data = df_new)
 summary(model_Tramadolimprove_AvePain) 
 confint(model_Tramadolimprove_AvePain)
+icc(model_Tramadolimprove_AvePain)
+
 model_Anticonimprove_AvePain <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*AvePain_c + (1|ID), data = df_new)
 summary(model_Anticonimprove_AvePain) 
 confint(model_Anticonimprove_AvePain)
+icc(model_Anticonimprove_AvePain)
+
 model_Opioid_improve_AvePain <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*AvePain_c + (1|ID), data = df_new)
 summary(model_Opioid_improve_AvePain) 
 confint(model_Opioid_improve_AvePain)
+icc(model_Opioid_improve_AvePain)
+
 model_PCSimprove_AvePain <- lmer(GlobalImprovement ~ B_Psych_PCS*AvePain_c + (1|ID), data = df_new)
 summary(model_PCSimprove_AvePain) 
 confint(model_PCSimprove_AvePain)
+icc(model_PCSimprove_AvePain)
+
 model_HADSimprove_AvePain <- lmer(GlobalImprovement ~ B_Psych_HADS*AvePain_c + (1|ID), data = df_new)
 summary(model_HADSimprove_AvePain) 
 confint(model_HADSimprove_AvePain)
+icc(model_HADSimprove_AvePain)
 #4; ActivInterf on daily improvement 
 model_ageimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Demog_Age*ActivityInt_c + (1|ID), data = df_new)
 summary(model_ageimprove_ActivityInt) 
 confint(model_ageimprove_ActivityInt)
+icc(model_ageimprove_ActivityInt)
+
 model_Tramadolimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Med_Tramadol*ActivityInt_c + (1|ID), data = df_new)
 summary(model_Tramadolimprove_ActivityInt) 
 confint(model_Tramadolimprove_ActivityInt)
+icc(model_Tramadolimprove_ActivityInt)
+
 model_Anticonimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Med_Anticonvulsant*ActivityInt_c + (1|ID), data = df_new)
 summary(model_Anticonimprove_ActivityInt) 
 confint(model_Anticonimprove_ActivityInt)
+icc(model_Anticonimprove_ActivityInt)
+
 model_Opioid_improve_ActivityInt <- lmer(GlobalImprovement ~ B_Med_OpioidsYN*ActivityInt_c + (1|ID), data = df_new)
 summary(model_Opioid_improve_ActivityInt) 
 confint(model_Opioid_improve_ActivityInt)
+icc(model_Opioid_improve_ActivityInt)
+
 model_PCSimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Psych_PCS*ActivityInt_c + (1|ID), data = df_new)
 summary(model_PCSimprove_ActivityInt) 
 confint(model_PCSimprove_ActivityInt)
+icc(model_PCSimprove_ActivityInt)
+
 model_HADSimprove_ActivityInt <- lmer(GlobalImprovement ~ B_Psych_HADS*ActivityInt_c + (1|ID), data = df_new)
 summary(model_HADSimprove_ActivityInt) 
 confint(model_HADSimprove_ActivityInt)
+icc(model_HADSimprove_ActivityInt)
 ```
+
+```{r}
+model11 <- lmer(GlobalImprovement ~ Sleep_c * B_Demog_Age + (1|ID), data = df_new)
+summary(model11)
+icc(model11)
+
+model12 <- lmer(GlobalImprovement ~ AvePain_c * B_Demog_Age + (1|ID), data = df_new) #
+summary(model12)
+icc(model12)
+
+model13 <- lmer(GlobalImprovement ~ ActivityInt_c * B_Demog_Age + (1|ID), data = df_new)
+summary(model13)
+icc(model13)
+
+model14 <- lmer(GlobalImprovement ~ Mood_c * B_Demog_Age + (1|ID), data = df_new)
+summary(model14)
+icc(model14)
+
+model21 <- lmer(GlobalImprovement ~ Sleep_c * B_Med_OpioidsYN + (1|ID), data = df_new)
+summary(model21)
+icc(model21)
+
+model22 <- lmer(GlobalImprovement ~ AvePain_c * B_Med_OpioidsYN + (1|ID), data = df_new)
+summary(model22)
+icc(model22)
+
+model23 <- lmer(GlobalImprovement ~ ActivityInt_c * B_Med_OpioidsYN + (1|ID), data = df_new)
+summary(model23)
+icc(model23)
+
+model24 <- lmer(GlobalImprovement ~ Mood_c * B_Med_OpioidsYN + (1|ID), data = df_new)
+summary(model24)
+icc(model24)
+```
+
+```{r}
+model_PEI <- lmer(AvePain_Change ~ B_Med_OpioidsYN + (1|ID), data = df_new)
+summary(model_PEI)
+icc(model_PEI)
+df_new <- df_new |>
+  mutate(APEI = ifelse(AvePain_Change >= 2, 1, 0))
+model_APEI <- glmer(APEI ~ B_Med_OpioidsYN + (1|ID), data = df_new, family = binomial())
+summary(model_APEI)
+icc(model_APEI)
+```
+
+
 
 \newpage
 
@@ -2273,5 +2388,157 @@ ggsave(a, dpi=1200, filename = "Figure Mar 2025; Density plot; PCS density.tif",
 
 ```
 
+
+```{r}
+## Style 2 for Pain model ****
+model12 <- lmer(GlobalImprovement ~ AvePain_c * B_Demog_Age + (1|ID), data = df_new) #
+summary(model12)
+
+percentiles <- quantile(df_new$B_Demog_Age, probs = c(0, 0.25, 0.5, 0.75, 1))
+
+new_data_act <- expand.grid(AvePain_c = seq(min(df_new$AvePain_c, na.rm = TRUE),max(df_new$AvePain_c, na.rm = TRUE),
+                                                length.out = 100),
+                            B_Demog_Age = percentiles,
+                            ID = unique(df_new$ID)[1])  
+
+predictions_act <- predict(model12, newdata = new_data_act, re.form = NULL)
+new_data_act$GlobalImprovement <- predictions_act
+
+a <- ggplot(df_new, aes(x = AvePain_c, y = GlobalImprovement, color = B_Demog_Age)) +
+  geom_line(data = new_data_act, aes(group = B_Demog_Age), size = 2.5) +
+  scale_color_gradientn(colors = c("#2878B5", "#9AC9DB", "#F8AC8C", "#C82423", "#FF8884"),# Change colors
+                        name = "Age",
+                        limits = range(df_new$B_Demog_Age)) +
+  labs(title = "Cross-Level Moderation: Average Pain and Improvement by Age",
+       x = "Average Pain",
+       y = "Global Improvement") +
+  scale_x_continuous(limits = c(-6,6),
+                     breaks = seq(-6, 6, 2)) +
+  scale_y_continuous(limits = c(0, 10), breaks = seq(0, 10, by = 2)) +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(size = 12, hjust = 0.45, margin = margin(b = 20)),
+    axis.title.x = element_text(margin = margin(t = 20)),
+    axis.title.y = element_text(margin = margin(r = 20)),
+    axis.text.x = element_text(size = 25),
+    axis.text.y = element_text(size = 25),
+    panel.grid.major = element_line(color = "lightgrey", size = 0),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+ggsave(a, dpi=1200, filename = "Figure Mar 2025; Moderation plot; Average Pain and global improve by age.tif", bg="white") # change name
+```
+
+
+```{r}
+model12 <- lmer(GlobalImprovement ~ ActivityInt_c + Mood_c + Sleep_c + AvePain_c + B_Med_OpioidsYN + (1 | ID), data = df_new)
+summary(model12)
+```
+
+
+
+
+```{r}
+## Style 2 for Pain model ****
+model12 <- lmer(GlobalImprovement ~ AvePain_c * B_Med_OpioidsYN + (1 | ID), data = df_new)
+summary(model12)
+
+new_data_act <- expand.grid(
+  AvePain_c = seq(min(df_new$AvePain_c, na.rm = TRUE),
+                  max(df_new$AvePain_c, na.rm = TRUE),
+                  length.out = 100),
+  B_Med_OpioidsYN = factor(unique(df_new$B_Med_OpioidsYN)),
+  ID = unique(df_new$ID)[1]
+)
+
+predictions_act <- predict(model12, newdata = new_data_act, re.form = NA)
+new_data_act$GlobalImprovement <- predictions_act
+
+a <- ggplot(df_new, aes(x = AvePain_c, y = GlobalImprovement, color = factor(B_Med_OpioidsYN))) +
+  geom_line(data = new_data_act, aes(group = factor(B_Med_OpioidsYN)), size = 2.5) +
+  scale_color_manual(values = c("0" = "#299D8F", "1" = "#E9C46A"),  # adjust levels if necessary
+                     name = "Opioids Use") +
+  labs(title = "Cross-Level Moderation: Average Pain and Improvement by Opioids Use",
+       x = "Average Pain",
+       y = "Global Improvement") +
+  scale_x_continuous(limits = c(-6, 6),
+                     breaks = seq(-6, 6, 2)) +
+  scale_y_continuous(limits = c(0, 10),
+                     breaks = seq(0, 10, by = 2)) +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(size = 12, hjust = 0.45, margin = margin(b = 20)),
+    axis.title.x = element_text(margin = margin(t = 20)),
+    axis.title.y = element_text(margin = margin(r = 20)),
+    axis.text.x = element_text(size = 25),
+    axis.text.y = element_text(size = 25),
+    panel.grid.major = element_line(color = "lightgrey", size = 0),
+    panel.grid.minor = element_line(color = "lightgrey", size = 0),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+
+
+ggsave(a, dpi=1200, filename = "Figure Mar 2025; Moderation plot; Activity intensity and global improve by Opioid Use.tif", bg="white")
+```
+
+
+```{r}
+## Missingness investigation
+library(naniar)
+# 1. Identify IDs with any missing AvePain_c
+ids_with_missing <- df_new %>% 
+  filter(is.na(AvePain_c)) %>% 
+  distinct(ID) %>% 
+  pull(ID)
+
+# 2. Randomly sample 10 IDs (set seed for reproducibility)
+set.seed(123)
+selected_ids <- sample(ids_with_missing, 8)
+
+# 3. Subset the data for these selected IDs
+df_sample <- df_new %>% 
+  filter(ID %in% selected_ids)
+
+# 4. Create a status column for observed vs missing values
+df_sample <- df_sample %>%
+  mutate(status = ifelse(is.na(AvePain_c), "Missing", "Observed"))
+
+# 5. To display missing points on the plot, determine a baseline value.
+# Here we use the overall minimum observed AvePain_c (from df_new) minus a small offset.
+min_val <- min(df_new$AvePain_c, na.rm = TRUE)
+df_sample <- df_sample %>%
+  mutate(AvePain_plot = ifelse(is.na(AvePain_c), min_val - 0.5, AvePain_c))
+
+# 6. Plot the data by ID with facets
+a <- ggplot(df_sample, aes(x = Day, group = ID)) +
+  # Draw lines connecting observed values (missing values cause gaps)
+  geom_line(aes(y = AvePain_c), color = "grey", na.rm = TRUE) +
+  # Plot points, using a different color for missing values (plotted at AvePain_plot)
+  geom_point(aes(y = AvePain_plot, color = status), size = 2) +
+  facet_wrap(~ ID, scales = "free_y") +
+  labs(title = "Observed Patterns of Average Pain with Missingness",
+       x = "Day",
+       y = "Average Pain (Centered)",
+       color = "Data Status") +
+  scale_color_manual(values = c("Observed" = "blue", "Missing" = "red")) +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(size = 12, hjust = 0.45, margin = margin(b = 20)),
+    axis.title.x = element_text(margin = margin(t = 20)),
+    axis.title.y = element_text(margin = margin(r = 20)),
+    axis.line = element_line(color = "black", linewidth = 0.5)
+  )
+ggsave(a, dpi=1200, filename = "Figure Apr 2025; Missing Pattern Plot.tif", bg="white")
+
+df_new2 <- df_new |>
+  mutate(missingpain = ifelse(is.na(AvePain_c), 1, 0))
+missing_model <- glmer(missingpain ~ B_Demog_Age + B_Demog_Gender + B_Clin_BMI + B_Demog_Ethnicity + B_Clin_Height + B_Clin_Weight + B_Clin_PainDur + (1|ID), family = binomial(), data = df_new2)
+summary(missing_model)
+
+```
 
 
